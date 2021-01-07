@@ -10,16 +10,16 @@ async function main() {
     await messenger.BootstrapLoader.registerChromeUrl([ 
         [
             "content",
-            "google4tbsync",
+            "google-4-tbsync",
             "content/"
         ],
         [
             "resource",
-            "google4tbsync",
+            "google-4-tbsync",
             "."
         ],
     ]);
-    await messenger.BootstrapLoader.registerBootstrapScript("chrome://google4tbsync/content/bootstrap.js");  
+    await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");  
 }
 
 main();

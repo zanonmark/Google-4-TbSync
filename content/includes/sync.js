@@ -47,7 +47,7 @@ var sync = {
         }
         
         let e = new Error(); 
-        e.name = "google4tbsync";
+        e.name = "google-4-tbsync";
         e.message = status.toUpperCase() + ": " + msg.toString() + " (" + details.toString() + ")";
         e.statusData = new TbSync.StatusData(status, msg.toString(), details.toString());        
         return e; 

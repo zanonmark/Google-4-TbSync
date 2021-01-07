@@ -22,7 +22,7 @@ let onInitDoneObserver = {
     
     // Load this provider add-on into TbSync.
     if (valid) {
-      await TbSync.providers.loadProvider(extension, "google", "chrome://google4tbsync/content/provider.js");
+      await TbSync.providers.loadProvider(extension, "google", "chrome://google-4-tbsync/content/provider.js");
     }
   }
 }

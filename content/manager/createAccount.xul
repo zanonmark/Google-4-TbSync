@@ -3,7 +3,7 @@
 <!DOCTYPE window [
   <!ENTITY % tbsyncDTD SYSTEM "chrome://tbsync/locale/tbSync.dtd">
   %tbsyncDTD;
-  <!ENTITY % providerDTD SYSTEM "chrome://google4tbsync/locale/provider.dtd">
+  <!ENTITY % providerDTD SYSTEM "chrome://google-4-tbsync/locale/provider.dtd">
   %providerDTD;
 ]>
 
@@ -17,7 +17,7 @@
     onunload="tbSyncNewAccount.onUnload();"
     onclose="return tbSyncNewAccount.onClose()" >
 
-    <script type="application/javascript" src="chrome://google4tbsync/content/manager/createAccount.js"/>
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/createAccount.js"/>
 
     <wizardpage onFirstPage="true" label="shortdescription">
         <description style="width: 450px">description</description>

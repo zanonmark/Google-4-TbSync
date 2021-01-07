@@ -24,7 +24,7 @@ var Base = class {
    */
   static async load() {
     // Set default prefs
-    let branch = Services.prefs.getDefaultBranch("extensions.google4tbsync.");
+    let branch = Services.prefs.getDefaultBranch("extensions.google-4-tbsync.");
     branch.setIntPref("timeout", 50);
   }
 
@@ -68,11 +68,11 @@ var Base = class {
   static getProviderIcon(size, accountData = null) {
     switch (size) {
       case 16:
-        return "resource://google4tbsync/skin/icon16.png";
+        return "resource://google-4-tbsync/skin/icon16.png";
       case 32:
-        return "resource://google4tbsync/skin/icon32.png";
+        return "resource://google-4-tbsync/skin/icon32.png";
       default :
-        return "resource://google4tbsync/skin/icon64.png";
+        return "resource://google-4-tbsync/skin/icon64.png";
     }
   }
 
@@ -130,7 +130,7 @@ var Base = class {
    *
    */
   static getCreateAccountWindowUrl() {
-    return "chrome://google4tbsync/content/manager/createAccount.xhtml";
+    return "chrome://google-4-tbsync/content/manager/createAccount.xhtml";
   }
 
   /**
@@ -149,7 +149,7 @@ var Base = class {
    *
    */
   static getEditAccountOverlayUrl() {
-    return "chrome://google4tbsync/content/manager/editAccountOverlay.xhtml";
+    return "chrome://google-4-tbsync/content/manager/editAccountOverlay.xhtml";
   }
 
   /**
@@ -297,7 +297,7 @@ var Base = class {
    *
    */
   static getConnectionTimeout(accountData) {
-    return Services.prefs.getBranch("extensions.google4tbsync.").getIntPref("timeout");
+    return Services.prefs.getBranch("extensions.google-4-tbsync.").getIntPref("timeout");
   }
 
   /**
@@ -323,7 +323,7 @@ var Base = class {
     try {
       await google.sync.folderList(syncData);
     } catch (e) {
-      if (e.name == "google4tbsync") {
+      if (e.name == "google-4-tbsync") {
         return e.statusData;
       } else {
         Components.utils.reportError(e);
@@ -358,7 +358,7 @@ var Base = class {
     try {
       await google.sync.singleFolder(syncData);
     } catch (e) {
-      if (e.name == "google4tbsync") {
+      if (e.name == "google-4-tbsync") {
         return e.statusData;
       } else {
         Components.utils.reportError(e);
@@ -612,5 +612,5 @@ var StandardFolderList = class {
 
 }
 
-Services.scriptloader.loadSubScript("chrome://google4tbsync/content/includes/sync.js", this, "UTF-8");
-Services.scriptloader.loadSubScript("chrome://google4tbsync/content/includes/addressbook.js", this, "UTF-8");
+Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");
+Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/addressbook.js", this, "UTF-8");
