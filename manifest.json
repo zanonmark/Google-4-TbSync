@@ -23,7 +23,6 @@
         ]
     },
     "permissions": [
-      "storage"
     ],
     "experiment_apis": {
         "BootstrapLoader": {
