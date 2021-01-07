@@ -2,7 +2,7 @@
 * Marco Zanon
 
 ## Contributors
-* John Bieling
+* John Bieling (original TbSync add-on template)
 
 ## Translators
 * ...

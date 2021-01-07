@@ -1,44 +1,44 @@
 {
-  "menu.name": {
-    "message": "Google's People API"
-  },
-  "add.title": {
-    "message": "Adding a Google account to TbSync"
-  },
-  "extensionDescription": {
-    "message": "Add synchronization support for Google accounts (using Google's People API) to TbSync."
-  },
-  "extensionName": {
-    "message": "Provider for Google"
-  },
-  "manager.tabs.accountsettings": {
-    "message": "Account settings"
-  },
-  "manager.tabs.syncsettings": {
-    "message": "Options"
-  },
-  "pref.AccountName": {
-    "message": "Account name"
-  },
-  "pref.ServerName": {
-    "message": "Host"
-  },
-  "pref.UserName": {
-    "message": "User name"
-  },
-  "pref.contactoptions": {
-    "message": "Contact options"
-  },
-  "pref.generaloptions": {
-    "message": "General options"
-  },
-  "pref.someOtherOption": {
-    "message": "Some other option"
-  },
-  "pref.someOtherOptionDescription": {
-    "message": "Description for some other option"
-  },
-  "pref.usehttps": {
-    "message": "Use secure connection (connect via HTTPS)"
-  }
+    "menu.name": {
+        "message": "Google's People API"
+    },
+    "add.title": {
+        "message": "Adding a Google account to TbSync"
+    },
+    "extensionDescription": {
+        "message": "Add synchronization support for Google accounts (using Google's People API) to TbSync."
+    },
+    "extensionName": {
+        "message": "Provider for Google"
+    },
+    "manager.tabs.accountsettings": {
+        "message": "Account settings"
+    },
+    "manager.tabs.syncsettings": {
+        "message": "Options"
+    },
+    "pref.AccountName": {
+        "message": "Account name"
+    },
+    "pref.ServerName": {
+        "message": "Host"
+    },
+    "pref.UserName": {
+        "message": "User name"
+    },
+    "pref.contactoptions": {
+        "message": "Contact options"
+    },
+    "pref.generaloptions": {
+        "message": "General options"
+    },
+    "pref.someOtherOption": {
+        "message": "Some other option"
+    },
+    "pref.someOtherOptionDescription": {
+        "message": "Description for some other option"
+    },
+    "pref.usehttps": {
+        "message": "Use secure connection (connect via HTTPS)"
+    }
 }

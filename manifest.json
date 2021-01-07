@@ -1,33 +1,44 @@
 {
-  "applications": {
-    "gecko": {
-      "id": "google4tbsync@marcozanon.com",
-      "strict_min_version": "78.0",
-      "strict_max_version": "78.*"
+    "manifest_version": 2,
+    "name": "__MSG_extensionName__",
+    "description": "__MSG_extensionDescription__",
+    "version": "1.0",
+    "author": "Marco Zanon",
+    "default_locale": "en-US",
+    "applications": {
+        "gecko": {
+            "id": "google4tbsync@marcozanon.com",
+            "strict_min_version": "78.0",
+            "strict_max_version": "78.*"
+        }
+    },
+    "icons": {
+        "16": "skin/icon16.png",
+        "32": "skin/icon32.png",
+        "64": "skin/icon64.png"
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "permissions": [
+      "storage"
+    ],
+    "experiment_apis": {
+        "BootstrapLoader": {
+            "schema": "content/api/BootstrapLoader/schema.json",
+            "parent": {
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "BootstrapLoader"
+                    ]
+                ],
+                "script": "content/api/BootstrapLoader/implementation.js"
+            }
+        }
     }
-  },
-  "manifest_version": 2,
-  "name": "__MSG_extensionName__",
-  "version": "1.0",
-  "author": "Marco Zanon",
-  "default_locale": "en-US",
-  "description": "__MSG_extensionDescription__",
-  "icons": {
-    "16": "skin/icon16.png",
-    "32": "skin/icon32.png",
-    "64": "skin/icon64.png"
-  },
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "experiment_apis": {
-    "BootstrapLoader": {
-      "schema": "content/api/BootstrapLoader/schema.json",
-      "parent": {
-        "scopes": ["addon_parent"],
-        "paths": [["BootstrapLoader"]],
-        "script": "content/api/BootstrapLoader/implementation.js"
-      }
-    }
-  }
 }
