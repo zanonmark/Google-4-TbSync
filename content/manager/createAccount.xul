@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<!DOCTYPE window [
+  <!ENTITY % tbsyncDTD SYSTEM "chrome://tbsync/locale/tbSync.dtd">
+  %tbsyncDTD;
+  <!ENTITY % providerDTD SYSTEM "chrome://google4tbsync/locale/provider.dtd">
+  %providerDTD;
+]>
+
+<wizard
+    width="600"
+    height="500"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    title="&add.title;"
+    id="tbsync.newaccount.wizard"
+    onload="tbSyncNewAccount.onLoad();"
+    onunload="tbSyncNewAccount.onUnload();"
+    onclose="return tbSyncNewAccount.onClose()" >
+
+    <script type="application/javascript" src="chrome://google4tbsync/content/manager/createAccount.js"/>
+
+    <wizardpage onFirstPage="true" label="shortdescription">
+        <description style="width: 450px">description</description>
+
+        <grid style="margin-top:1ex">
+            <columns>
+                <column flex="1" />
+                <column flex="2" />
+            </columns>
+            <rows>
+                <row>
+                    <vbox pack="center"><label value="Account Name" /></vbox>
+                    <textbox id="tbsync.newaccount.name" oninput="tbSyncNewAccount.onUserTextInput();"/>
+                </row>
+                <row>
+                    <vbox pack="center"><label value="User" /></vbox>
+                    <textbox id="tbsync.newaccount.user" oninput="tbSyncNewAccount.onUserTextInput();"/>
+                </row>
+                <row>
+                    <vbox pack="center"><label value="Password" /></vbox>
+                    <textbox id="tbsync.newaccount.password" type="password" oninput="tbSyncNewAccount.onUserTextInput();"/>
+                </row>
+                <row id="tbsync.newaccount.url.box">
+                    <vbox pack="center"><label value="Host" /></vbox>
+                    <textbox id="tbsync.newaccount.url" oninput="tbSyncNewAccount.onUserTextInput();"/>
+                </row>
+            </rows>
+        </grid>
+  </wizardpage>
+    
+</wizard>
