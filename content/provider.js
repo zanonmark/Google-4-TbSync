@@ -9,7 +9,6 @@
 
 "use strict";
 
-// FIXME: diff
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 
 // Every Object in here will be loaded into the following namespace: TbSync.providers.google. 
@@ -21,29 +20,27 @@ const google = TbSync.providers.google;
 var Base = class {
 
     /**
-     * Called during load of this provider add-on.
+     * Called during the load of this provider add-on.
      *
      */
     static async load() {
-        // Set default prefs
+        // Set the default preferences.
         let branch = Services.prefs.getDefaultBranch("extensions.google-4-tbsync.");
         branch.setIntPref("timeout", 50);
-// FIXME: diff
     }
 
     /**
-     * Called during unload of this provider add-on.
+     * Called during the unload of this provider add-on.
      *
      */
     static async unload() {
-// FIXME: diff
     }
 
     /**
-     * Returns name of this provider for the "Add account" menu of tbe TbSync
-     * account manager.
+     * Returns the name of this provider for the "Add account" menu of the
+     * TbSync account manager.
      *
-     * @returns {string}  The name of this provider.
+     * @returns {string}  A name.
      *
      */
     static getProviderName() {
@@ -55,22 +52,25 @@ var Base = class {
      * If it is not matching the version identifier of the TbSync add-on the
      * user has currently installed, this provider add-on is not loaded.
      *
-     * @returns {string}  The API version identifier.
+     * @returns {string}  A version identifier.
      *
      */
-    static getApiVersion() { return "2.4"; }
+    static getApiVersion() {
+        return "2.4";
+    }
 
     /**
-     * Returns the location of a provider icon.
+     * Returns the location of an icon for this provider.
      *
      * @param {integer}      size         The size of the requested icon.
      * @param {AccountData}  accountData  The AccountData instance of the
      *                                    account, which is requesting the
      *                                    icon. Optional.
      *
+     * @returns {string}  A resource URI to the file to be used as icon.
+     *
      */
     static getProviderIcon(size, accountData = null) {
-// FIXME: diff
         switch (size) {
             case 16:
                 return "resource://google-4-tbsync/skin/icon16.png";
@@ -82,30 +82,29 @@ var Base = class {
     }
 
     /**
-     * Returns a list of sponsors, they will be sorted by sortIndex.
+     * Returns a list of sponsors, sorted by sortIndex.
      * 
      * ::
      * 
      *    return {
-     *      "sortIndex": {
-     *                     name: "Name", 
-     *                     description: "Something", 
-     *                     icon: "chrome://path/or/empty",
-     *                     link: "url://or/empty"
-     *                   },
+     *        "sortIndex": {
+     *            name: "Name", 
+     *            description: "Something", 
+     *            icon: "chrome://path/or/empty",
+     *            link: "url://or/empty",
+     *        },
      *    }
      *
-     * @returns {Object}  List of sponsors.
+     * @returns {Object}  A list of sponsors.
      *
      */
     static getSponsors() {
-        return {
-        };
+        return {};
     }
 
     /**
-     * Returns the URL of a page with details about contributors
-     * (used in the manager UI).
+     * Returns the URL of a page with details about contributors (used in the
+     * manager UI).
      *
      * @returns {string}  An URL.
      *
@@ -127,7 +126,7 @@ var Base = class {
     /**
      * Returns the URL of the new account window.
      *
-     * The URL will be opened via openDialog(), when the user wants to create a
+     * The URL will be opened via openDialog() when the user wants to create a
      * new account of this provider.
      *
      * @returns {string}  A chrome URI to the file to be used in the "Create
@@ -154,73 +153,70 @@ var Base = class {
      *
      */
     static getEditAccountOverlayUrl() {
-       return "chrome://google-4-tbsync/content/manager/editAccountOverlay.xhtml";
+        return "chrome://google-4-tbsync/content/manager/editAccountOverlay.xhtml";
     }
 
     /**
      * Returns an Object which contains all possible account properties of
-     * accounts of this provider, with its default value if not yet stored in
+     * accounts of this provider, with their default value if not yet stored in
      * the database.
      * 
-     * The returned Object uses the properties names as key and its default
-     * values as their value:
+     * The returned Object uses the property names as keys and their default
+     * values as values:
      *
      * ::
      * 
      *    return {
-     *      "username": "",
-     *      "host": "",
-     *      "https": true,
-     *      "someOtherOption": false,    
+     *        username: "",
+     *        host: "",
+     *        https: true,
+     *        someOtherOption: false,    
      *    }
      *
      * Please also check the standard account properties added by TbSync.
      *
-     * @returns {Object}  List of properties with default values.
+     * @returns {Object}  A list of properties with default values.
      *
      */
     static getDefaultAccountEntries() {
-// FIXME: diff
         let row = {
-            "username": "",
-            "host": "",
-            "https": true
-        }; 
+            username: "",
+        };
+        //
         return row;
     }
 
     /**
      * Returns an Object which contains all possible folder properties of
-     * folders of this provider, with its default value if not yet stored in the 
-     * database.
+     * folders of this provider, with their default value if not yet stored in
+     * the database.
      * 
-     * @returns {Object}  List of properties with default values.
+     * @returns {Object}  A list of properties with default values.
      *
      */
     static getDefaultFolderEntries() {
-// FIXME: diff
         let folder = {
-            "UID": "",
-            "targetID": "",
+            UID: "",
+            targetID: "",
         };
+        //
         return folder;
     }
 
     /**
-     * Is called everytime an account of this provider is enabled in the
-     * manager UI.
+     * Called everytime an account of this provider is enabled in the manager
+     * UI.
      *
      * @param {AccountData}  accountData  The AccountData instance of the
      *                                    account being enabled.
      *
      */
     static onEnableAccount(accountData) {
-// FIXME: diff
     }
 
     /**
-     * Is called everytime an account of this provider is disabled in the
-     * manager UI.
+     * Called everytime an account of this provider is disabled in the manager
+     * UI.
      *
      * @param {AccountData}  accountData  The AccountData instance of the
      *                                    account being disabled.
@@ -230,15 +226,14 @@ var Base = class {
     }
 
     /**
-     * Is called everytime an account of this provider is deleted in the
-     * manager UI.
+     * Called everytime an account of this provider is deleted in the manager
+     * UI.
      *
      * @param {AccountData}  accountData  The AccountData instance of the
      *                                    account being deleted.
      *
      */
     static onDeleteAccount(accountData) {
-// FIXME: diff
     }
 
     /**
@@ -267,31 +262,30 @@ var Base = class {
      *                                    account being queried.
      * @param {string}       query        The search query.
      *
-     * @returns Array of Objects.
+     * @returns {array}  An array of Objects.
      *
      */
     static async abAutoComplete(accountData, query)  {
-// FIXME: diff
         return [];
     }
 
     /**
      * Returns all folders of the account, sorted in the desired order.
      *
-     * The order will be used in the folder list and also as the order to sync
-     * the resources of the account identified by the passed AccountData.
+     * The order will be used in the folder list and also as the order to
+     * synchronize the resources of the account identified by the passed
+     * AccountData.
      *
      * @param {AccountData}  accountData  The AccountData instance for the
      *                                    account for which the sorted list of
      *                                    folders should be returned.
      *
-     * @returns Array of :class:`FolderData` instances in the desired
-     *          order.
+     * @returns {array}  An array of :class:`FolderData` instances in the
+     *                   desired order.
      *
      */
     static getSortedFolders(accountData) {
-// FIXME: diff
-       return accountData.getAllFolders();
+        return accountData.getAllFolders();
     }
 
     /**
@@ -304,90 +298,203 @@ var Base = class {
      *                                    account for which the timeout is
      *                                    being requested.
      *
-     * @returns {integer}  The timeout in milliseconds.
+     * @returns {integer}  A timeout in milliseconds.
      *
      */
     static getConnectionTimeout(accountData) {
-       return Services.prefs.getBranch("extensions.google-4-tbsync.").getIntPref("timeout");
+        return Services.prefs.getBranch("extensions.google-4-tbsync.").getIntPref("timeout");
     }
 
     /**
-     * Is called to synchronize the folder list.
+     * Called to synchronize the folder list.
      *
      * Never call this method directly, but use :class:`AccountData.sync`.
      *
      * @param {SyncData}  syncData   The SyncData instance with information 
-     *                               regarding the requested sync
-     * @param {string}    syncJob    A specific sync job, defaults to "sync",
-     *                               but can be set via the syncDescription.
-     *                               (see AccountData.sync or FolderData.sync).
+     *                               regarding the requested synchronization.
+     * @param {string}    syncJob    A specific synchronization job, defaults to
+     *                               "sync", but can be set via the
+     *                               syncDescription (see AccountData.sync or
+     *                               FolderData.sync).
      * @param {integer}   syncRunNr  Indicates the n-th number the account is
-     *                               being (re-)synced due to enforced retries.
-     *                               It starts with 1 and is limited by 
+     *                               being (re-)synchronized due to enforced
+     *                               retries. It starts with 1 and is limited by 
      *                               syncDescription.maxAccountReruns.
      *
-     * @returns A :class:`StatusData` instance with information of the
-     *         sync (failed/success).
+     * @returns {StatusData}  A :class:`StatusData` instance with information of
+     *                        the synchronization (failed / success).
      *
      */
     static async syncFolderList(syncData, syncJob, syncRunNr) {   
         try {
             await google.sync.folderList(syncData);
         } catch (e) {
-            if (e.name == "google-4-tbsync") {
+            if ("google-4-tbsync" == e.name) {
                 return e.statusData;
             } else {
                 Components.utils.reportError(e);
-                // re-throw any other error and let TbSync handle it
+                // Re-throw any other error and let TbSync handle it.
                 throw (e);
             }
         }
+        //
         return new TbSync.StatusData();
     }
 
     /**
-     * Is called to synchronize a folder.
+     * Called to synchronize a folder.
      *
      * Never call this method directly, but use :class:`AccountData.sync` or
      * :class:`FolderData.sync`.
      *
      * @param {SyncData}  syncData   The SyncData instance with information 
-     *                               regarding the requested sync
-     * @param {string}    syncJob    A specific sync job, defaults to "sync",
-     *                               but can be set via the syncDescription.
-     *                               (see AccountData.sync or FolderData.sync).
+     *                               regarding the requested synchronization.
+     * @param {string}    syncJob    A specific synchronization job, defaults to
+     *                               "sync", but can be set via the
+     *                               syncDescription (see AccountData.sync or
+     *                               FolderData.sync).
      * @param {integer}   syncRunNr  Indicates the n-th number the account is
-     *                               being (re-)synced due to enforced retries.
-     *                               It starts with 1 and is limited by 
+     *                               being (re-)synchronized due to enforced
+     *                               retries. It starts with 1 and is limited by 
      *                               syncDescription.maxAccountReruns.
      *
-     * @returns A :class:`StatusData` instance with information of the
-     *         sync (failed/success).
+     * @returns {StatusData}  A :class:`StatusData` instance with information of
+     *                        the synchronization (failed / success).
      *
      */
     static async syncFolder(syncData, syncJob, syncRunNr) {
-// FIXME: diff     
         try {
             await google.sync.singleFolder(syncData);
         } catch (e) {
-            if (e.name == "google-4-tbsync") {
+            if ("google-4-tbsync" == e.name) {
                 return e.statusData;
             } else {
                 Components.utils.reportError(e);
-                // re-throw any other error and let TbSync handle it
+                // Re-throw any other error and let TbSync handle it.
                 throw (e);
             }
         }
+        //
         return new TbSync.StatusData();
     }
 
 }
 
-// FIXME: diff
+/**
+ * This provider is implementing the StandardFolderList class instead of the
+ * FolderList class.
+ */
+var StandardFolderList = class {
+
+    /**
+     * Called before the context menu of the folderlist is shown, allows to
+     * show / hide custom menu options based on the selected folder. During an
+     * active synchronization, folderData will be null and the folder list will
+     * be disabled.
+     *
+     * @param {nsIDOMWindow}  window      The Object of the account settings
+     *                                    window.
+     * @param {FolderData}    folderData  The FolderData instance of the
+     *                                    selected folder.
+     *
+     */
+    static onContextMenuShowing(window, folderData) {
+    }
+
+    /**
+     * Returns the icon for a folder to be shown in the folderlist.
+     *
+     * @param {FolderData}  folderData  The FolderData instance of the folder
+     *                                  for which the icon is requested.
+     *                                   
+     * @returns {string}  A Chrome URI of the icon.
+     *
+     */
+    static getTypeImage(folderData) {
+        switch (folderData.getFolderProperty("targetType")) {
+            case "addressbook":
+                return "chrome://tbsync/skin/contacts16.png";
+        }
+    }
+
+    /**
+     * Returns the display name for a folder to be shown in the folderlist.
+     *
+     * @param {FolderData}  folderData  The FolderData instance of the folder
+     *                                  for which the display name is requested.
+     *                                   
+     * @returns {string}  A display name of the folder.   
+     *
+     */
+    static getFolderDisplayName(folderData) {
+        return folderData.getFolderProperty("foldername");
+    }
+
+    /**
+     * Returns the attributes for the *readonly* `menuitem <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_
+     * element of the ACL selector for a folder to be shown in the folderlist.
+     * You can define any available attribute (label, disabled, hidden, style, 
+     * ...) by returning an Object which uses the attribute names as keys and
+     * the attribute values as values. For example:
+     * 
+     * ::
+     * 
+     *    return {
+     *        label: "Readonly access",
+     *        disabled: false,
+     *    }
+     *
+     * If both (RO+RW) do not return any attributes, the ACL menu is not
+     * displayed at all.
+     *
+     * @param {FolderData}  folderData  The FolderData instance of the folder for
+     *                                  which the attributes for the ACL RO XUL
+     *                                  element are requested.
+     *                                   
+     * @returns {Object}  A list of attributes and their values for the ACL RO
+     *                    XUL element.
+     *
+     */
+    static getAttributesRoAcl(folderData) {
+        return null;
+    }
+
+    /**
+     * Returns the attributes for the *read/write*
+     * `menuitem <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_
+     * element of the ACL selector for a folder to be shown in the folderlist.
+     * You can define any available attribute (label, disabled, hidden, style, 
+     * ...) by returning an Object which uses the attribute names as keys and
+     * the attribute values as values. For example:
+     * 
+     * ::
+     * 
+     *    return {
+     *        label: "Read/Write access",
+     *        disabled: true,
+     *    }
+     *
+     * If both (RO+RW) do not return any attributes, the ACL menu is not
+     * displayed at all.
+     *
+     * @param {FolderData}  folderData  The FolderData instance of the folder
+     *                                  for which the attributes for the ACL RW
+     *                                  XUL element are requested.
+     *                                   
+     * @returns {Object}  A list of attributes and their values for the ACL RW
+     *                    XUL element.
+     *
+     */
+    static getAttributesRwAcl(folderData) {
+        return null;
+    }
+
+}
+
 var TargetData = class {
 
     /**
-     * TargetData constrcutor.
+     * TargetData constructor.
      *
      * @param {FolderData}  folderData  The FolderData instance of the folder
      *                                  for which this TargetData instance is
@@ -399,86 +506,98 @@ var TargetData = class {
     }
     
     /**
-     * Check, if the target object of this TargetData exists in the local
+     * Check if the target object of this TargetData exists in the local
      * storage.
      *
-     * @returns {boolean}  True, if target exists.
+     * @returns {boolean}  True if target exists.
      *
      */
     hasTarget() {
         let target = this._folderData.getFolderProperty("targetID");
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        if ((directory !== null) && (directory instanceof Components.interfaces.nsIAbDirectory)) {
+        //
+        if ((null !== directory) && (directory instanceof Components.interfaces.nsIAbDirectory)) {
             return true;
         }
+        //
         return false;
     }
 
     /**
-     * Returns the actual target object (for example a `nsIAbDirectory <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_).
+     * Returns the actual target object (for example a
+     * `nsIAbDirectory <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_).
      * If the target does not exist, it should be created. 
      *
      * .. note::
      *    The thrown error message will be used as a status and TbSync will
      *    use ``status.<Error.message>`` from your string bundle (see
-     *    :class:`Base.getStringBundleUrl`) for the actual error/status 
+     *    :class:`Base.getStringBundleUrl`) for the actual error / status 
      *    message.
      *
      * @returns {Object}  Whatever you want to use as target object for
      *                    this TargetData.
      *
-     * @throws {Error}    Reason, why the target could not be created.
+     * @throws {Error}    A reason (why the target could not be created).
      *
      */
     async getTarget() { 
         let target = this._folderData.getFolderProperty("targetID");
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
+        //
         if (!directory) {
             let dirPrefId = MailServices.ab.newAddressBook(this._folderData.getFolderProperty("foldername"), "", 2);
             let directory = MailServices.ab.getDirectoryFromId(dirPrefId);
+            //
             if (!directory) {
                 throw new Error("notargets");
             }
+            //
             this._folderData.setFolderProperty("targetID", directory.UID);
         }
+        //
         return directory;
     }
     
     /**
      * Removes the target from the local storage. If it does not exist, return
-     * silently. A call to :class:`TargetData.hasTarget()` should return ``false``, after this has
-     * been executed.
+     * silently. A call to :class:`TargetData.hasTarget()` should return
+     * ``false``, after this has been executed.
      *
      */
     removeTarget() {
         let target = this._folderData.getFolderProperty("targetID");
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
+        //
         try {
             if (directory) {
                 MailServices.ab.deleteAddressBook(directory.URI);
             }
-        } catch (e) {}
+        }
+        catch (e) {
+        }
     }
 
     /**
      * Disconnects the target in the local storage from this TargetData, but
-     * does not delete it, so it becomes a stale "left over". A call
-     * to :class:`TargetData.hasTarget()` should return ``false``, after this has been executed.
+     * does not delete it, so it becomes a stale "left over". A call to
+     * :class:`TargetData.hasTarget()` should return ``false``, after this has
+     * been executed.
      * 
      */
     disconnectTarget() {
     }  
-
     
     /**
-     * Getter/Setter for the target name.
+     * Getter / setter for the target name.
      *
-     * @throws {Error}    Reason, why the target name could not be set/retrieved.
+     * @throws {Error}  A reason (why the target name could not be set /
+                        retrieved).
      *
      */
     set targetName(newName) {
         let target = this._folderData.getFolderProperty("targetID");
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
+        //
         if (directory && newName) {
             directory.dirName = newName;
         }     
@@ -486,9 +605,11 @@ var TargetData = class {
     get targetName() {
         let target = this._folderData.getFolderProperty("targetID");
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
+        //
         if (directory) {
             return directory.dirName;
         }
+        //
         throw new Error("notargets");
     }
     
@@ -508,125 +629,11 @@ var TargetData = class {
 
 }
 
-// This is just for the documentation generated from this file to
-// have a "TargetData". You do not need to extend your own class
-// of course and just name it as needed directly.
+// This is just for the documentation generated from this file to have a
+// "TargetData". You do not need to extend your own class of course and just
+// name it as needed directly.
 var TargetData_addressbook = class extends TargetData {
 }
 
-/**
- * This provider is implementing the StandardFolderList class instead of
- * the FolderList class.
- */
-var StandardFolderList = class {
-
-    /**
-     * Is called before the context menu of the folderlist is shown, allows to
-     * show/hide custom menu options based on the selected folder. During an
-     * active synchronisation, folderData will be null and the folder list will
-     * be disabled.
-     *
-     * @param {nsIDOMWindow}  window      Object of the account settings window.
-     * @param {FolderData}    folderData  The FolderData instance of the selected
-     *                                    folder.
-     *
-     */
-    static onContextMenuShowing(window, folderData) {
-    }
-
-
-
-    /**
-     * Returns the icon for a folder to be shown in the folderlist.
-     *
-     * @param {FolderData}  folderData  The FolderData instance of the folder for
-     *                                  which the icon is requested.
-     *                                   
-     * @returns {string}  Chrome URL of icon.
-     *
-     */
-    static getTypeImage(folderData) {
-        switch (folderData.getFolderProperty("targetType")) {
-            case "addressbook":
-                return "chrome://tbsync/skin/contacts16.png";
-        }
-    }
-
-    /**
-     * Returns the display name for a folder to be shown in the folderlist.
-     *
-     * @param {FolderData}  folderData  The FolderData instance of the folder for
-     *                                  which the display name is requested.
-     *                                   
-     * @returns {string}  Display name of the folder.   
-     *
-     */
-    static getFolderDisplayName(folderData) {
-        return folderData.getFolderProperty("foldername");
-    }
-
-    /**
-     * Returns the attributes for the *readonly* `menuitem <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_
-     * element of the ACL selector for a folder to be shown in the folderlist.
-     * You can define any available attribute (label, disabled, hidden, style, 
-     * ...) by returning an Object which uses the attribute names as key and
-     * its values as their value. For example:
-     * 
-     * ::
-     * 
-     *    return {
-     *      label: "Readonly access",
-     *      disabled: false
-     *    }
-     *
-     * If both (RO+RW) do not return any attributes, the ACL menu is not
-     * displayed at all.
-     *
-     * @param {FolderData}  folderData  The FolderData instance of the folder for
-     *                                  which the attributes for the ACL RO XUL
-     *                                  element are requested.
-     *                                   
-     * @returns {Object}  A list of attributes and their values for the ACL RO
-     *                    XUL element.
-     *
-     */
-    static getAttributesRoAcl(folderData) {
-// FIXME: diff
-        return null;
-    }
-
-    /**
-     * Returns the attributes for the *read/write* `menuitem <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_
-     * element of the ACL selector for a folder to be shown in the folderlist.
-     * You can define any available attribute (label, disabled, hidden, style, 
-     * ...) by returning an Object which uses the attribute names as key and
-     * its values as their value. For example:
-     * 
-     * ::
-     * 
-     *    return {
-     *       label: "Read/Write access",
-     *       disabled: true
-     *    }
-     *
-     * If both (RO+RW) do not return any attributes, the ACL menu is not
-     * displayed at all.
-     *
-     * @param {FolderData}  folderData  The FolderData instance of the folder for
-     *                                  which the attributes for the ACL RW XUL
-     *                                  element are requested.
-     *                                   
-     * @returns {Object}  A list of attributes and their values for the ACL RW
-     *                    XUL element.
-     *
-     */
-    static getAttributesRwAcl(folderData) {
-// FIXME: diff
-        return null;
-    }
-
-}
-
-// FIXME: diff
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/addressbook.js", this, "UTF-8");

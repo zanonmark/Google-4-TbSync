@@ -15,55 +15,46 @@ const google = TbSync.providers.google;
 
 var tbSyncNewAccount = {
 
-    onClose: function () {
+    onClose: function() {
         return true;
     },
 
-    onLoad: function () {
+    onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
-
-        this.elementName = document.getElementById('tbsync.newaccount.name');
-        this.elementUser = document.getElementById('tbsync.newaccount.user');
-        this.elementUrl = document.getElementById('tbsync.newaccount.url');
-        this.elementPass = document.getElementById('tbsync.newaccount.password');
-        this.elementServertype = document.getElementById('tbsync.newaccount.servertype');
-        
-        document.documentElement.getButton("back").hidden = true;
-        document.documentElement.getButton("finish").disabled = true;
-
-        document.getElementById("tbsync.newaccount.name").focus();
-
+        //
+        this.accountNameWidget = document.getElementById('tbsync.newaccount.accountName');
+        this.usernameWidget = document.getElementById('tbsync.newaccount.username');
+        //
+        document.getElementById('tbsync.newaccount.wizard').canRewind = false;
+        document.getElementById('tbsync.newaccount.wizard').canAdvance = false;
+        //
+        document.getElementById("tbsync.newaccount.accountName").focus();
+        //
         document.addEventListener("wizardfinish", tbSyncNewAccount.onFinish.bind(this));
     },
 
-    onUnload: function () {
+    onUnload: function() {
     },
 
-    onUserTextInput: function () {
-        document.documentElement.getButton("finish").disabled = (this.elementName.value.trim() == "" || this.elementUser.value == "" || this.elementPass.value == "" ||  this.elementUrl.value.trim() == "");
+    onUserTextInput: function() {
+        document.getElementById('tbsync.newaccount.wizard').canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.usernameWidget.value.trim()));
     },
 
-    onFinish: function (event) {
-        let username = this.elementUser.value;
-        let password = this.elementPass.value;
-        let accountname = this.elementName.value.trim();
-        let url = this.elementUrl.value.trim();
-        tbSyncNewAccount.addAccount(username, password, accountname, url);
+    onFinish: function(event) {
+        let accountName = this.accountNameWidget.value.trim();
+        let username = this.usernameWidget.value.trim();
+        //
+        tbSyncNewAccount.addAccount(accountName, username);
     },
 
-    addAccount (username, password, accountname, url) {
+    addAccount: function(accountName, username) {
+        // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
+        // Override the default values.
         newAccountEntry.username = username;
-        newAccountEntry.host = url;
-
-        if (url) {
-            //if no protocoll is given, prepend "https://"
-            if (url.substring(0,4) != "http" || url.indexOf("://") == -1) url = "https://" + url.split("://").join("/");
-            newAccountEntry.https = (url.substring(0,5) == "https");
-        }
-
         // Add the new account.
-        let newAccountData = this.providerData.addAccount(accountname, newAccountEntry);
+        let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
+        //
         window.close();
     }
 };

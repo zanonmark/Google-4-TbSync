@@ -20,6 +20,7 @@ async function main() {
             "."
         ],
     ]);
+    //
     await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");  
 }
 
