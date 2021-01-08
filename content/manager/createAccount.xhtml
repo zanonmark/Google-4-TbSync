@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<window
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    width="600"
+    height="500"
+    onload="tbSyncNewAccount.onLoad();"
+    onunload="tbSyncNewAccount.onUnload();"
+    onclose="return tbSyncNewAccount.onClose();">
+
+    <linkset>
+        <html:link rel="localization" href="toolkit/global/wizard.ftl" />
+    </linkset>
+
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/locales.js" />
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/createAccount.js" />
+
+    <wizard
+        id="tbsync.newaccount.wizard"
+        title="__GOOGLE4TBSYNCMSG_add.title__">
+
+        <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.serverprofile.title__">
+            <vbox flex="1">
+                <description style="width: 450px; margin-top:1em;">__GOOGLE4TBSYNCMSG_add.serverprofile.description__</description>
+                <grid style="margin-top: 1ex;">
+                    <columns>
+                        <column flex="1" />
+                        <column flex="2" />
+                    </columns>
+                    <rows>
+                        <row>
+                            <vbox pack="center"><label value="Account name" /></vbox>
+                            <html:input id="tbsync.newaccount.name" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row>
+                            <vbox pack="center"><label value="User" /></vbox>
+                            <html:input id="tbsync.newaccount.user" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row>
+                            <vbox pack="center"><label value="Password" /></vbox>
+                            <html:input id="tbsync.newaccount.password" type="password" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row id="tbsync.newaccount.url.box">
+                            <vbox pack="center"><label value="Host" /></vbox>
+                            <html:input id="tbsync.newaccount.url" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                    </rows>
+                </grid>
+            </vbox>
+        </wizardpage>
+
+    </wizard>
+
+</window>
