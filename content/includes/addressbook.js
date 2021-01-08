@@ -9,6 +9,7 @@
 
 "use strict";
 
+// FIXME: diff
 var addressbook = {
     getDirectoryFromDirectoryUID: function(UID) {
         let directories = MailServices.ab.directories;

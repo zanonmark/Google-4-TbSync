@@ -23,6 +23,7 @@ let onInitDoneObserver = {
 
         // Load this provider add-on into TbSync.
         if (valid) {
+// FIXME: diff
             await TbSync.providers.loadProvider(extension, "google", "chrome://google-4-tbsync/content/provider.js");
         }
     }
@@ -59,5 +60,6 @@ function shutdown(data, reason) {
     } catch (e) {
         //if this fails, TbSync has been unloaded already and has unloaded this addon as well
     }
+// FIXME: diff
     Services.obs.notifyObservers(null, "chrome-flush-caches", null);
 }

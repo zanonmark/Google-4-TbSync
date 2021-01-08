@@ -9,6 +9,7 @@
 
 "use strict";
 
+// FIXME: diff
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 
 // Every Object in here will be loaded into the following namespace: TbSync.providers.google. 
@@ -27,6 +28,7 @@ var Base = class {
         // Set default prefs
         let branch = Services.prefs.getDefaultBranch("extensions.google-4-tbsync.");
         branch.setIntPref("timeout", 50);
+// FIXME: diff
     }
 
     /**
@@ -34,6 +36,7 @@ var Base = class {
      *
      */
     static async unload() {
+// FIXME: diff
     }
 
     /**
@@ -44,7 +47,7 @@ var Base = class {
      *
      */
     static getProviderName() {
-        return TbSync.getString("menu.name", "Google");
+        return TbSync.getString("menu.name", "google");
     }
 
     /**
@@ -67,6 +70,7 @@ var Base = class {
      *
      */
     static getProviderIcon(size, accountData = null) {
+// FIXME: diff
         switch (size) {
             case 16:
                 return "resource://google-4-tbsync/skin/icon16.png";
@@ -176,6 +180,7 @@ var Base = class {
      *
      */
     static getDefaultAccountEntries() {
+// FIXME: diff
         let row = {
             "username": "",
             "host": "",
@@ -193,6 +198,7 @@ var Base = class {
      *
      */
     static getDefaultFolderEntries() {
+// FIXME: diff
         let folder = {
             "UID": "",
             "targetID": "",
@@ -209,6 +215,7 @@ var Base = class {
      *
      */
     static onEnableAccount(accountData) {
+// FIXME: diff
     }
 
     /**
@@ -231,6 +238,7 @@ var Base = class {
      *
      */
     static onDeleteAccount(accountData) {
+// FIXME: diff
     }
 
     /**
@@ -263,6 +271,7 @@ var Base = class {
      *
      */
     static async abAutoComplete(accountData, query)  {
+// FIXME: diff
         return [];
     }
 
@@ -281,6 +290,7 @@ var Base = class {
      *
      */
     static getSortedFolders(accountData) {
+// FIXME: diff
        return accountData.getAllFolders();
     }
 
@@ -320,7 +330,7 @@ var Base = class {
      *         sync (failed/success).
      *
      */
-    static async syncFolderList(syncData, syncJob, syncRunNr) {        
+    static async syncFolderList(syncData, syncJob, syncRunNr) {   
         try {
             await google.sync.folderList(syncData);
         } catch (e) {
@@ -356,6 +366,7 @@ var Base = class {
      *
      */
     static async syncFolder(syncData, syncJob, syncRunNr) {
+// FIXME: diff     
         try {
             await google.sync.singleFolder(syncData);
         } catch (e) {
@@ -372,6 +383,7 @@ var Base = class {
 
 }
 
+// FIXME: diff
 var TargetData = class {
 
     /**
@@ -579,6 +591,7 @@ var StandardFolderList = class {
      *
      */
     static getAttributesRoAcl(folderData) {
+// FIXME: diff
         return null;
     }
 
@@ -608,10 +621,12 @@ var StandardFolderList = class {
      *
      */
     static getAttributesRwAcl(folderData) {
+// FIXME: diff
         return null;
     }
 
 }
 
+// FIXME: diff
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/addressbook.js", this, "UTF-8");

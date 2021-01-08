@@ -41,7 +41,7 @@ var sync = {
                 break;
 
             default:
-                console.log(" GOOGLE-4-TbSync: Unknown status <"+aStatus+">");
+                console.log("Google-4-TbSync: Unknown status <"+aStatus+">");
                 status = TbSync.StatusData.ERROR;
                 break;
         }
@@ -51,7 +51,9 @@ var sync = {
         e.message = status.toUpperCase() + ": " + msg.toString() + " (" + details.toString() + ")";
         e.statusData = new TbSync.StatusData(status, msg.toString(), details.toString());        
         return e; 
-    }, 
+    },
+
+// FIXME: diff
 
     folderList: async function(syncData) {        
         // Simulation of folders retrieved from Server, with changing names.
@@ -59,6 +61,8 @@ var sync = {
             {UID: 1, name: "Example Folder 1 ("+Date.now()+")"},
             {UID: 2, name: "Example Folder 2 ("+Date.now()+")"},
         ];
+
+// FIXME: diff
         
         for (let folder of foundFolders) {
             let existingFolder = syncData.accountData.getFolder("UID", folder.UID);
@@ -86,8 +90,10 @@ var sync = {
         }
     },
 
+// FIXME: diff
 
     singleFolder: async function (syncData)  {
+// FIXME: diff
         // add target to syncData
         try {
             // accessing the target for the first time will check if it is avail and if not will create it (if possible)
@@ -114,5 +120,7 @@ var sync = {
             throw google.sync.finish("warning", e.message);
         }
     },
+
+// FIXME: diff
 
 }
