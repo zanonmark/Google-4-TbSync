@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css" ?>
 
+<!--
+ -  This file is part of Google-4-TbSync.
+ -  See CONTRIBUTORS.md for details.
+ -
+ -  This Source Code Form is subject to the terms of the Mozilla Public
+ -  License, v. 2.0. If a copy of the MPL was not distributed with this
+ -  file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ -->
+
 <window xmlns:html="http://www.w3.org/1999/xhtml" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" width="600" height="500" onload="tbSyncNewAccount.onLoad();" onunload="tbSyncNewAccount.onUnload();" onclose="return tbSyncNewAccount.onClose();">
 
     <linkset>
@@ -14,7 +23,7 @@
 
         <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.serverprofile.title__">
             <vbox flex="1">
-                <description style="width: 450px; margin-top:1em;">__GOOGLE4TBSYNCMSG_add.serverprofile.description__</description>
+                <description style="width: 450px; margin-top: 1em;">__GOOGLE4TBSYNCMSG_add.serverprofile.description__</description>
                 <grid style="margin-top: 1ex;">
                     <columns>
                         <column flex="1" />
@@ -22,11 +31,15 @@
                     </columns>
                     <rows>
                         <row>
-                            <vbox pack="center"><label value="Account name" /></vbox>
+                            <vbox pack="center">
+                                <label value="Account name" />
+                            </vbox>
                             <html:input id="tbsync.newaccount.accountName" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
                         <row>
-                            <vbox pack="center"><label value="Username" /></vbox>
+                            <vbox pack="center">
+                                <label value="Username" />
+                            </vbox>
                             <html:input id="tbsync.newaccount.username" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
                     </rows>

@@ -56,5 +56,6 @@ var tbSyncNewAccount = {
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         //
         window.close();
-    }
+    },
+
 };

@@ -18,7 +18,9 @@ var addressbook = {
             let directory = directories.getNext();
             //
             if (directory instanceof Components.interfaces.nsIAbDirectory) {
-                if (UID == directory.UID) return directory;
+                if (UID == directory.UID) {
+                    return directory;
+                }
             }
         }
         //

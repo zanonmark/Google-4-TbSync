@@ -12,12 +12,12 @@ async function main() {
         [
             "content",
             "google-4-tbsync",
-            "content/"
+            "content/",
         ],
         [
             "resource",
             "google-4-tbsync",
-            "."
+            ".",
         ],
     ]);
     //

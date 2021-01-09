@@ -13,9 +13,8 @@ const google = TbSync.providers.google;
 
 var tbSyncEditAccountOverlay = {
 
-    onload: function (window, accountData) {
+    onload: function(window, accountData) {
         this.accountData = accountData;
-
     },
 
 };

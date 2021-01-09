@@ -22,9 +22,6 @@
     "pref.AccountName": {
         "message": "Account name"
     },
-    "pref.ServerName": {
-        "message": "Host"
-    },
     "pref.UserName": {
         "message": "User name"
     },
@@ -34,13 +31,4 @@
     "pref.generaloptions": {
         "message": "General options"
     },
-    "pref.someOtherOption": {
-        "message": "Some other option"
-    },
-    "pref.someOtherOptionDescription": {
-        "message": "Description for some other option"
-    },
-    "pref.usehttps": {
-        "message": "Use secure connection (connect via HTTPS)"
-    }
 }
