@@ -1,14 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css" ?>
 
-<window
-    xmlns:html="http://www.w3.org/1999/xhtml"
-    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    width="600"
-    height="500"
-    onload="tbSyncNewAccount.onLoad();"
-    onunload="tbSyncNewAccount.onUnload();"
-    onclose="return tbSyncNewAccount.onClose();">
+<window xmlns:html="http://www.w3.org/1999/xhtml" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" width="600" height="500" onload="tbSyncNewAccount.onLoad();" onunload="tbSyncNewAccount.onUnload();" onclose="return tbSyncNewAccount.onClose();">
 
     <linkset>
         <html:link rel="localization" href="toolkit/global/wizard.ftl" />
@@ -17,9 +10,7 @@
     <script type="application/javascript" src="chrome://google-4-tbsync/content/locales.js" />
     <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/createAccount.js" />
 
-    <wizard
-        id="tbsync.newaccount.wizard"
-        title="__GOOGLE4TBSYNCMSG_add.title__">
+    <wizard id="tbsync.newaccount.wizard" title="__GOOGLE4TBSYNCMSG_add.title__">
 
         <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.serverprofile.title__">
             <vbox flex="1">
