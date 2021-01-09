@@ -328,7 +328,8 @@ var Base = class {
     static async syncFolderList(syncData, syncJob, syncRunNr) {   
         try {
             await google.sync.folderList(syncData);
-        } catch (e) {
+        }
+        catch (e) {
             if ("google-4-tbsync" == e.name) {
                 return e.statusData;
             } else {
@@ -365,7 +366,8 @@ var Base = class {
     static async syncFolder(syncData, syncJob, syncRunNr) {
         try {
             await google.sync.singleFolder(syncData);
-        } catch (e) {
+        }
+        catch (e) {
             if ("google-4-tbsync" == e.name) {
                 return e.statusData;
             } else {

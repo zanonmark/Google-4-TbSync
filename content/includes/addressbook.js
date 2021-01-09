@@ -9,16 +9,20 @@
 
 "use strict";
 
-// FIXME: diff
 var addressbook = {
+
     getDirectoryFromDirectoryUID: function(UID) {
         let directories = MailServices.ab.directories;
+        //
         while (UID && directories.hasMoreElements()) {
             let directory = directories.getNext();
+            //
             if (directory instanceof Components.interfaces.nsIAbDirectory) {
-                if (directory.UID == UID) return directory;
+                if (UID == directory.UID) return directory;
             }
-        }       
+        }
+        //
         return null;
-    },
+    }
+
 }

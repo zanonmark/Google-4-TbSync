@@ -19,7 +19,8 @@ let onInitDoneObserver = {
         try {
             var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
             valid = TbSync.enabled;
-        } catch (e) {
+        }
+        catch (e) {
             // If this fails, TbSync is not loaded yet and we will get the notification later again.
         }
         // Load this provider add-on into TbSync.
@@ -53,7 +54,8 @@ function shutdown(data, reason) { // Possible reasons: APP_SHUTDOWN, ADDON_DISAB
     try {
         var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
         TbSync.providers.unloadProvider("google");
-    } catch (e) {
+    }
+    catch (e) {
         // If this fails, TbSync has been unloaded already and has unloaded this addon as well.
     }
     //
