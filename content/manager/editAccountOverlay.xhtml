@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet href="chrome://tbsync/content/skin/fix_dropdown_1534697.css" type="text/css" ?>
+
+<!--
+ -  This file is part of Google-4-TbSync.
+ -  See CONTRIBUTORS.md for details.
+ -
+ -  This Source Code Form is subject to the terms of the Mozilla Public
+ -  License, v. 2.0. If a copy of the MPL was not distributed with this
+ -  file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+ -->
+
+<overlay xmlns:html="http://www.w3.org/1999/xhtml" id="tbSyncAccountConfig">
+
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/locales.js" />
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/editAccountOverlay.js" />
+
+    <tab id="manager.tabs.accountsettings" label="__GOOGLE4TBSYNCMSG_manager.tabs.accountsettings__" appendto="manager.tabs" />
+    <tab id="manager.tabs.syncsettings" label="__GOOGLE4TBSYNCMSG_manager.tabs.syncsettings__" appendto="manager.tabs" />
+
+    <tabpanel id="manager.tabpanels.accountsettings" appendto="manager.tabpanels" flex="1" orient="vertical"> <!-- Account settings. -->
+        <vbox flex="1">
+            <label id="tbsync.accountsettings.label.config" class="header lockIfConnected" style="margin-left: 0; margin-bottom: 1ex;" value="" />                
+            <grid flex="1">
+                <columns>
+                    <column flex="0" style="margin-right: 1ex;" />
+                    <column flex="1" />
+                </columns>
+                <rows>
+                    <row>
+                        <vbox pack="center">
+                            <label style="text-align: left;" control="tbsync.accountsettings.pref.accountname" value="__GOOGLE4TBSYNCMSG_pref.AccountName__" />
+                        </vbox>
+                        <html:input id="tbsync.accountsettings.pref.accountname" />
+                    </row>
+                    <row>
+                        <vbox pack="center">
+                            <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.user" value="__GOOGLE4TBSYNCMSG_pref.UserName__" />
+                        </vbox>
+                        <html:input id="tbsync.accountsettings.pref.user" class="lockIfConnected" />
+                    </row>
+                </rows>
+            </grid>
+            <vbox flex="1" />
+            <vbox class="showIfConnected">
+                <hbox>
+                    <vbox pack="center">
+                        <image src="chrome://tbsync/skin/info16.png" />
+                    </vbox>
+                    <description flex="1">__TBSYNCMSG_manager.lockedsettings.description__</description>
+                </hbox>
+            </vbox>
+        </vbox>
+    </tabpanel>
+
+    <tabpanel id="manager.tabpanels.syncsettings" appendto="manager.tabpanels" flex="1" orient="vertical"> <!-- Synchronization settings. -->
+        <vbox flex="1">
+            <label style="margin-left: 0; margin-bottom: 1ex;" class="header lockIfConnected" value="__GOOGLE4TBSYNCMSG_pref.contactoptions__" />
+<!--
+            <vbox>
+                <checkbox id="tbsync.accountsettings.pref.syncGroups" class="lockIfConnected" label="__GOOGLE4TBSYNCMSG_pref.syncGroups__" />
+                <description style="margin-left: 2em;" class="lockIfConnected">__GOOGLE4TBSYNCMSG_pref.syncGroupsDescription__</description>
+            </vbox>
+-->
+            <vbox flex="1" />
+            <vbox class="showIfConnected">
+                <hbox>
+                    <vbox pack="center">
+                        <image src="chrome://tbsync/skin/info16.png" />
+                    </vbox>
+                    <description flex="1">__TBSYNCMSG_manager.lockedsettings.description__</description>
+                </hbox>
+            </vbox>
+        </vbox>
+    </tabpanel>
+
+</overlay>
