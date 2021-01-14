@@ -23,7 +23,7 @@ var tbSyncNewAccount = {
         this.providerData = new TbSync.ProviderData("google");
         //
         this.accountNameWidget = document.getElementById('tbsync.newaccount.accountName');
-        this.usernameWidget = document.getElementById('tbsync.newaccount.username');
+        this.accessTokenWidget = document.getElementById('tbsync.newaccount.accessToken');
         //
         document.getElementById('tbsync.newaccount.wizard').canRewind = false;
         document.getElementById('tbsync.newaccount.wizard').canAdvance = false;
@@ -37,21 +37,21 @@ var tbSyncNewAccount = {
     },
 
     onUserTextInput: function() {
-        document.getElementById('tbsync.newaccount.wizard').canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.usernameWidget.value.trim()));
+        document.getElementById('tbsync.newaccount.wizard').canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.accessTokenWidget.value.trim()));
     },
 
     onFinish: function(event) {
         let accountName = this.accountNameWidget.value.trim();
-        let username = this.usernameWidget.value.trim();
+        let accessToken = this.accessTokenWidget.value.trim();
         //
-        tbSyncNewAccount.addAccount(accountName, username);
+        tbSyncNewAccount.addAccount(accountName, accessToken);
     },
 
-    addAccount: function(accountName, username) {
+    addAccount: function(accountName, accessToken) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
-        newAccountEntry.username = username;
+        newAccountEntry.accessToken = accessToken;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         //
