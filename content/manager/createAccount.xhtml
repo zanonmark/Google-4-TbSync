@@ -17,6 +17,7 @@
     </linkset>
 
     <script type="application/javascript" src="chrome://google-4-tbsync/content/locales.js" />
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/includes/PeopleAPI.js" />
     <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/createAccount.js" />
 
     <wizard id="tbsync.newaccount.wizard" title="__GOOGLE4TBSYNCMSG_add.title__">
@@ -41,6 +42,10 @@
                                 <label value="Access token" />
                             </vbox>
                             <html:input id="tbsync.newaccount.accessToken" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row>
+                            <vbox />
+                            <html:input type="button" onclick="peopleApi.getNewAccessToken();" value="Get new access token" />
                         </row>
                     </rows>
                 </grid>

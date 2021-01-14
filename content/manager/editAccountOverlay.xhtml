@@ -13,6 +13,7 @@
 <overlay xmlns:html="http://www.w3.org/1999/xhtml" id="tbSyncAccountConfig">
 
     <script type="application/javascript" src="chrome://google-4-tbsync/content/locales.js" />
+    <script type="application/javascript" src="chrome://google-4-tbsync/content/includes/PeopleAPI.js" />
     <script type="application/javascript" src="chrome://google-4-tbsync/content/manager/editAccountOverlay.js" />
 
     <tab id="manager.tabs.accountsettings" label="__GOOGLE4TBSYNCMSG_manager.tabs.accountsettings__" appendto="manager.tabs" />
@@ -38,6 +39,10 @@
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.accessToken" value="__GOOGLE4TBSYNCMSG_pref.AccessToken__" />
                         </vbox>
                         <html:input id="tbsync.accountsettings.pref.accessToken" class="lockIfConnected" />
+                    </row>
+                    <row>
+                        <vbox />
+                        <html:input type="button" onclick="peopleApi.getNewAccessToken();" value="Get new access token" />
                     </row>
                 </rows>
             </grid>
