@@ -9,10 +9,9 @@
 
 "use strict";
 
-const API_KEY = "AIzaSyAsE_GvLvP_wAFSc_GjgMO3RI09Cz2aQbY";
-const DISCOVERY_DOCS = [ "https://people.googleapis.com/$discovery/rest?version=v1" ];
 const CLIENT_ID = "307111179231-m9mhci0rl9f02tqbm20rgca9hk61leg4.apps.googleusercontent.com";
 const SCOPES = "profile https://www.googleapis.com/auth/contacts";
+const DISCOVERY_DOCS = [ "https://people.googleapis.com/$discovery/rest?version=v1" ];
 
 class PeopleAPI {
 
