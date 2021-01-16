@@ -9,18 +9,40 @@
 
 "use strict";
 
-const CLIENT_ID = "307111179231-m9mhci0rl9f02tqbm20rgca9hk61leg4.apps.googleusercontent.com";
 const SCOPES = "profile https://www.googleapis.com/auth/contacts";
 const DISCOVERY_DOCS = [ "https://people.googleapis.com/$discovery/rest?version=v1" ];
 
 class PeopleAPI {
 
-    constructor() { // TODO
+    clientId = null;
+    clientSecret = null;
+    code = null;
+    accessToken = null;
+
+    constructor(clientId, clientSecret, code) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.code = code;
     }
 
-    getNewAccessToken() { // TODO
+    getClientId() {
+        return this.clientId;
+    }
+
+    getClientSecret() {
+        return this.clientSecret;
+    }
+
+    getCode() {
+        return this.code;
+    }
+
+    static getNewCode() {
+// TODO
+    }
+
+    getAccessToken() {
+// TODO
     }
 
 }
-
-let peopleApi = new PeopleAPI();
