@@ -17,12 +17,16 @@ var tbSyncEditAccountOverlay = {
     clientIDWidget: null,
     clientSecretWidget: null,
     codeWidget: null,
+    browserWidget: null,
 
     onLoad: function(window, accountData) {
         this.accountNameWidget = document.getElementById("tbsync.accountsettings.pref.accountname");
         this.clientIDWidget = document.getElementById("tbsync.accountsettings.pref.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.accountsettings.pref.clientSecret");
         this.codeWidget = document.getElementById("tbsync.accountsettings.pref.code");
+        this.browserWidget = document.getElementById("tbsync.newaccount.browser");
+        //
+        this.browserWidget.style.display = "none";
         //
         this.accountData = accountData;
     },
@@ -35,10 +39,17 @@ var tbSyncEditAccountOverlay = {
     },
 
     onNewCodeRequest: function() {
-        let newCode = PeopleAPI.getNewCode();
+        let clientID = this.clientIDWidget.value.trim();
+        let clientSecret = this.clientSecretWidget.value.trim();
+        let code = this.codeWidget.value.trim();
         //
-        if (null != newCode) {
-            this.codeWidget.value = newCode;
+        try {
+            let peopleAPI = new PeopleAPI(clientID, clientSecret, code);
+            //
+            peopleAPI.getNewCode(this.browserWidget, this.codeWidget);
+        }
+        catch (exception) {
+            alert("Could not get a new code: " + exception);
         }
     },
 
