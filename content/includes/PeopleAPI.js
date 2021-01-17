@@ -14,19 +14,19 @@ const DISCOVERY_DOCS = [ "https://people.googleapis.com/$discovery/rest?version=
 
 class PeopleAPI {
 
-    clientId = null;
+    clientID = null;
     clientSecret = null;
     code = null;
     accessToken = null;
 
-    constructor(clientId, clientSecret, code) {
-        this.clientId = clientId;
+    constructor(clientID, clientSecret, code) {
+        this.clientID = clientId;
         this.clientSecret = clientSecret;
         this.code = code;
     }
 
-    getClientId() {
-        return this.clientId;
+    getClientID() {
+        return this.clientID;
     }
 
     getClientSecret() {

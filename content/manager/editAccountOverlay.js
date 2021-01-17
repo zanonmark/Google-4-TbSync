@@ -13,8 +13,33 @@ const google = TbSync.providers.google;
 
 var tbSyncEditAccountOverlay = {
 
-    onload: function(window, accountData) {
+    accountNameWidget: null,
+    clientIDWidget: null,
+    clientSecretWidget: null,
+    codeWidget: null,
+
+    onLoad: function(window, accountData) {
+        this.accountNameWidget = document.getElementById("tbsync.accountsettings.pref.accountname");
+        this.clientIDWidget = document.getElementById("tbsync.accountsettings.pref.clientID");
+        this.clientSecretWidget = document.getElementById("tbsync.accountsettings.pref.clientSecret");
+        this.codeWidget = document.getElementById("tbsync.accountsettings.pref.code");
+        //
         this.accountData = accountData;
+    },
+
+    onUnload: function() {
+    },
+
+    onClose: function() {
+        return true;
+    },
+
+    onNewCodeRequest: function() {
+        let newCode = PeopleAPI.getNewCode();
+        //
+        if (null != newCode) {
+            this.codeWidget.value = newCode;
+        }
     },
 
 };

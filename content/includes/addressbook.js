@@ -25,6 +25,6 @@ var addressbook = {
         }
         //
         return null;
-    }
+    },
 
 }

@@ -39,13 +39,25 @@
                         </row>
                         <row>
                             <vbox pack="center">
-                                <label value="Access token" />
+                                <label value="Client ID" />
                             </vbox>
-                            <html:input id="tbsync.newaccount.accessToken" oninput="tbSyncNewAccount.onUserTextInput();" />
+                            <html:input id="tbsync.newaccount.clientID" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row>
+                            <vbox pack="center">
+                                <label value="Client secret" />
+                            </vbox>
+                            <html:input id="tbsync.newaccount.clientSecret" oninput="tbSyncNewAccount.onUserTextInput();" />
+                        </row>
+                        <row>
+                            <vbox pack="center">
+                                <label value="Code" />
+                            </vbox>
+                            <html:input id="tbsync.newaccount.code" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
                         <row>
                             <vbox />
-                            <html:input type="button" onclick="peopleApi.getNewAccessToken();" value="Get new access token" />
+                            <html:input type="button" onclick="tbSyncNewAccount.onNewCodeRequest();" value="__GOOGLE4TBSYNCMSG_pref.GetNewCode__" />
                         </row>
                     </rows>
                 </grid>

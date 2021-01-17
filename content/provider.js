@@ -180,7 +180,9 @@ var Base = class {
      */
     static getDefaultAccountEntries() {
         let row = {
-            accessToken: "",
+            clientID: "",
+            clientSecret: "",
+            code: "",
         };
         //
         return row;
