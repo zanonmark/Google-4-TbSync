@@ -12,12 +12,15 @@ As Google forbids open source projects to include such credentials (because they
 
 The basic steps are the following.
 * Login to [Google API Console](https://console.developers.google.com).
-* Create a new project and name it whatever you want, e.g.: "MyGoogle4TbSync".
-* In the Credentials page, create a OAuth 2.0 Client ID with:
+* Create a new project and name it whatever you want, e.g.: "YOURNAME-Google4TbSync".
+* In the _Credentials_ page, create a OAuth 2.0 Client ID with:
   * application type: Desktop app;
   * name: whatever you want.
 * Write down the Client ID and Client Secret properties displayed on screen (and keep them safe!).
-* In the OAuth consent screen page, create a new consent screen with:
-  * user type: external.
-* Publish the app; otherwise only users specified in Test users will be able to
-  use the add-on (note: users added this way cannot be removed).
+* In the _OAuth consent screen_ page, create a new consent screen with:
+  * user type: external;
+  * app name: whatever you want, but it would be a good idea to reuse the project name, e.g.: "YOURNAME-Google4TbSync";
+  * user support email: your email address;
+  * developer contact information: your email address;
+  * scopes: "https://www.googleapis.com/auth/contacts";
+  * status: app published (otherwise only users specified in _Test users_ will be able to use the add-on - note: users added this way cannot be removed later).
