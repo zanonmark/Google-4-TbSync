@@ -52,4 +52,8 @@ var tbSyncEditAccountOverlay = {
 let observer = new MutationObserver(function(mutationList, observer) {
     tbSyncEditAccountOverlay.resetWidgetReferences();
 });
-observer.observe(document, { attributes: true, childList: true, subtree: true });
+observer.observe(document, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+});
