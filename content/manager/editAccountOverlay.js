@@ -19,7 +19,7 @@ var tbSyncEditAccountOverlay = {
     codeWidget: null,
     browserWidget: null,
 
-    onLoad: function(window, accountData) {
+    onload: function(window, accountData) {
         this.accountData = accountData;
     },
 
