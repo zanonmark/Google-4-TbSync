@@ -334,7 +334,8 @@ var Base = class {
         catch (e) {
             if ("google-4-tbsync" == e.name) {
                 return e.statusData;
-            } else {
+            }
+            else {
                 Components.utils.reportError(e);
                 // Re-throw any other error and let TbSync handle it.
                 throw (e);
@@ -372,7 +373,8 @@ var Base = class {
         catch (e) {
             if ("google-4-tbsync" == e.name) {
                 return e.statusData;
-            } else {
+            }
+            else {
                 Components.utils.reportError(e);
                 // Re-throw any other error and let TbSync handle it.
                 throw (e);
