@@ -28,9 +28,7 @@ var tbSyncNewAccount = {
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
         this.codeWidget = document.getElementById("tbsync.newaccount.code");
-        this.browserWidget = document.getElementById("tbsync.newaccount.browser");
-        //
-        this.browserWidget.style.display = "none";
+        this.browserWidget = document.getElementById("browser");
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;

@@ -68,8 +68,11 @@ class PeopleAPI {
                     let code = group[1];
                     // ...apply the code to the textbox...
                     codeWidget.value = code;
-                    codeWidget.oninput(); // Trigger the event.
-                    // ...then hide the browser...
+                    // ...trigger the onInput event if necessary...
+                    if (codeWidget.oninput) {
+                        codeWidget.oninput();
+                    }
+                    // ...hide the browser...
                     browserWidget.style.display = "none";
                     browserWidget.src = "about:blank";
                     // ...and stop the interval.
