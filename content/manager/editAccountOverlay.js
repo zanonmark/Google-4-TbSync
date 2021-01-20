@@ -21,9 +21,7 @@ var tbSyncEditAccountOverlay = {
 
     onload: function(window, accountData) {
         this.accountData = accountData;
-    },
-
-    resetWidgetReferences: function() {
+        //
         this.accountNameWidget = document.getElementById("tbsync.accountsettings.pref.accountname");
         this.clientIDWidget = document.getElementById("tbsync.accountsettings.pref.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.accountsettings.pref.clientSecret");
@@ -47,13 +45,3 @@ var tbSyncEditAccountOverlay = {
     },
 
 };
-
-// Add a mutation observer to set the widget references after the overlay has been loaded.
-let observer = new MutationObserver(function(mutationList, observer) {
-    tbSyncEditAccountOverlay.resetWidgetReferences();
-});
-observer.observe(document, {
-    attributes: true,
-    childList: true,
-    subtree: true,
-});
