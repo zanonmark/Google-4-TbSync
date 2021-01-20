@@ -43,49 +43,51 @@ class PeopleAPI {
         return this.code;
     }
 
-    getNewCode(browserWidget, codeWidget) {
-        if (null == browserWidget) {
-            throw "Invalid value: browserWidget: null."
-        }
+    getNewCode(codeWidget) {
         if (null == codeWidget) {
             throw "Invalid value: codeWidget: null."
         }
         // Prepare the authorization code request URL.
         let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth?client_id=__CLIENT_ID__&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=__SCOPE__&response_type=code".replace("__CLIENT_ID__", this.getClientID()).replace("__SCOPE__", SCOPES);
         console.log("PeopleAPI.getNewCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
-        // Load the URL.
-        browserWidget.src = authorizationCodeRequestURL;
-        browserWidget.style.display = "block";
-        // Check the response every 1s.
-        let interval = setInterval(function() {
-            let browserTitle = browserWidget.contentTitle;
-            // If the browser title contains "Success"...
-            if (browserTitle.startsWith("Success")) {
-                let pattern = new RegExp("code=(.*)&", "i");
-                let group = pattern.exec(browserTitle);
-                // ...and if the code could be retrieved...
-                if (null != group) {
-                    let code = group[1];
-                    // ...apply the code to the textbox...
-                    codeWidget.value = code;
-                    console.log("PeopleAPI.getNewCode(): code = " + code);
-                    // ...trigger the onInput event (only if necessary)...
-                    if (codeWidget.oninput) {
-                        codeWidget.oninput();
+        // Open the browser window.
+        let authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", "tbsyncAuthentication", "chrome");
+        let browserWidget = null;
+        authenticationWindow.onload = function() {
+            // Set the browser widget.
+            browserWidget = authenticationWindow.document.getElementById("browser");
+            // Load the URL.
+            browserWidget.setAttribute("src", authorizationCodeRequestURL);
+            // Check the response every 1s.
+            let interval = setInterval(function() {
+                let browserTitle = browserWidget.contentTitle;
+                // If the browser title contains "Success"...
+                if (browserTitle.startsWith("Success")) {
+                    let pattern = new RegExp("code=(.*)&", "i");
+                    let group = pattern.exec(browserTitle);
+                    // ...and if the code could be retrieved...
+                    if (null != group) {
+                        let code = group[1];
+                        // ...apply the code to the textbox...
+                        codeWidget.value = code;
+                        console.log("PeopleAPI.getNewCode(): code = " + code);
+                        // ...trigger the onInput event (only if necessary)...
+                        if (codeWidget.oninput) {
+                            codeWidget.oninput();
+                        }
+                        // ...close the browser window...
+                        authenticationWindow.close();
+                        // ...stop the interval...
+                        clearInterval(interval);
+                        // ...and set the code to the object.
+                        this.code = code;
                     }
-                    // ...hide the browser...
-                    browserWidget.style.display = "none";
-                    browserWidget.src = "about:blank";
-                    // ...stop the interval...
-                    clearInterval(interval);
-                    // ...and set the code to the object.
-                    this.code = code;
                 }
-            }
-        }, 1000);
+            }, 1000);
+        }
     }
 
-    getAccessToken() {
+    getNewAccessToken() {
         // Prepare the access token request URL and data.
         let accessTokenRequestURL = "https://accounts.google.com/o/oauth2/token";
         let accessTokenRequestData = {

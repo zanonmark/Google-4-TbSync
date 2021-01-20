@@ -82,6 +82,7 @@ var sync = {
     },
 
     singleFolder: async function(syncData) {
+// TODO
         // Add target to syncData.
         try {
             // Accessing the target for the first time will check if it is available and if not will create it (if possible).

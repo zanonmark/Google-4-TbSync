@@ -19,7 +19,6 @@ var tbSyncNewAccount = {
     clientIDWidget: null,
     clientSecretWidget: null,
     codeWidget: null,
-    browserWidget: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -28,7 +27,6 @@ var tbSyncNewAccount = {
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
         this.codeWidget = document.getElementById("tbsync.newaccount.code");
-        this.browserWidget = document.getElementById("browser");
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -57,7 +55,7 @@ var tbSyncNewAccount = {
         try {
             let peopleAPI = new PeopleAPI(clientID, clientSecret, code);
             //
-            peopleAPI.getNewCode(this.browserWidget, this.codeWidget);
+            peopleAPI.getNewCode(this.codeWidget);
         }
         catch (exception) {
             alert("Could not get a new code: " + exception);
