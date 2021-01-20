@@ -49,7 +49,7 @@ var sync = {
     },
 
     folderList: async function(syncData) {        
-        // Simulation of folders retrieved from Server, with changing names.
+        // Simulation of folders retrieved from Server.
         let foundFolders = [
             {UID: 1, name: "Contacts"},
         ];
