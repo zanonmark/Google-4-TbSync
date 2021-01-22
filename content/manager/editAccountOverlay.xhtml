@@ -47,14 +47,8 @@
                         <html:input id="tbsync.accountsettings.pref.clientSecret" class="lockIfConnected" />
                     </row>
                     <row>
-                        <vbox pack="center">
-                            <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.code" value="__GOOGLE4TBSYNCMSG_pref.Code__" />
-                        </vbox>
-                        <html:input id="tbsync.accountsettings.pref.code" class="lockIfConnected" />
-                    </row>
-                    <row>
                         <vbox />
-                        <html:input type="button" class="lockIfConnected" onclick="tbSyncEditAccountOverlay.onNewCodeRequest();" value="__GOOGLE4TBSYNCMSG_pref.GetNewCode__" />
+                        <html:input type="button" class="lockIfConnected" onclick="tbSyncEditAccountOverlay.onCheckConnection();" value="__GOOGLE4TBSYNCMSG_pref.CheckConnection__" />
                     </row>
                 </rows>
             </grid>

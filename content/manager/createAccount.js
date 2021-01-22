@@ -18,7 +18,6 @@ var tbSyncNewAccount = {
     accountNameWidget: null,
     clientIDWidget: null,
     clientSecretWidget: null,
-    codeWidget: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -26,7 +25,6 @@ var tbSyncNewAccount = {
         this.accountNameWidget = document.getElementById("tbsync.newaccount.accountName");
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
-        this.codeWidget = document.getElementById("tbsync.newaccount.code");
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -44,43 +42,26 @@ var tbSyncNewAccount = {
     },
 
     onUserTextInput: function() {
-        document.getElementById("tbsync.newaccount.wizard").canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.clientIDWidget.value.trim()) && ("" !== this.clientSecretWidget.value.trim()) && ("" !== this.codeWidget.value.trim()));
-    },
-
-    onNewCodeRequest: function() {
-        let clientID = this.clientIDWidget.value.trim();
-        let clientSecret = this.clientSecretWidget.value.trim();
-        let code = this.codeWidget.value.trim();
-        //
-        try {
-            let peopleAPI = new PeopleAPI(clientID, clientSecret, code);
-            //
-            peopleAPI.getNewCode(this.codeWidget);
-        }
-        catch (exception) {
-            alert("Could not get a new code: " + exception);
-        }
+        document.getElementById("tbsync.newaccount.wizard").canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.clientIDWidget.value.trim()) && ("" !== this.clientSecretWidget.value.trim()));
     },
 
     onFinish: function(event) {
         let accountName = this.accountNameWidget.value.trim();
         let clientID = this.clientIDWidget.value.trim();
         let clientSecret = this.clientSecretWidget.value.trim();
-        let code = this.codeWidget.value.trim();
         //
-        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, code);
+        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret);
     },
 
-    addAccount: function(accountName, clientID, clientSecret, code) {
+    addAccount: function(accountName, clientID, clientSecret) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
         newAccountEntry.clientID = clientID;
         newAccountEntry.clientSecret = clientSecret;
-        newAccountEntry.code = code;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
-        //
+        // Close the window.
         window.close();
     },
 

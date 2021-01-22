@@ -182,7 +182,6 @@ var Base = class {
         let row = {
             clientID: "",
             clientSecret: "",
-            code: "",
         };
         //
         return row;
@@ -338,7 +337,7 @@ var Base = class {
             else {
                 Components.utils.reportError(e);
                 // Re-throw any other error and let TbSync handle it.
-                throw (e);
+                throw e;
             }
         }
         //
@@ -377,7 +376,7 @@ var Base = class {
             else {
                 Components.utils.reportError(e);
                 // Re-throw any other error and let TbSync handle it.
-                throw (e);
+                throw e;
             }
         }
         //
