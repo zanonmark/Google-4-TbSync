@@ -38,6 +38,14 @@ class PeopleAPI {
         return this.getAccountData().getAccountProperty("clientSecret");
     }
 
+    setRefreshToken(refreshToken) {
+        this.getAccountData().setAccountProperty("refreshToken", refreshToken);
+    }
+
+    getRefreshToken() {
+        return this.getAccountData().getAccountProperty("refreshToken");
+    }
+
     /* Authentication and authorization. */
 
     async getNewAuthorizationCode() {
@@ -125,31 +133,61 @@ class PeopleAPI {
         return responseData;
     }
 
-    async getNewAccessToken() {
+    async retrieveNewRefreshToken() {
         // Get a new authorization code.
         let authorizationCode = await this.getNewAuthorizationCode();
-        // Prepare the access token request URL and data.
-        let accessTokenRequestURL = "https://accounts.google.com/o/oauth2/token";
-        let accessTokenRequestData = {
-            code: authorizationCode,
+        // Prepare the refresh token request URL and data.
+        let refreshTokenRequestURL = "https://accounts.google.com/o/oauth2/token";
+        let refreshTokenRequestData = {
             client_id: this.getClientID(),
             client_secret: this.getClientSecret(),
             redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
             grant_type: "authorization_code",
+            code: authorizationCode,
         };
         // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData(accessTokenRequestURL, accessTokenRequestData);
-        // Retrieve the access token.
-        let accessToken = responseData.access_token;
-        console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
-        //
-        return accessToken;
+        let responseData = await this.getResponseData(refreshTokenRequestURL, refreshTokenRequestData);
+        // Retrieve the refresh token...
+        let refreshToken = responseData.refresh_token;
+        console.log("PeopleAPI.retrieveNewRefreshToken(): refreshToken = " + refreshToken);
+        // ...and save it to the account data.
+        this.setRefreshToken(refreshToken);
     }
 
-    checkConnection() {
-        (async () => {
-            alert("Your new access token is: " + await this.getNewAccessToken());
-        })();
+    async getNewAccessToken(retrieveNewRefreshToken = false) {
+        console.log("PeopleAPI.getNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
+        // Retrieve a new refresh token if necessary.
+        if (retrieveNewRefreshToken) {
+            await this.retrieveNewRefreshToken();
+        }
+        // Get the refresh token.
+        let refreshToken = this.getRefreshToken();
+        // Prepare the access token request URL and data.
+        let accessTokenRequestURL = "https://accounts.google.com/o/oauth2/token";
+        let accessTokenRequestData = {
+            client_id: this.getClientID(),
+            client_secret: this.getClientSecret(),
+            grant_type: "refresh_token",
+            refresh_token: refreshToken,
+        };
+        // Try retrieving the access token.
+        try {
+            // Perform the request and retrieve the response data.
+            let responseData = await this.getResponseData(accessTokenRequestURL, accessTokenRequestData);
+            // Retrieve the access token.
+            let accessToken = responseData.access_token;
+            console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
+            //
+            return accessToken;
+        }
+        catch (error) {
+            // If the old refresh token was used, chances are it expired or was invalidated, so...
+            if (!retrieveNewRefreshToken) {
+                console.log("Unable to get a new access token, retrying with a new refresh token first.");
+                // ...retry with a new refresh token.
+                return await this.getNewAccessToken(true);
+            }
+        }
     }
 
     /* Contacts. */
@@ -158,6 +196,12 @@ class PeopleAPI {
         // Get a new access token.
         let newAccessToken = this.getNewAccessToken();
 // TODO
+    }
+
+    checkConnection() {
+        (async () => {
+            alert("Your new access token is: " + await this.getNewAccessToken());
+        })();
     }
 
 }

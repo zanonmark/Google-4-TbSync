@@ -182,6 +182,7 @@ var Base = class {
         let row = {
             clientID: "",
             clientSecret: "",
+            refreshToken: null,
         };
         //
         return row;
