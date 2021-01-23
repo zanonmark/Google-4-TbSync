@@ -93,6 +93,29 @@ class PeopleAPI {
         return promise;
     }
 
+    async getResponseData(requestURL, requestData) {
+        console.log("PeopleAPI.getResponseData(): requestURL = " + requestURL);
+        console.log("PeopleAPI.getResponseData(): requestData = " + JSON.stringify(requestData));
+        // Perform the request.
+        let response = await fetch(requestURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+        });
+        // Check the response status.
+        console.log("PeopleAPI.getResponseData(): responseStatus = " + response.status);
+        if (200 != response.status) {
+            throw new Error("Invalid response: " + response.status);
+        }
+        // Retrieve the response data.
+        let responseData = await response.json();
+        console.log("PeopleAPI.getResponseData(): responseData = " + JSON.stringify(responseData));
+        //
+        return responseData;
+    }
+
     async getNewAccessToken() {
         // Get a new authorization code.
         let authorizationCode = await this.getNewAuthorizationCode();
@@ -105,23 +128,10 @@ class PeopleAPI {
             redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
             grant_type: "authorization_code",
         };
-        console.log("PeopleAPI.getNewAccessToken(): accessTokenRequestURL = " + accessTokenRequestURL);
-        console.log("PeopleAPI.getNewAccessToken(): accessTokenRequestData = " + JSON.stringify(accessTokenRequestData));
-        // Perform the request.
-        let response = await fetch(accessTokenRequestURL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(accessTokenRequestData),
-        });
-        // Check the response status.
-        if (200 != response.status) {
-            throw new Error("Invalid response: " + response.status);
-        }
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData(accessTokenRequestURL, accessTokenRequestData);
         // Retrieve the access token.
-        let data = await response.json();
-        let accessToken = data.access_token;
+        let accessToken = responseData.access_token;
         console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
         //
         return accessToken;
