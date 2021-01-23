@@ -105,8 +105,8 @@ class PeopleAPI {
             redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
             grant_type: "authorization_code",
         };
-        console.log("PeopleAPI.getAccessToken(): accessTokenRequestURL = " + accessTokenRequestURL);
-        console.log("PeopleAPI.getAccessToken(): accessTokenRequestData = " + JSON.stringify(accessTokenRequestData));
+        console.log("PeopleAPI.getNewAccessToken(): accessTokenRequestURL = " + accessTokenRequestURL);
+        console.log("PeopleAPI.getNewAccessToken(): accessTokenRequestData = " + JSON.stringify(accessTokenRequestData));
         // Perform the request.
         let response = await fetch(accessTokenRequestURL, {
             method: "POST",
@@ -122,7 +122,7 @@ class PeopleAPI {
         // Retrieve the access token.
         let data = await response.json();
         let accessToken = data.access_token;
-        console.log("PeopleAPI.getAccessToken(): accessToken = " + accessToken);
+        console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
         //
         return accessToken;
     }
