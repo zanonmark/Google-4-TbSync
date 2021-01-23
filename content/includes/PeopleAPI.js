@@ -78,6 +78,15 @@ class PeopleAPI {
                             resolve(authorizationCode);
                         }
                     }
+                    // Else if the browser title contains "Error"...
+                    else if (browserTitle.startsWith("Error")) {
+                        // ...close the browser window...
+                        authenticationWindow.close();
+                        // ...stop the title interval...
+                        clearInterval(titleInterval);
+                        // ...and return an error.
+                        reject(new Error("Browser title: " + browserTitle));
+                    }
                 }, 1000);
             };
             authenticationWindow.onclose = function() {
