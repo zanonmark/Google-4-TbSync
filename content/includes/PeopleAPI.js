@@ -38,7 +38,7 @@ class PeopleAPI {
         return this.getAccountData().getAccountProperty("clientSecret");
     }
 
-    /* Connections. */
+    /* Authentication and authorization. */
 
     async getNewAuthorizationCode() {
         let clientID = this.getClientID();
