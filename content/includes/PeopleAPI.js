@@ -11,6 +11,7 @@
 
 const SCOPES = "profile https://www.googleapis.com/auth/contacts";
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
+const CONTACT_LIST_PAGE_SIZE = 1000;
 
 class PeopleAPI {
 
@@ -205,22 +206,41 @@ class PeopleAPI {
 
     /* Contacts. */
 
-    async getContactList() { // FIXME: retrieve the full list (not only the first 100 contacts)
+    async getContactList() {
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
-        // Prepare the contact list request URL and data.
-        let contactListRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
-        contactListRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            personFields: "names",
-            access_token: accessToken,
-        });
-        let contactListRequestData = null;
-        // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData("GET", contactListRequestURL, contactListRequestData);
-        // Retrieve the contact list.
-        let contactList = responseData.connections;
-        console.log("PeopleAPI.getContactList(): contactList = " + JSON.stringify(contactList));
+        // Retrieve the contact list page by page.
+        let contactList = [];
+        let nextPageToken = null;
+        while (true) {
+            console.log("PeopleAPI.getContactList(): nextPageToken = " + nextPageToken);
+            // Prepare the partial contact list request URL and data.
+            let partialContactListRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
+            partialContactListRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+                personFields: "names",
+                pageSize: CONTACT_LIST_PAGE_SIZE,
+                sortOrder: "LAST_NAME_ASCENDING",
+                access_token: accessToken,
+            });
+            if (null != nextPageToken) {
+                partialContactListRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
+            }
+            let partialContactListRequestData = null;
+            // Perform the request and retrieve the response data.
+            let responseData = await this.getResponseData("GET", partialContactListRequestURL, partialContactListRequestData);
+            // Retrieve the partial contact list...
+            let partialContactList = responseData.connections;
+            // ...and concatenate it with the contact list.
+            contactList = contactList.concat(partialContactList);
+            // Retrieve the next page token, necessary to retrieve the next page.
+            nextPageToken = responseData.nextPageToken;
+            // Check if this was the last page.
+            if (null == nextPageToken) {
+                break;
+            }
+        }
         //
+        console.log("PeopleAPI.getContactList(): contactList = " + JSON.stringify(contactList));
         return contactList;
     }
 
@@ -233,8 +253,7 @@ class PeopleAPI {
     /* Helpers. */
 
     static getObjectAsEncodedURIParameters(x) {
-        let parameters = [
-        ];
+        let parameters = [];
         //
         for (let p in x) {
             if (x.hasOwnProperty(p)) {
