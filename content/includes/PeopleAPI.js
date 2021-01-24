@@ -10,7 +10,7 @@
 "use strict";
 
 const SCOPES = "profile https://www.googleapis.com/auth/contacts";
-const DISCOVERY_DOCS = [ "https://people.googleapis.com/$discovery/rest?version=v1" ];
+const SERVICE_ENDPOINT = "https://people.googleapis.com";
 
 class PeopleAPI {
 
@@ -53,7 +53,13 @@ class PeopleAPI {
         // Prepare a new promise.
         let promise = new Promise(function(resolve, reject) {
             // Prepare the authorization code request URL.
-            let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth?client_id=__CLIENT_ID__&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=__SCOPE__&response_type=code".replace("__CLIENT_ID__", clientID).replace("__SCOPE__", SCOPES);
+            let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth";
+            authorizationCodeRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+                client_id: clientID,
+                redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
+                scope: SCOPES,
+                response_type: "code",
+            });
             console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
             // Open the browser window.
             let authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome");
@@ -110,21 +116,28 @@ class PeopleAPI {
         return promise;
     }
 
-    async getResponseData(requestURL, requestData) {
+    async getResponseData(method, requestURL, requestData) {
+        if ((null == method) || ("" === method)) {
+            throw new Error("Invalid value: method: null or empty.");
+        }
+        if ((null == requestURL) || ("" === requestURL)) {
+            throw new Error("Invalid value: requestURL: null or empty.");
+        }
+        //
         console.log("PeopleAPI.getResponseData(): requestURL = " + requestURL);
         console.log("PeopleAPI.getResponseData(): requestData = " + JSON.stringify(requestData));
         // Perform the request.
         let response = await fetch(requestURL, {
-            method: "POST",
+            method: method,
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(requestData),
+            body: (("GET" === method.toUpperCase()) || ("HEAD" === method.toUpperCase()) ? null : JSON.stringify(requestData)),
         });
         // Check the response status.
         console.log("PeopleAPI.getResponseData(): responseStatus = " + response.status);
         if (200 != response.status) {
-            throw new Error("Invalid response: " + response.status);
+            throw new Error("Invalid response: " + response.status + ": " + response.statusText);
         }
         // Retrieve the response data.
         let responseData = await response.json();
@@ -146,7 +159,7 @@ class PeopleAPI {
             code: authorizationCode,
         };
         // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData(refreshTokenRequestURL, refreshTokenRequestData);
+        let responseData = await this.getResponseData("POST", refreshTokenRequestURL, refreshTokenRequestData);
         // Retrieve the refresh token...
         let refreshToken = responseData.refresh_token;
         console.log("PeopleAPI.retrieveNewRefreshToken(): refreshToken = " + refreshToken);
@@ -173,7 +186,7 @@ class PeopleAPI {
         // Try retrieving the access token.
         try {
             // Perform the request and retrieve the response data.
-            let responseData = await this.getResponseData(accessTokenRequestURL, accessTokenRequestData);
+            let responseData = await this.getResponseData("POST", accessTokenRequestURL, accessTokenRequestData);
             // Retrieve the access token.
             let accessToken = responseData.access_token;
             console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
@@ -192,16 +205,44 @@ class PeopleAPI {
 
     /* Contacts. */
 
-    getContactList() {
+    async getContactList() { // FIXME: retrieve the full list (not only the first 100 contacts)
         // Get a new access token.
-        let newAccessToken = this.getNewAccessToken();
-// TODO
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the contact list request URL and data.
+        let contactListRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
+        contactListRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            personFields: "names",
+            access_token: accessToken,
+        });
+        let contactListRequestData = null;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("GET", contactListRequestURL, contactListRequestData);
+        // Retrieve the contact list.
+        let contactList = responseData.connections;
+        console.log("PeopleAPI.getContactList(): contactList = " + JSON.stringify(contactList));
+        //
+        return contactList;
     }
 
     checkConnection() {
         (async () => {
-            alert("Your new access token is: " + await this.getNewAccessToken());
+            alert("Your contact list size: " + (await this.getContactList()).length);
         })();
+    }
+
+    /* Helpers. */
+
+    static getObjectAsEncodedURIParameters(x) {
+        let parameters = [
+        ];
+        //
+        for (let p in x) {
+            if (x.hasOwnProperty(p)) {
+               parameters.push(encodeURIComponent(p) + "=" + encodeURIComponent(x[p]));
+            }
+        }
+        //
+        return parameters.join("&");
     }
 
 }
