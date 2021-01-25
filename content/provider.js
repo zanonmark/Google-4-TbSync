@@ -327,7 +327,7 @@ var Base = class {
      *                        the synchronization (failed / success).
      *
      */
-    static async syncFolderList(syncData, syncJob, syncRunNr) {   
+    static async syncFolderList(syncData, syncJob, syncRunNr) {
         try {
             await google.sync.folderList(syncData);
         }
