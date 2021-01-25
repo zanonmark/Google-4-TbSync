@@ -76,7 +76,7 @@ var Base = class {
                 return "resource://google-4-tbsync/skin/icon16.png";
             case 32:
                 return "resource://google-4-tbsync/skin/icon32.png";
-            default :
+            default:
                 return "resource://google-4-tbsync/skin/icon64.png";
         }
     }
@@ -267,7 +267,7 @@ var Base = class {
      * @returns {array}  An array of Objects.
      *
      */
-    static async abAutoComplete(accountData, query)  {
+    static async abAutoComplete(accountData, query) {
         return [];
     }
 
