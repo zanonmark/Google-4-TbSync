@@ -551,7 +551,7 @@ var TargetData = class {
         let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
         //
         if (!directory) {
-            let dirPrefId = MailServices.ab.newAddressBook(this._folderData.getFolderProperty("foldername"), "", 2);
+            let dirPrefId = MailServices.ab.newAddressBook(this._folderData.getFolderProperty("foldername"), "", 101);
             let directory = MailServices.ab.getDirectoryFromId(dirPrefId);
             //
             if (!directory) {
