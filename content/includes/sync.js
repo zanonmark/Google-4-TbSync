@@ -82,14 +82,13 @@ var sync = {
     },
 
     singleFolder: async function(syncData) {
-// TODO
         // Add target to syncData.
         try {
             // Accessing the target for the first time will check if it is available and if not will create it (if possible).
             syncData.target = await syncData.currentFolderData.targetData.getTarget();
         }
         catch (e) {
-            Components.utils.reportError(e);        
+            Components.utils.reportError(e);
             throw google.sync.finish("warning", e.message);
         }
         //
@@ -97,7 +96,7 @@ var sync = {
         //
         try {
             switch (syncData.currentFolderData.getFolderProperty("targetType")) {
-                case "addressbook": 
+                case "addressbook":
                     // Do something with syncData.target.
                     break;
                 default:
@@ -106,7 +105,7 @@ var sync = {
             }
         }
         catch (e) {
-            Components.utils.reportError(e);        
+            Components.utils.reportError(e);
             throw google.sync.finish("warning", e.message);
         }
     },
