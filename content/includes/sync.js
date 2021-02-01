@@ -9,6 +9,8 @@
  
 "use strict";
 
+Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
+
 var sync = {
     
     finish: function(aStatus = "", msg = "", details = "") {
@@ -48,10 +50,14 @@ var sync = {
         return e; 
     },
 
-    folderList: async function(syncData) {        
+    folderList: async function(syncData) {
+        // Retrieve information about the authenticated user.
+        let peopleAPI = new PeopleAPI(syncData.accountData);
+        let authenticatedUser = await peopleAPI.getAuthenticatedUser();
+        let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
         // Simulation of folders retrieved from Server.
         let foundFolders = [
-            {UID: 1, name: "Contacts"},
+            {UID: 1, name: "Google Contacts (" + authenticatedUserEmail + ")"},
         ];
         //
         for (let folder of foundFolders) {
@@ -97,7 +103,15 @@ var sync = {
         try {
             switch (syncData.currentFolderData.getFolderProperty("targetType")) {
                 case "addressbook":
-                    // Do something with syncData.target.
+// FIXME https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
+/* FIXME
+                    let peopleAPI = new PeopleAPI(syncData.accountData);
+                    //
+                    let googleContactList = await peopleAPI.getContactList();
+console.log("googleContactList.length = " + googleContactList.length + ", local.length = " + ); // FIXME
+console.log("syncData.target.readOnly = " + syncData.target.readOnly); // FIXME
+*/
+                    //
                     break;
                 default:
                     throw new Error("Unsupported target");
