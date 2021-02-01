@@ -23,6 +23,6 @@ The basic steps are the following.
   * _App name_: whatever you want, but it would be appropriate to reuse the project name, e.g.: "YOURNAME-Google-4-TbSync";
   * _User support email_: your email address;
   * _Developer contact information_: your email address;
-  * scopes: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts" (which will be displayed in _Your sensitive scopes_);
+  * scopes: "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email" (which will be displayed in _Your non-sensitive scopes_) and "https://www.googleapis.com/auth/contacts" (which will be displayed in _Your sensitive scopes_);
   * _Test users_: your email address (just to test that everything works fine) and all other email addresses you want to use this add-on.
 * In the _Library_ page, search for the _Google People API_ card and enable the corresponding API.
