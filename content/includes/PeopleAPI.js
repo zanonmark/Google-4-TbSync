@@ -9,7 +9,7 @@
 
 "use strict";
 
-const SCOPES = "profile https://www.googleapis.com/auth/contacts";
+const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_LIST_PAGE_SIZE = 1000;
 
@@ -204,9 +204,28 @@ class PeopleAPI {
         }
     }
 
-    /* Contacts. */
+    /* People. */
 
-    async getContactList() {
+    async getAuthenticatedUser() { // https://developers.google.com/people/api/rest/v1/people/get
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the authenticated user request URL and data.
+        let authenticatedUserRequestURL = SERVICE_ENDPOINT + "/v1/people/me";
+        authenticatedUserRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            personFields: "names,emailAddresses",
+            access_token: accessToken,
+        });
+        let authenticatedUserRequestData = null;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("GET", authenticatedUserRequestURL, authenticatedUserRequestData);
+        // Retrieve the authenticated user.
+        let authenticatedUser = responseData;
+        //
+        console.log("PeopleAPI.getAuthenticatedUser(): authenticatedUser = " + JSON.stringify(authenticatedUser));
+        return authenticatedUser;
+    }
+
+    async getContactList() { // https://developers.google.com/people/api/rest/v1/people.connections/list
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
         // Retrieve the contact list page by page.
@@ -246,7 +265,13 @@ class PeopleAPI {
 
     checkConnection() {
         (async () => {
-            alert("Your contact list size: " + (await this.getContactList()).length);
+            let authenticatedUser = await this.getAuthenticatedUser();
+            let authenticatedUserName = authenticatedUser.names[0].displayName;
+            let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
+            //
+            let contactList = await this.getContactList();
+            //
+            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contactList.length + " contacts.");
         })();
     }
 
