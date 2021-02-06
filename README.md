@@ -4,6 +4,10 @@ This provider add-on adds Google synchronization capabilities to TbSync. Only co
 
 The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by John Bieling himself.
 
+### Warning
+
+The project is still in its early development stage. *Backup all your addressbooks (both Google's and Thunderbird's) before running the software!*
+
 ### Please note
 
 In order to use this Thunderbird add-on, a Google API Console project is needed, and specifically its _Client ID_ and _Client Secret_ properties.
