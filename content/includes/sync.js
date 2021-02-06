@@ -9,7 +9,7 @@
  
 "use strict";
 
-Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
+Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AddressBookSynchronizer.js", this, "UTF-8");
 
 var sync = {
     
@@ -103,15 +103,7 @@ var sync = {
         try {
             switch (syncData.currentFolderData.getFolderProperty("targetType")) {
                 case "addressbook":
-// FIXME https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
-/* FIXME
-                    let peopleAPI = new PeopleAPI(syncData.accountData);
-                    //
-                    let googleContactList = await peopleAPI.getContactList();
-console.log("googleContactList.length = " + googleContactList.length + ", local.length = " + ); // FIXME
-console.log("syncData.target.readOnly = " + syncData.target.readOnly); // FIXME
-*/
-                    //
+                    await AddressBookSynchronizer.synchronize(syncData);
                     break;
                 default:
                     throw new Error("Unsupported target");
