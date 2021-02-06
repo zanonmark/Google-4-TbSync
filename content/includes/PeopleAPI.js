@@ -21,7 +21,7 @@ class PeopleAPI {
 
     constructor(accountData) {
         if (null == accountData) {
-            throw new Error("Invalid value: accountData: null.");
+            throw new Error("Invalid 'accountData': null.");
         }
         //
         this.accountData = accountData;
@@ -119,10 +119,10 @@ class PeopleAPI {
 
     async getResponseData(method, requestURL, requestData) {
         if ((null == method) || ("" === method)) {
-            throw new Error("Invalid value: method: null or empty.");
+            throw new Error("Invalid 'method': null or empty.");
         }
         if ((null == requestURL) || ("" === requestURL)) {
-            throw new Error("Invalid value: requestURL: null or empty.");
+            throw new Error("Invalid 'requestURL': null or empty.");
         }
         //
         console.log("PeopleAPI.getResponseData(): requestURL = " + requestURL);

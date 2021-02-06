@@ -16,11 +16,16 @@ class AddressBookSynchronizer {
     /* Synchronization. */
 
     static async synchronize(syncData) {
-console.log("synchronize()"); // FIXME
-        // Create a new PeopleAPI object.
-        let peopleAPI = new PeopleAPI(syncData.accountData);
+        if (null == syncData) {
+            new Error("Invalid 'syncData': null.");
+        }
         // Retrieve the target address book.
         let targetAddressBook = syncData.target;
+        if (null == targetAddressBook) {
+            new Error("Invalid target address book: null.");
+        }
+        // Create a new PeopleAPI object.
+        let peopleAPI = new PeopleAPI(syncData.accountData);
     }
 
 }

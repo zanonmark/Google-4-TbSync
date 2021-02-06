@@ -20,25 +20,32 @@ var sync = {
             case "":
             case "ok":
                 status = TbSync.StatusData.SUCCESS;
+                //
                 break;
             case "info":
                 status = TbSync.StatusData.INFO;
+                //
                 break;
             case "resyncAccount":
                 status = TbSync.StatusData.ACCOUNT_RERUN;
+                //
                 break;
             case "resyncFolder":
                 status = TbSync.StatusData.FOLDER_RERUN;
+                //
                 break;
             case "warning":
                 status = TbSync.StatusData.WARNING;
+                //
                 break;
             case "error":
                 status = TbSync.StatusData.ERROR;
+                //
                 break;
             default:
                 console.log("Google-4-TbSync: Unknown status <" + aStatus + ">");
                 status = TbSync.StatusData.ERROR;
+                //
                 break;
         }
         //
@@ -104,9 +111,11 @@ var sync = {
             switch (syncData.currentFolderData.getFolderProperty("targetType")) {
                 case "addressbook":
                     await AddressBookSynchronizer.synchronize(syncData);
+                    //
                     break;
                 default:
                     throw new Error("Unsupported target");
+                    //
                     break;
             }
         }
