@@ -6,7 +6,7 @@ The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSyn
 
 ### Warning
 
-The project is still in its early development stage. **Backup all your addressbooks (both Google's and Thunderbird's) before running the software!**
+The project is still in its early development stage. **Backup both your Google and Thunderbird address books before running the software!**
 
 ### Please note
 
