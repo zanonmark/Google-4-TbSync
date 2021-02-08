@@ -26,6 +26,23 @@ class AddressBookSynchronizer {
         }
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
+        // Retrieve all server contacts.
+        let serverContacts = await peopleAPI.getContactList();
+        // Prepare the variables for the cycles.
+        let deletedServerContacts = [];
+        let deletedLocalContacts = [];
+        // Cycle on the server contacts.
+        for (let serverContact in serverContacts) {
+            // TODO: get contactId
+            // TODO: if contact(contactId) not in targetAddressBook
+            // TODO:   if contactId not in deletedLocalContacts
+            // TODO:     add it
+            // TODO: else
+            // TODO:   if contact(contactId) newer than the one in targetAddressBook
+            // TODO:     update it
+        }
+        // Cycle on the local contacts.
+        // TODO
     }
 
 }
