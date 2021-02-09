@@ -199,7 +199,11 @@ var Base = class {
     static getDefaultFolderEntries() {
         let folder = {
             UID: "",
-            targetID: "",
+            target: "",
+            targetName: "",
+            targetType: "",
+            foldername: "",
+            downloadonly: "",
         };
         //
         return folder;
@@ -497,148 +501,12 @@ var StandardFolderList = class {
 
 }
 
-var TargetData = class {
+var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData {
 
-    /**
-     * TargetData constructor.
-     *
-     * @param {FolderData}  folderData  The FolderData instance of the folder
-     *                                  for which this TargetData instance is
-     *                                  being created.
-     *
-     */
-    constructor(folderData) {            
-        this._folderData = folderData;
-    }
-    
-    /**
-     * Check if the target object of this TargetData exists in the local
-     * storage.
-     *
-     * @returns {boolean}  True if target exists.
-     *
-     */
-    hasTarget() {
-        let target = this._folderData.getFolderProperty("targetID");
-        let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        //
-        if ((null !== directory) && (directory instanceof Components.interfaces.nsIAbDirectory)) {
-            return true;
-        }
-        //
-        return false;
+    constructor(folderData) {
+        super(folderData);
     }
 
-    /**
-     * Returns the actual target object (for example a
-     * `nsIAbDirectory <https://dxr.mozilla.org/comm-central/source/comm/mailnews/addrbook/public/nsIAbDirectory.idl>`_).
-     * If the target does not exist, it should be created. 
-     *
-     * .. note::
-     *    The thrown error message will be used as a status and TbSync will
-     *    use ``status.<Error.message>`` from your string bundle (see
-     *    :class:`Base.getStringBundleUrl`) for the actual error / status 
-     *    message.
-     *
-     * @returns {Object}  Whatever you want to use as target object for
-     *                    this TargetData.
-     *
-     * @throws {Error}    A reason (why the target could not be created).
-     *
-     */
-    async getTarget() { 
-        let target = this._folderData.getFolderProperty("targetID");
-        let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        //
-        if (!directory) {
-            let dirPrefId = MailServices.ab.newAddressBook(this._folderData.getFolderProperty("foldername"), "", 101);
-            let directory = MailServices.ab.getDirectoryFromId(dirPrefId);
-            //
-            if (!directory) {
-                throw new Error("notargets");
-            }
-            //
-            this._folderData.setFolderProperty("targetID", directory.UID);
-        }
-        //
-        return directory;
-    }
-    
-    /**
-     * Removes the target from the local storage. If it does not exist, return
-     * silently. A call to :class:`TargetData.hasTarget()` should return
-     * ``false``, after this has been executed.
-     *
-     */
-    removeTarget() {
-        let target = this._folderData.getFolderProperty("targetID");
-        let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        //
-        try {
-            if (directory) {
-                MailServices.ab.deleteAddressBook(directory.URI);
-            }
-        }
-        catch (e) {
-        }
-    }
-
-    /**
-     * Disconnects the target in the local storage from this TargetData, but
-     * does not delete it, so it becomes a stale "left over". A call to
-     * :class:`TargetData.hasTarget()` should return ``false``, after this has
-     * been executed.
-     * 
-     */
-    disconnectTarget() {
-    }  
-    
-    /**
-     * Getter / setter for the target name.
-     *
-     * @throws {Error}  A reason (why the target name could not be set /
-                        retrieved).
-     *
-     */
-    set targetName(newName) {
-        let target = this._folderData.getFolderProperty("targetID");
-        let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        //
-        if (directory && newName) {
-            directory.dirName = newName;
-        }     
-    }
-    get targetName() {
-        let target = this._folderData.getFolderProperty("targetID");
-        let directory = google.addressbook.getDirectoryFromDirectoryUID(target);
-        //
-        if (directory) {
-            return directory.dirName;
-        }
-        //
-        throw new Error("notargets");
-    }
-    
-    /**
-     * The readonly property of the associated folder has been changed via the
-     * TbSync UI.
-     *
-     * .. note::
-     *    This might be changed to a general FolderProperty observer.
-     *
-     * @param {boolean}  value  The current value of the ``downloadonly`` folder
-     *                          property.
-     *
-     */    
-    setReadOnly(value) {
-    }
-
-}
-
-// This is just for the documentation generated from this file to have a
-// "TargetData". You do not need to extend your own class of course and just
-// name it as needed directly.
-var TargetData_addressbook = class extends TargetData {
 }
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");

@@ -64,7 +64,7 @@ var sync = {
         let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
         // Simulation of folders retrieved from Server.
         let foundFolders = [
-            {UID: 1, name: "Google Contacts (" + authenticatedUserEmail + ")"},
+            {UID: 1, name: authenticatedUserEmail},
         ];
         //
         for (let folder of foundFolders) {
