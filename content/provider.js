@@ -507,6 +507,54 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
         super(folderData);
     }
 
+    get primaryKeyField() {
+        return "X-GOOGLE-LOGKEY";
+    }
+
+    generatePrimaryKey() {
+        return TbSync.generateUUID();
+    }
+
+    get logUserChanges() {
+        return true;
+    }
+
+    directoryObserver(aTopic) {
+        switch (aTopic) {
+            case "addrbook-removed":
+            case "addrbook-updated":
+                break;
+        }
+    }
+
+    cardObserver(aTopic, abCardItem) {
+        switch (aTopic) {
+            case "addrbook-contact-updated":
+            case "addrbook-contact-removed":
+                break;
+            case "addrbook-contact-created":
+                abCardItem.setProperty("X-GOOGLE-LOGKEY", TbSync.generateUUID());
+                abCardItem.abDirectory.modifyItem(abCardItem);
+                //
+                break;
+        }
+    }
+
+    listObserver(aTopic, abListItem, abListMember) {
+        switch (aTopic) {
+            case "addrbook-list-member-added":
+            case "addrbook-list-member-removed":
+                break;
+            case "addrbook-list-removed":
+            case "addrbook-list-updated":
+                break;
+            case "addrbook-list-created":
+                abListItem.setProperty("X-GOOGLE-LOGKEY", TbSync.generateUUID());
+                //
+                break;
+        }
+    }
+
 }
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");
