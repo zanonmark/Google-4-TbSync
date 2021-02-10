@@ -63,7 +63,14 @@ class PeopleAPI {
             });
             console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
             // Open the browser window.
-            let authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome");
+            let authenticationWindow = null;
+            try {
+                authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen");
+            }
+            catch (error) {
+                let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
+                authenticationWindow = windowWatcher.openWindow(null, "chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen", null);
+            }
             let browserWidget = null;
             let titleInterval = null;
             let authorizationCodeRetrieved = false;
@@ -73,7 +80,7 @@ class PeopleAPI {
                 // Load the URL.
                 browserWidget.setAttribute("src", authorizationCodeRequestURL);
                 // Check the response every 1s.
-                titleInterval = setInterval(function() {
+                titleInterval = authenticationWindow.setInterval(function() {
                     // Retrieve the browser title.
                     let browserTitle = browserWidget.contentTitle;
                     // If the browser title contains "Success"...
@@ -87,7 +94,7 @@ class PeopleAPI {
                             // ...close the browser window...
                             authenticationWindow.close();
                             // ...stop the title interval...
-                            clearInterval(titleInterval);
+                            authenticationWindow.clearInterval(titleInterval);
                             // ...and return the authorization code.
                             authorizationCodeRetrieved = true;
                             resolve(authorizationCode);
@@ -98,7 +105,7 @@ class PeopleAPI {
                         // ...close the browser window...
                         authenticationWindow.close();
                         // ...stop the title interval...
-                        clearInterval(titleInterval);
+                        authenticationWindow.clearInterval(titleInterval);
                         // ...and return an error.
                         reject(new Error("Browser title: " + browserTitle));
                     }
@@ -106,7 +113,7 @@ class PeopleAPI {
             };
             authenticationWindow.onclose = function() {
                 // Stop the title interval.
-                clearInterval(titleInterval);
+                authenticationWindow.clearInterval(titleInterval);
                 // Return an error if the browser window was closed before retrieving the authorization code.
                 if (!authorizationCodeRetrieved) {
                     reject(new Error("Browser window closed before the authorization code was retrieved."));
