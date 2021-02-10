@@ -27,21 +27,43 @@ class AddressBookSynchronizer {
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
         // Retrieve all server contacts.
-        let serverContacts = await peopleAPI.getContactList();
+        let serverContactList = await peopleAPI.getContactList();
         // Prepare the variables for the cycles.
-        let deletedServerContacts = [];
-        let deletedLocalContacts = [];
+        console.log("AddressBookSynchronizer.synchronize(): Retrieving local changes since the last synchronization.");
+        let addedLocalContacts = targetAddressBook.getAddedItemsFromChangeLog();
+        let deletedLocalContacts = targetAddressBook.getDeletedItemsFromChangeLog();
         // Cycle on the server contacts.
-        for (let serverContact in serverContacts) {
-            // TODO: get contactId
-            // TODO: if contact(contactId) not in targetAddressBook
-            // TODO:   if contactId not in deletedLocalContacts
-            // TODO:     add it
-            // TODO: else
-            // TODO:   if contact(contactId) newer than the one in targetAddressBook
-            // TODO:     update it
+        console.log("AddressBookSynchronizer.synchronize(): Starting to cycle on the server contacts.");
+        for (let serverContact of serverContactList) {
+            // Get the resource name (in the form 'people/contact_id') and the display name.
+            let resourceName = serverContact.resourceName;
+            let displayName = serverContact.names[0].displayName;
+            console.log("AddressBookSynchronizer.synchronize(): resourceName = " + resourceName + " (" + displayName + ")");
+            // If the contact is not already available locally...
+            if (null == await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName)) {
+                // ...and if it wasn't previously deleted locally...
+                if (!deletedLocalContacts.includes(resourceName)) {
+                    // ...then add it locally.
+                    // TODO
+                    console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
+                }
+            }
+            // If the contact is already available locally...
+            else {
+                // ...and the server one is more recent...
+                if (true /* TODO */) {
+                    // ...then update it locally.
+                    // TODO
+                    console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was updated locally.");
+                }
+            }
         }
-        // Cycle on the local contacts.
+//console.log("i = " + JSON.stringify(targetAddressBook.getItemsFromChangeLog())); // FIXME
+//console.log("a = " + JSON.stringify(targetAddressBook.getAddedItemsFromChangeLog())); // FIXME
+//console.log("d = " + JSON.stringify(targetAddressBook.getDeletedItemsFromChangeLog())); // FIXME
+        // Add remotely all the contacts which were previously added locally.
+        // TODO
+        // Determine and delete locally all the contacts which were previously deleted remotely.
         // TODO
     }
 
