@@ -501,6 +501,7 @@ var StandardFolderList = class {
 
 }
 
+// See Dav4TbSync's implementation for details.
 var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData {
 
     constructor(folderData) {
@@ -508,7 +509,7 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
     }
 
     get primaryKeyField() {
-        return "X-GOOGLE-LOGKEY";
+        return "X-GOOGLE-RESOURCENAME";
     }
 
     generatePrimaryKey() {
@@ -533,7 +534,7 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
             case "addrbook-contact-removed":
                 break;
             case "addrbook-contact-created":
-                abCardItem.setProperty("X-GOOGLE-LOGKEY", TbSync.generateUUID());
+                abCardItem.setProperty("X-GOOGLE-RESOURCENAME", TbSync.generateUUID());
                 abCardItem.abDirectory.modifyItem(abCardItem);
                 //
                 break;
@@ -549,7 +550,7 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
             case "addrbook-list-updated":
                 break;
             case "addrbook-list-created":
-                abListItem.setProperty("X-GOOGLE-LOGKEY", TbSync.generateUUID());
+                abListItem.setProperty("X-GOOGLE-RESOURCENAME", TbSync.generateUUID());
                 //
                 break;
         }
