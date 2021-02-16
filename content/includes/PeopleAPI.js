@@ -243,7 +243,7 @@ class PeopleAPI {
             // Prepare the partial contact list request URL and data.
             let partialContactListRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
             partialContactListRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-                personFields: "names,emailAddresses,phoneNumbers,addresses",
+                personFields: "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies",
                 pageSize: CONTACT_LIST_PAGE_SIZE,
                 sortOrder: "LAST_NAME_ASCENDING",
                 access_token: accessToken,
