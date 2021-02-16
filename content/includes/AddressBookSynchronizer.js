@@ -44,7 +44,26 @@ class AddressBookSynchronizer {
                 // ...and if it wasn't previously deleted locally...
                 if (!deletedLocalContacts.includes(resourceName)) {
                     // ...then add it locally.
-                    // TODO
+                    let localContact = targetAddressBook.createNewCard();
+                    localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                    if (serverContact.names && serverContact.names[0] && serverContact.names[0].givenName) {
+                        localContact.setProperty("FirstName", serverContact.names[0].givenName);
+                    }
+                    if (serverContact.names && serverContact.names[0] && serverContact.names[0].familyName) {
+                        localContact.setProperty("LastName", serverContact.names[0].familyName);
+                    }
+                    if (serverContact.names && serverContact.names[0] && serverContact.names[0].displayName) {
+                        localContact.setProperty("DisplayName", serverContact.names[0].displayName);
+                    }
+                    if (serverContact.emailAddresses && serverContact.emailAddresses[0] && serverContact.emailAddresses[0].value) {
+                        localContact.setProperty("PrimaryEmail", serverContact.emailAddresses[0].value);
+                    }
+                    if (serverContact.emailAddresses && serverContact.emailAddresses[1] && serverContact.emailAddresses[1].value) {
+                        localContact.setProperty("SecondEmail", serverContact.emailAddresses[1].value);
+                    }
+// TODO: phone numbers, addresses
+                    localContact.setProperty("isMailList", false);
+                    await targetAddressBook.addItem(localContact);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
                 }
             }
