@@ -43,331 +43,13 @@ class AddressBookSynchronizer {
             if (null == await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName)) {
                 // ...and if it wasn't previously deleted locally...
                 if (!deletedLocalContacts.includes(resourceName)) {
-                    // ...then add it locally.
-// FIXME 1: move the following code into a method on its own.
-// FIXME 2: if null, delete old properties
+                    // ...then create a new one...
                     let localContact = targetAddressBook.createNewCard();
-                    localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    if (serverContact.names && serverContact.names[0]) {
-                        if (serverContact.names[0].givenName) {
-                            localContact.setProperty("FirstName", serverContact.names[0].givenName);
-                        }
-                        if (serverContact.names[0].familyName) {
-                            localContact.setProperty("LastName", serverContact.names[0].familyName);
-                        }
-                        if (serverContact.names[0].displayName) {
-                            localContact.setProperty("DisplayName", serverContact.names[0].displayName);
-                        }
-                    }
-                    if (serverContact.nicknames && serverContact.nicknames[0]) {
-                        localContact.setProperty("NickName", serverContact.nicknames[0].value);
-                    }
-                    if (serverContact.emailAddresses) {
-                        if (serverContact.emailAddresses[0]) {
-                            localContact.setProperty("PrimaryEmail", serverContact.emailAddresses[0].value);
-                        }
-                        if (serverContact.emailAddresses[1]) {
-                            localContact.setProperty("SecondEmail", serverContact.emailAddresses[1].value);
-                        }
-                    }
-                    if (serverContact.phoneNumbers) {
-                        let workPhoneNumber = null;
-                        let homePhoneNumber = null;
-                        let faxPhoneNumber = null;
-                        let pagerPhoneNumber = null;
-                        let mobilePhoneNumber = null;
-                        for (let phoneNumber of serverContact.phoneNumbers) {
-                            switch (phoneNumber.type) {
-                                case "work":
-                                    if (null == workPhoneNumber) {
-                                        workPhoneNumber = phoneNumber.value;
-                                    }
-                                    break;
-                                case "home":
-                                    if (null == homePhoneNumber) {
-                                        homePhoneNumber = phoneNumber.value;
-                                    }
-                                    break;
-                                case "workFax":
-                                case "homeFax":
-                                    if (null == faxPhoneNumber) {
-                                        faxPhoneNumber = phoneNumber.value;
-                                    }
-                                    break;
-                                case "pager":
-                                    if (null == pagerPhoneNumber) {
-                                        pagerPhoneNumber = phoneNumber.value;
-                                    }
-                                    break;
-                                case "mobile":
-                                    if (null == mobilePhoneNumber) {
-                                        mobilePhoneNumber = phoneNumber.value;
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (null != workPhoneNumber) {
-                            localContact.setProperty("WorkPhone", workPhoneNumber);
-                        }
-                        if (null != homePhoneNumber) {
-                            localContact.setProperty("HomePhone", homePhoneNumber);
-                        }
-                        if (null != faxPhoneNumber) {
-                            localContact.setProperty("FaxNumber", faxPhoneNumber);
-                        }
-                        if (null != pagerPhoneNumber) {
-                            localContact.setProperty("PagerNumber", pagerPhoneNumber);
-                        }
-                        if (null != mobilePhoneNumber) {
-                            localContact.setProperty("CellularNumber", mobilePhoneNumber);
-                        }
-                    }
-                    if (serverContact.addresses) {
-                        let homeInformation = false;
-                        let homeAddress = null;
-                        let homeAddress2 = null;
-                        let homeCity = null;
-                        let homeState = null;
-                        let homeZipCode = null;
-                        let homeCountry = null;
-                        let workInformation = false;
-                        let workAddress = null;
-                        let workAddress2 = null;
-                        let workCity = null;
-                        let workState = null;
-                        let workZipCode = null;
-                        let workCountry = null;
-                        for (let address of serverContact.addresses) {
-                            switch (address.type) {
-                                case "home":
-                                    if (!homeInformation) {
-                                        if (address.streetAddress) {
-                                            homeAddress = address.streetAddress;
-                                        }
-                                        if (address.extendedAddress) {
-                                            homeAddress2 = address.extendedAddress;
-                                        }
-                                        if (address.city) {
-                                            homeCity = address.city;
-                                        }
-                                        if (address.region) {
-                                            homeState = address.region;
-                                        }
-                                        if (address.postalCode) {
-                                            homeZipCode = address.postalCode;
-                                        }
-                                        if (address.country) {
-                                            homeCountry = address.country;
-                                        }
-                                        homeInformation = true;
-                                    }
-                                    break;
-                                case "work":
-                                    if (!workInformation) {
-                                        if (address.streetAddress) {
-                                            workAddress = address.streetAddress;
-                                        }
-                                        if (address.extendedAddress) {
-                                            workAddress2 = address.extendedAddress;
-                                        }
-                                        if (address.city) {
-                                            workCity = address.city;
-                                        }
-                                        if (address.region) {
-                                            workState = address.region;
-                                        }
-                                        if (address.postalCode) {
-                                            workZipCode = address.postalCode;
-                                        }
-                                        if (address.country) {
-                                            workCountry = address.country;
-                                        }
-                                        workInformation = true;
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (null != homeAddress) {
-                            localContact.setProperty("HomeAddress", homeAddress);
-                        }
-                        if (null != homeAddress2) {
-                            localContact.setProperty("HomeAddress2", homeAddress2);
-                        }
-                        if (null != homeCity) {
-                            localContact.setProperty("HomeCity", homeCity);
-                        }
-                        if (null != homeState) {
-                            localContact.setProperty("HomeState", homeState);
-                        }
-                        if (null != homeZipCode) {
-                            localContact.setProperty("HomeZipCode", homeZipCode);
-                        }
-                        if (null != homeCountry) {
-                            localContact.setProperty("HomeCountry", homeCountry);
-                        }
-                        if (null != workAddress) {
-                            localContact.setProperty("WorkAddress", workAddress);
-                        }
-                        if (null != workAddress2) {
-                            localContact.setProperty("WorkAddress2", workAddress2);
-                        }
-                        if (null != workCity) {
-                            localContact.setProperty("WorkCity", workCity);
-                        }
-                        if (null != workState) {
-                            localContact.setProperty("WorkState", workState);
-                        }
-                        if (null != workZipCode) {
-                            localContact.setProperty("WorkZipCode", workZipCode);
-                        }
-                        if (null != workCountry) {
-                            localContact.setProperty("WorkCountry", workCountry);
-                        }
-                    }
-                    if (serverContact.organizations && serverContact.organizations[0]) {
-                        if (serverContact.organizations[0].name) {
-                            localContact.setProperty("Company", serverContact.organizations[0].name);
-                        }
-                        if (serverContact.organizations[0].title) {
-                            localContact.setProperty("JobTitle", serverContact.organizations[0].title);
-                        }
-                        if (serverContact.organizations[0].department) {
-                            localContact.setProperty("Department", serverContact.organizations[0].department);
-                        }
-                    }
-                    if (serverContact.urls) {
-                        let personalWebPage = null;
-                        let workWebPage = null;
-                        for (let url of serverContact.urls) {
-                            switch (url.type) {
-                                case "work":
-                                    if (null == workWebPage) {
-                                        workWebPage = url.value;
-                                    }
-                                    break;
-                                default:
-                                    if (null == personalWebPage) {
-                                        personalWebPage = url.value;
-                                    }
-                                    break;
-                            }
-                        }
-                        if (null != personalWebPage) {
-                            localContact.setProperty("WebPage2", personalWebPage);
-                        }
-                        if (null != workWebPage) {
-                            localContact.setProperty("WebPage1", workWebPage);
-                        }
-                    }
-                    if (serverContact.birthdays && serverContact.birthdays[0]) {
-                        localContact.setProperty("BirthMonth", serverContact.birthdays[0].text.substr(0, 2));
-                        localContact.setProperty("BirthDay", serverContact.birthdays[0].text.substr(3, 2));
-                        localContact.setProperty("BirthYear", serverContact.birthdays[0].text.substr(6, 4));
-                    }
-                    if (serverContact.userDefined) {
-                        if (serverContact.userDefined[0]) {
-                            localContact.setProperty("Custom1", serverContact.userDefined[0].value);
-                        }
-                        if (serverContact.userDefined[1]) {
-                            localContact.setProperty("Custom2", serverContact.userDefined[1].value);
-                        }
-                        if (serverContact.userDefined[2]) {
-                            localContact.setProperty("Custom3", serverContact.userDefined[2].value);
-                        }
-                        if (serverContact.userDefined[3]) {
-                            localContact.setProperty("Custom4", serverContact.userDefined[3].value);
-                        }
-                    }
-                    if (serverContact.imClients) {
-                        let googleTalkUsername = null;
-                        let aimUsername = null;
-                        let yahooUsername = null;
-                        let skypeUsername = null;
-                        let qqUsername = null;
-                        let msnUsername = null;
-                        let icqUsername = null;
-                        let jabberUsername = null;
-                        for (let imClient of serverContact.imClients) {
-                            switch (imClient.protocol) {
-                                case "googleTalk":
-                                    if (null == googleTalkUsername) {
-                                        googleTalkUsername = imClient.username;
-                                    }
-                                    break;
-                                case "aim":
-                                    if (null == aimUsername) {
-                                        aimUsername = imClient.username;
-                                    }
-                                    break;
-                                case "yahoo":
-                                    if (null == yahooUsername) {
-                                        yahooUsername = imClient.username;
-                                    }
-                                    break;
-                                case "skype":
-                                    if (null == skypeUsername) {
-                                        skypeUsername = imClient.username;
-                                    }
-                                    break;
-                                case "qq":
-                                    if (null == qqUsername) {
-                                        qqUsername = imClient.username;
-                                    }
-                                    break;
-                                case "msn":
-                                    if (null == msnUsername) {
-                                        msnUsername = imClient.username;
-                                    }
-                                    break;
-                                case "icq":
-                                    if (null == icqUsername) {
-                                        icqUsername = imClient.username;
-                                    }
-                                    break;
-                                case "jabber":
-                                    if (null == jabberUsername) {
-                                        jabberUsername = imClient.username;
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (null != googleTalkUsername) {
-                            localContact.setProperty("_GoogleTalk", googleTalkUsername);
-                        }
-                        if (null != aimUsername) {
-                            localContact.setProperty("_AimScreenName", aimUsername);
-                        }
-                        if (null != yahooUsername) {
-                            localContact.setProperty("_Yahoo", yahooUsername);
-                        }
-                        if (null != skypeUsername) {
-                            localContact.setProperty("_Skype", skypeUsername);
-                        }
-                        if (null != qqUsername) {
-                            localContact.setProperty("_QQ", qqUsername);
-                        }
-                        if (null != msnUsername) {
-                            localContact.setProperty("_MSN", msnUsername);
-                        }
-                        if (null != icqUsername) {
-                            localContact.setProperty("_ICQ", icqUsername);
-                        }
-                        if (null != jabberUsername) {
-                            localContact.setProperty("_JabberId", jabberUsername);
-                        }
-                    }
-                    if (serverContact.biographies) {
-                        if (serverContact.biographies[0]) {
-                            localContact.setProperty("Notes", serverContact.biographies[0].value);
-                        }
-                    }
                     localContact.setProperty("isMailList", false);
+                    // ...import the information...
+                    localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                    localContact = AddressBookSynchronizer.getLocalContactFromServerContact(localContact, serverContact);
+                    // ...and add it locally.
                     await targetAddressBook.addItem(localContact);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
                 }
@@ -389,6 +71,406 @@ class AddressBookSynchronizer {
         // TODO
         // Determine and delete locally all the contacts which were previously deleted remotely.
         // TODO
+    }
+
+    static getLocalContactFromServerContact(localContact, serverContact) {
+        if (null == localContact) {
+            new Error("Invalid 'localContact': null.");
+        }
+        if (null == serverContact) {
+            new Error("Invalid 'serverContact': null.");
+        }
+        // Reset all the properties managed by this method.
+        localContact.deleteProperty("FirstName");
+        localContact.deleteProperty("LastName");
+        localContact.deleteProperty("DisplayName");
+        localContact.deleteProperty("NickName");
+        localContact.deleteProperty("PrimaryEmail");
+        localContact.deleteProperty("SecondEmail");
+        localContact.deleteProperty("WorkPhone");
+        localContact.deleteProperty("HomePhone");
+        localContact.deleteProperty("FaxNumber");
+        localContact.deleteProperty("PagerNumber");
+        localContact.deleteProperty("CellularNumber");
+        localContact.deleteProperty("HomeAddress");
+        localContact.deleteProperty("HomeAddress2");
+        localContact.deleteProperty("HomeCity");
+        localContact.deleteProperty("HomeState");
+        localContact.deleteProperty("HomeZipCode");
+        localContact.deleteProperty("HomeCountry");
+        localContact.deleteProperty("WorkAddress");
+        localContact.deleteProperty("WorkAddress2");
+        localContact.deleteProperty("WorkCity");
+        localContact.deleteProperty("WorkState");
+        localContact.deleteProperty("WorkZipCode");
+        localContact.deleteProperty("WorkCountry");
+        localContact.deleteProperty("Company");
+        localContact.deleteProperty("JobTitle");
+        localContact.deleteProperty("Department");
+        localContact.deleteProperty("WebPage2");
+        localContact.deleteProperty("WebPage1");
+        localContact.deleteProperty("BirthMonth");
+        localContact.deleteProperty("BirthDay");
+        localContact.deleteProperty("BirthYear");
+        localContact.deleteProperty("Custom1");
+        localContact.deleteProperty("Custom2");
+        localContact.deleteProperty("Custom3");
+        localContact.deleteProperty("Custom4");
+        localContact.deleteProperty("_GoogleTalk");
+        localContact.deleteProperty("_AimScreenName");
+        localContact.deleteProperty("_Yahoo");
+        localContact.deleteProperty("_Skype");
+        localContact.deleteProperty("_QQ");
+        localContact.deleteProperty("_MSN");
+        localContact.deleteProperty("_ICQ");
+        localContact.deleteProperty("_JabberId");
+        localContact.deleteProperty("Notes");
+        // Set the names.
+        if (serverContact.names) {
+            if (serverContact.names[0] && serverContact.names[0].givenName) {
+                localContact.setProperty("FirstName", serverContact.names[0].givenName);
+            }
+            if (serverContact.names[0] && serverContact.names[0].familyName) {
+                localContact.setProperty("LastName", serverContact.names[0].familyName);
+            }
+            if (serverContact.names[0] && serverContact.names[0].displayName) {
+                localContact.setProperty("DisplayName", serverContact.names[0].displayName);
+            }
+        }
+        if (serverContact.nicknames) {
+            if (serverContact.nicknames[0] && serverContact.nicknames[0].value) {
+                localContact.setProperty("NickName", serverContact.nicknames[0].value);
+            }
+        }
+        // Set the email addresses.
+        if (serverContact.emailAddresses) {
+            if (serverContact.emailAddresses[0] && serverContact.emailAddresses[0].value) {
+                localContact.setProperty("PrimaryEmail", serverContact.emailAddresses[0].value);
+            }
+            if (serverContact.emailAddresses[1] && serverContact.emailAddresses[1].value) {
+                localContact.setProperty("SecondEmail", serverContact.emailAddresses[1].value);
+            }
+        }
+        // Set the phone numbers.
+        if (serverContact.phoneNumbers) {
+            let workPhoneNumber = false;
+            let homePhoneNumber = false;
+            let faxPhoneNumber = false;
+            let pagerPhoneNumber = false;
+            let mobilePhoneNumber = false;
+            //
+            for (let phoneNumber of serverContact.phoneNumbers) {
+                switch (phoneNumber.type) {
+                    case "work":
+                        if (workPhoneNumber) {
+                            continue;
+                        }
+                        //
+                        if (phoneNumber.value) {
+                            localContact.setProperty("WorkPhone", phoneNumber.value);
+                        }
+                        workPhoneNumber = true;
+                        //
+                        break;
+                    case "home":
+                        if (homePhoneNumber) {
+                            continue;
+                        }
+                        //
+                        if (phoneNumber.value) {
+                            localContact.setProperty("HomePhone", phoneNumber.value);
+                        }
+                        homePhoneNumber = true;
+                        //
+                        break;
+                    case "workFax":
+                    case "homeFax":
+                        if (faxPhoneNumber) {
+                            continue;
+                        }
+                        //
+                        if (phoneNumber.value) {
+                            localContact.setProperty("FaxNumber", phoneNumber.value);
+                        }
+                        faxPhoneNumber = true;
+                        //
+                        break;
+                    case "pager":
+                        if (pagerPhoneNumber) {
+                            continue;
+                        }
+                        //
+                        if (phoneNumber.value) {
+                            localContact.setProperty("PagerNumber", phoneNumber.value);
+                        }
+                        pagerPhoneNumber = true;
+                        //
+                        break;
+                    case "mobile":
+                        if (mobilePhoneNumber) {
+                            continue;
+                        }
+                        //
+                        if (phoneNumber.value) {
+                            localContact.setProperty("CellularNumber", phoneNumber.value);
+                        }
+                        mobilePhoneNumber = true;
+                        //
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // Set the addresses.
+        if (serverContact.addresses) {
+            let homeInformation = false;
+            let workInformation = false;
+            //
+            for (let address of serverContact.addresses) {
+                switch (address.type) {
+                    case "home":
+                        if (homeInformation) {
+                            continue;
+                        }
+                        //
+                        if (address.streetAddress) {
+                            localContact.setProperty("HomeAddress", address.streetAddress);
+                        }
+                        if (address.extendedAddress) {
+                            localContact.setProperty("HomeAddress2", address.extendedAddress);
+                        }
+                        if (address.city) {
+                            localContact.setProperty("HomeCity", address.city);
+                        }
+                        if (address.region) {
+                            localContact.setProperty("HomeState", address.region);
+                        }
+                        if (address.postalCode) {
+                            localContact.setProperty("HomeZipCode", address.postalCode);
+                        }
+                        if (address.country) {
+                            localContact.setProperty("HomeCountry", address.country);
+                        }
+                        homeInformation = true;
+                        //
+                        break;
+                    case "work":
+                        if (workInformation) {
+                            continue;
+                        }
+                        //
+                        if (address.streetAddress) {
+                            localContact.setProperty("WorkAddress", address.streetAddress);
+                        }
+                        if (address.extendedAddress) {
+                            localContact.setProperty("WorkAddress2", address.extendedAddress);
+                        }
+                        if (address.city) {
+                            localContact.setProperty("WorkCity", address.city);
+                        }
+                        if (address.region) {
+                            localContact.setProperty("WorkState", address.region);
+                        }
+                        if (address.postalCode) {
+                            localContact.setProperty("WorkZipCode", address.postalCode);
+                        }
+                        if (address.country) {
+                            localContact.setProperty("WorkCountry", address.country);
+                        }
+                        workInformation = true;
+                        //
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // Set the work information.
+        if (serverContact.organizations) {
+            if (serverContact.organizations[0] && serverContact.organizations[0].name) {
+                localContact.setProperty("Company", serverContact.organizations[0].name);
+            }
+            if (serverContact.organizations[0] && serverContact.organizations[0].title) {
+                localContact.setProperty("JobTitle", serverContact.organizations[0].title);
+            }
+            if (serverContact.organizations[0] && serverContact.organizations[0].department) {
+                localContact.setProperty("Department", serverContact.organizations[0].department);
+            }
+        }
+        // Set the webpages.
+        if (serverContact.urls) {
+            let personalWebPage = false;
+            let workWebPage = false;
+            //
+            for (let url of serverContact.urls) {
+                switch (url.type) {
+                    case "work":
+                        if (workWebPage) {
+                            continue;
+                        }
+                        //
+                        if (url.value) {
+                            localContact.setProperty("WebPage1", url.value);
+                        }
+                        workWebPage = true;
+                        //
+                        break;
+                    default:
+                        if (personalWebPage) {
+                            continue;
+                        }
+                        //
+                        if (url.value) {
+                            localContact.setProperty("WebPage2", url.value);
+                        }
+                        personalWebPage = true;
+                        //
+                        break;
+                }
+            }
+        }
+        // Set the birthday.
+        if (serverContact.birthdays) {
+            if (serverContact.birthdays[0] && serverContact.birthdays[0].text.substr(0, 2)) {
+                localContact.setProperty("BirthMonth", serverContact.birthdays[0].text.substr(0, 2));
+            }
+            if (serverContact.birthdays[0] && serverContact.birthdays[0].text.substr(3, 2)) {
+                localContact.setProperty("BirthDay", serverContact.birthdays[0].text.substr(3, 2));
+            }
+            if (serverContact.birthdays[0] && serverContact.birthdays[0].text.substr(6, 4)) {
+                localContact.setProperty("BirthYear", serverContact.birthdays[0].text.substr(6, 4));
+            }
+        }
+        // Set the custom fields.
+        if (serverContact.userDefined) {
+            if (serverContact.userDefined[0] && serverContact.userDefined[0].value) {
+                localContact.setProperty("Custom1", serverContact.userDefined[0].value);
+            }
+            if (serverContact.userDefined[1] && serverContact.userDefined[1].value) {
+                localContact.setProperty("Custom2", serverContact.userDefined[1].value);
+            }
+            if (serverContact.userDefined[2] && serverContact.userDefined[2].value) {
+                localContact.setProperty("Custom3", serverContact.userDefined[2].value);
+            }
+            if (serverContact.userDefined[3] && serverContact.userDefined[3].value) {
+                localContact.setProperty("Custom4", serverContact.userDefined[3].value);
+            }
+        }
+        // Set the IM usernames.
+        if (serverContact.imClients) {
+            let googleTalkUsername = false;
+            let aimUsername = false;
+            let yahooUsername = false;
+            let skypeUsername = false;
+            let qqUsername = false;
+            let msnUsername = false;
+            let icqUsername = false;
+            let jabberUsername = false;
+            //
+            for (let imClient of serverContact.imClients) {
+                switch (imClient.protocol) {
+                    case "googleTalk":
+                        if (googleTalkUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_GoogleTalk", imClient.username);
+                        }
+                        googleTalkUsername = true;
+                        //
+                        break;
+                    case "aim":
+                        if (aimUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_AimScreenName", imClient.username);
+                        }
+                        aimUsername = true;
+                        //
+                        break;
+                    case "yahoo":
+                        if (yahooUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_Yahoo", imClient.username);
+                        }
+                        yahooUsername = true;
+                        //
+                        break;
+                    case "skype":
+                        if (skypeUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_Skype", imClient.username);
+                        }
+                        skypeUsername = true;
+                        //
+                        break;
+                    case "qq":
+                        if (qqUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_QQ", imClient.username);
+                        }
+                        qqUsername = true;
+                        //
+                        break;
+                    case "msn":
+                        if (msnUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_MSN", imClient.username);
+                        }
+                        msnUsername = true;
+                        //
+                        break;
+                    case "icq":
+                        if (icqUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_ICQ", imClient.username);
+                        }
+                        icqUsername = true;
+                        //
+                        break;
+                    case "jabber":
+                        if (jabberUsername) {
+                            continue;
+                        }
+                        //
+                        if (imClient.username) {
+                            localContact.setProperty("_JabberId", imClient.username);
+                        }
+                        jabberUsername = true;
+                        //
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // Set the notes.
+        if (serverContact.biographies) {
+            if (serverContact.biographies[0] && serverContact.biographies[0].value) {
+                localContact.setProperty("Notes", serverContact.biographies[0].value);
+            }
+        }
+        //
+        return localContact;
     }
 
 }
