@@ -39,16 +39,19 @@ class AddressBookSynchronizer {
             let resourceName = serverContact.resourceName;
             let displayName = serverContact.names[0].displayName;
             console.log("AddressBookSynchronizer.synchronize(): resourceName = " + resourceName + " (" + displayName + ")");
+            // Try to match the server contact locally.
+            let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName);
             // If the contact is not already available locally...
-            if (null == await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName)) {
+            if (null == localContact) {
                 // ...and if it wasn't previously deleted locally...
                 if (!deletedLocalContacts.includes(resourceName)) {
                     // ...then create a new one...
-                    let localContact = targetAddressBook.createNewCard();
+                    localContact = targetAddressBook.createNewCard();
                     localContact.setProperty("isMailList", false);
                     // ...import the information...
                     localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContact = AddressBookSynchronizer.getLocalContactFromServerContact(localContact, serverContact);
+                    localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
                     // ...and add it locally.
                     await targetAddressBook.addItem(localContact);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
@@ -57,23 +60,29 @@ class AddressBookSynchronizer {
             // If the contact is already available locally...
             else {
                 // ...and the server one is more recent...
-                if (true /* TODO */) {
-                    // ...then update it locally.
-                    // TODO
+                if (localContact.getProperty("X-GOOGLE-ETAG") !== serverContact.etag) {
+                    // ...then import the information...
+                    localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+                    // ...and update it locally.
+                    await targetAddressBook.modifyItem(localContact);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was updated locally.");
                 }
             }
         }
 //console.log("i = " + JSON.stringify(targetAddressBook.getItemsFromChangeLog())); // FIXME
 //console.log("a = " + JSON.stringify(targetAddressBook.getAddedItemsFromChangeLog())); // FIXME
+//console.log("m = " + JSON.stringify(targetAddressBook.getModifiedItemsFromChangeLog())); // FIXME
 //console.log("d = " + JSON.stringify(targetAddressBook.getDeletedItemsFromChangeLog())); // FIXME
         // Add remotely all the contacts which were previously added locally.
+        // TODO
+        // Update remotely all the contacts which were previously updated locally.
         // TODO
         // Determine and delete locally all the contacts which were previously deleted remotely.
         // TODO
     }
 
-    static getLocalContactFromServerContact(localContact, serverContact) {
+    static fillLocalContactWithServerContactInformation(localContact, serverContact) {
         if (null == localContact) {
             new Error("Invalid 'localContact': null.");
         }
