@@ -11,7 +11,7 @@
 
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
-const CONTACT_LIST_PAGE_SIZE = 1000;
+const CONTACT_PAGE_SIZE = 1000;
 
 class PeopleAPI {
 
@@ -232,32 +232,32 @@ class PeopleAPI {
         return authenticatedUser;
     }
 
-    async getContactList() { // https://developers.google.com/people/api/rest/v1/people.connections/list
+    async getContacts() { // https://developers.google.com/people/api/rest/v1/people.connections/list
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
-        // Retrieve the contact list page by page.
-        let contactList = [];
+        // Retrieve the contacts page by page.
+        let contacts = [];
         let nextPageToken = null;
         while (true) {
-            console.log("PeopleAPI.getContactList(): nextPageToken = " + nextPageToken);
-            // Prepare the partial contact list request URL and data.
-            let partialContactListRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
-            partialContactListRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            console.log("PeopleAPI.getContacts(): nextPageToken = " + nextPageToken);
+            // Prepare the partial contact request URL and data.
+            let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
+            partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
                 personFields: "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies",
-                pageSize: CONTACT_LIST_PAGE_SIZE,
+                pageSize: CONTACT_PAGE_SIZE,
                 sortOrder: "LAST_NAME_ASCENDING",
                 access_token: accessToken,
             });
             if (null != nextPageToken) {
-                partialContactListRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
+                partialContactRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
             }
-            let partialContactListRequestData = null;
+            let partialContactRequestData = null;
             // Perform the request and retrieve the response data.
-            let responseData = await this.getResponseData("GET", partialContactListRequestURL, partialContactListRequestData);
-            // Retrieve the partial contact list...
-            let partialContactList = responseData.connections;
-            // ...and concatenate it with the contact list.
-            contactList = contactList.concat(partialContactList);
+            let responseData = await this.getResponseData("GET", partialContactRequestURL, partialContactRequestData);
+            // Retrieve the partial contacts...
+            let partialContacts = responseData.connections;
+            // ...and concatenate it with the contacts.
+            contacts = contacts.concat(partialContacts);
             // Retrieve the next page token, necessary to retrieve the next page.
             nextPageToken = responseData.nextPageToken;
             // Check if this was the last page.
@@ -266,8 +266,8 @@ class PeopleAPI {
             }
         }
         //
-        console.log("PeopleAPI.getContactList(): contactList = " + JSON.stringify(contactList));
-        return contactList;
+        console.log("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
+        return contacts;
     }
 
     checkConnection() {
@@ -276,9 +276,9 @@ class PeopleAPI {
             let authenticatedUserName = authenticatedUser.names[0].displayName;
             let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
             //
-            let contactList = await this.getContactList();
+            let contacts = await this.getContacts();
             //
-            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contactList.length + " contacts.");
+            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts.");
         })();
     }
 

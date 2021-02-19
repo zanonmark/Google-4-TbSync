@@ -27,14 +27,14 @@ class AddressBookSynchronizer {
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
         // Retrieve all server contacts.
-        let serverContactList = await peopleAPI.getContactList();
+        let serverContacts = await peopleAPI.getContacts();
         // Prepare the variables for the cycles.
         console.log("AddressBookSynchronizer.synchronize(): Retrieving local changes since the last synchronization.");
         let addedLocalContacts = targetAddressBook.getAddedItemsFromChangeLog();
         let deletedLocalContacts = targetAddressBook.getDeletedItemsFromChangeLog();
         // Cycle on the server contacts.
         console.log("AddressBookSynchronizer.synchronize(): Starting to cycle on the server contacts.");
-        for (let serverContact of serverContactList) {
+        for (let serverContact of serverContacts) {
             // Get the resource name (in the form 'people/contact_id') and the display name.
             let resourceName = serverContact.resourceName;
             let displayName = serverContact.names[0].displayName;
