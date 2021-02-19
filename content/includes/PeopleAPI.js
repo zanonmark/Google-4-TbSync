@@ -140,7 +140,7 @@ class PeopleAPI {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: (("GET" === method.toUpperCase()) || ("HEAD" === method.toUpperCase()) ? null : JSON.stringify(requestData)),
+            body: ((null == requestData) ? null : JSON.stringify(requestData)),
         });
         // Check the response status.
         console.log("PeopleAPI.getResponseData(): responseStatus = " + response.status);
@@ -268,6 +268,25 @@ class PeopleAPI {
         //
         console.log("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
         return contacts;
+    }
+
+    async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
+        if (null == resourceName) {
+            throw new Error("Invalid 'resourceName': null.");
+        }
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the contact deletion request URL and data.
+        let contactDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":deleteContact";
+        contactDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            access_token: accessToken,
+        });
+        let contactDeletionRequestData = null;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("DELETE", contactDeletionRequestURL, contactDeletionRequestData);
+        //
+        console.log("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
+        return true;
     }
 
     checkConnection() {
