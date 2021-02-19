@@ -11,6 +11,7 @@
 
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
+const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies";
 const CONTACT_PAGE_SIZE = 1000;
 
 class PeopleAPI {
@@ -243,7 +244,7 @@ class PeopleAPI {
             // Prepare the partial contact request URL and data.
             let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
             partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-                personFields: "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies",
+                personFields: CONTACT_PERSON_FIELDS,
                 pageSize: CONTACT_PAGE_SIZE,
                 sortOrder: "LAST_NAME_ASCENDING",
                 access_token: accessToken,
