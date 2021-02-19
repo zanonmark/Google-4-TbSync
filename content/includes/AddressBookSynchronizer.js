@@ -31,17 +31,18 @@ class AddressBookSynchronizer {
         // Prepare the variables for the cycles.
         console.log("AddressBookSynchronizer.synchronize(): Retrieving local changes since the last synchronization.");
         let addedLocalContacts = targetAddressBook.getAddedItemsFromChangeLog();
+        let modifiedLocalContacts = targetAddressBook.getModifiedItemsFromChangeLog();
         let deletedLocalContacts = targetAddressBook.getDeletedItemsFromChangeLog();
         // Cycle on the server contacts.
-        console.log("AddressBookSynchronizer.synchronize(): Starting to cycle on the server contacts.");
+        console.log("AddressBookSynchronizer.synchronize(): Cycling on the server contacts.");
         for (let serverContact of serverContacts) {
             // Get the resource name (in the form 'people/contact_id') and the display name.
             let resourceName = serverContact.resourceName;
             let displayName = serverContact.names[0].displayName;
-            console.log("AddressBookSynchronizer.synchronize(): resourceName = " + resourceName + " (" + displayName + ")");
+            console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ")");
             // Try to match the server contact locally.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName);
-            // If the contact is not available locally...
+            // If such a local contact is not available...
             if (null == localContact) {
                 // ...if it was previously deleted locally...
                 if (deletedLocalContacts.includes(resourceName)) {
@@ -65,29 +66,35 @@ class AddressBookSynchronizer {
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
                 }
             }
-            // If the contact is available locally...
+            // If such a local contact is available...
             else {
                 // ...if the server one is more recent...
                 if (localContact.getProperty("X-GOOGLE-ETAG") !== serverContact.etag) {
                     // ...then import the information...
                     localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
                     localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
-                    // ...and update it locally.
+                    // ...update it locally...
                     await targetAddressBook.modifyItem(localContact);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was updated locally.");
+                    // ...and remove it from the local changelog.
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
             }
         }
-//console.log("i = " + JSON.stringify(targetAddressBook.getItemsFromChangeLog())); // FIXME
-//console.log("a = " + JSON.stringify(targetAddressBook.getAddedItemsFromChangeLog())); // FIXME
-//console.log("m = " + JSON.stringify(targetAddressBook.getModifiedItemsFromChangeLog())); // FIXME
-//console.log("d = " + JSON.stringify(targetAddressBook.getDeletedItemsFromChangeLog())); // FIXME
         // Add remotely all the contacts which were previously added locally.
-        // TODO
+        console.log("AddressBookSynchronizer.synchronize(): Cycling on the locally added contacts.");
+        for (let localContact of addedLocalContacts) {
+            // TODO
+        }
         // Update remotely all the contacts which were previously updated locally.
-        // TODO
+        console.log("AddressBookSynchronizer.synchronize(): Cycling on the locally modified contacts.");
+        for (let localContact of modifiedLocalContacts) {
+            // TODO
+        }
         // Determine and delete locally all the contacts which were previously deleted remotely.
         // TODO
+        //
+        console.log("AddressBookSynchronizer.synchronize(): Done synchronizing.");
     }
 
     static fillLocalContactWithServerContactInformation(localContact, serverContact) {
