@@ -534,9 +534,6 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
             case "addrbook-contact-removed":
                 break;
             case "addrbook-contact-created":
-                abCardItem.setProperty("X-GOOGLE-RESOURCENAME", TbSync.generateUUID());
-                abCardItem.abDirectory.modifyItem(abCardItem);
-                //
                 break;
         }
     }
@@ -550,8 +547,6 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
             case "addrbook-list-updated":
                 break;
             case "addrbook-list-created":
-                abListItem.setProperty("X-GOOGLE-RESOURCENAME", TbSync.generateUUID());
-                //
                 break;
         }
     }
