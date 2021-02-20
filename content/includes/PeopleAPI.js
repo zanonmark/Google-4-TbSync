@@ -271,6 +271,28 @@ class PeopleAPI {
         return contacts;
     }
 
+    async createContact(serverContact) { // https://developers.google.com/people/api/rest/v1/people/createContact
+        if (null == serverContact) {
+            throw new Error("Invalid 'serverContact': null.");
+        }
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the contact creation request URL and data.
+        let contactCreationRequestURL = SERVICE_ENDPOINT + "/v1/people:createContact";
+        contactCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            personFields: CONTACT_PERSON_FIELDS,
+            access_token: accessToken,
+        });
+        let contactCreationRequestData = serverContact;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("POST", contactCreationRequestURL, contactCreationRequestData);
+        // Retrieve the contact.
+        let contact = responseData;
+        //
+        console.log("PeopleAPI.createContact(): contact = " + JSON.stringify(contact));
+        return contact;
+    }
+
     async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
         if (null == resourceName) {
             throw new Error("Invalid 'resourceName': null.");
