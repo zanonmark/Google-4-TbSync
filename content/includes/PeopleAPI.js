@@ -92,22 +92,22 @@ class PeopleAPI {
                         if (null != group) {
                             let authorizationCode = group[1];
                             console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCode = " + authorizationCode);
-                            // ...close the browser window...
+                            // Close the browser window.
                             authenticationWindow.close();
-                            // ...stop the title interval...
+                            // Stop the title interval.
                             authenticationWindow.clearInterval(titleInterval);
-                            // ...and return the authorization code.
+                            // Return the authorization code.
                             authorizationCodeRetrieved = true;
                             resolve(authorizationCode);
                         }
                     }
                     // If the browser title contains "Error"...
                     else if (browserTitle.startsWith("Error")) {
-                        // ...close the browser window...
+                        // Close the browser window.
                         authenticationWindow.close();
-                        // ...stop the title interval...
+                        // Stop the title interval.
                         authenticationWindow.clearInterval(titleInterval);
-                        // ...and return an error.
+                        // Return an error.
                         reject(new Error("Browser title: " + browserTitle));
                     }
                 }, 1000);
@@ -169,10 +169,10 @@ class PeopleAPI {
         };
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("POST", refreshTokenRequestURL, refreshTokenRequestData);
-        // Retrieve the refresh token...
+        // Retrieve the refresh token.
         let refreshToken = responseData.refresh_token;
         console.log("PeopleAPI.retrieveNewRefreshToken(): refreshToken = " + refreshToken);
-        // ...and save it to the account data.
+        // Save the refresh token to the account data.
         this.setRefreshToken(refreshToken);
     }
 
@@ -205,8 +205,8 @@ class PeopleAPI {
         catch (error) {
             // If the old refresh token was used, chances are it expired or was invalidated, so...
             if (!retrieveNewRefreshToken) {
+                // Retry with a new refresh token.
                 console.log("Unable to get a new access token, retrying with a new refresh token first.");
-                // ...retry with a new refresh token.
                 return await this.getNewAccessToken(true);
             }
         }
@@ -255,9 +255,9 @@ class PeopleAPI {
             let partialContactRequestData = null;
             // Perform the request and retrieve the response data.
             let responseData = await this.getResponseData("GET", partialContactRequestURL, partialContactRequestData);
-            // Retrieve the partial contacts...
+            // Retrieve the partial contacts.
             let partialContacts = responseData.connections;
-            // ...and concatenate it with the contacts.
+            // Concatenate the partial contacts with the contacts.
             contacts = contacts.concat(partialContacts);
             // Retrieve the next page token, necessary to retrieve the next page.
             nextPageToken = responseData.nextPageToken;
