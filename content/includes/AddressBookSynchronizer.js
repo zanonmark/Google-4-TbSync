@@ -64,8 +64,8 @@ class AddressBookSynchronizer {
                     // Add the local contact locally.
                     await targetAddressBook.addItem(localContact, true);
                     console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was added locally.");
-// FIXME: the following two lines should be logically useless, but I sometimes find some of the contacts (2-3 out of 490) added before into the local changelog...
                     // Remove the resource name from the local changelog (added items).
+                    // (This should be logically useless, but sometimes the changelog is filled with some of the contacts added above.)
                     targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
             }
