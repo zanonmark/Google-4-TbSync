@@ -109,7 +109,26 @@ class AddressBookSynchronizer {
         // Cycle on the locally modified contacts.
         console.log("AddressBookSynchronizer.synchronize(): Cycling on the locally modified contacts.");
         for (let localContactKey of modifiedLocalContacts) {
-            // TODO
+            // Retrieve the local contact.
+            let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactKey);
+            // Create a new server contact.
+            let serverContact = {};
+            serverContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
+            serverContact.etag = localContact.getProperty("X-GOOGLE-ETAG");
+            // Import the local contact information into the server contact.
+            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact);
+            // Update the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
+            serverContact = await peopleAPI.updateContact(serverContact);
+            let resourceName = serverContact.resourceName;
+            let displayName = serverContact.names[0].displayName;
+            console.log("AddressBookSynchronizer.synchronize(): " + resourceName + " (" + displayName + ") was updated remotely.");
+            // Update the local contact locally.
+            localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+            await targetAddressBook.modifyItem(localContact, true);
+            // Remove the local contact key from the local changelog (modified items).
+            targetAddressBook.removeItemFromChangeLog(localContactKey);
         }
         // Determine all the contacts which were previously deleted remotely and delete them locally.
         // TODO
