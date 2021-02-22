@@ -131,7 +131,25 @@ class AddressBookSynchronizer {
             targetAddressBook.removeItemFromChangeLog(localContactKey);
         }
         // Determine all the contacts which were previously deleted remotely and delete them locally.
-        // TODO
+        console.log("AddressBookSynchronizer.synchronize(): Determining all the remotely deleted contacts.");
+        for (let localContact of targetAddressBook.getAllItems()) {
+            // Get the primary key value.
+            let localContactKey = localContact.getProperty("X-GOOGLE-RESOURCENAME");
+            let displayName = localContact.getProperty("DisplayName");
+            // Check if the primary key value matches any of the resource names downloaded.
+            let localContactFoundAmongServerContacts = false;
+            for (let serverContact of serverContacts) {
+                if (localContactKey === serverContact.resourceName) {
+                    localContactFoundAmongServerContacts = true;
+                    break;
+                }
+            }
+            // Delete the local contact locally if necessary.
+            if (!localContactFoundAmongServerContacts) {
+                targetAddressBook.deleteItem(localContact, true);
+                console.log("AddressBookSynchronizer.synchronize(): " + localContactKey + " (" + displayName + ") was deleted locally.");
+            }
+        }
         //
         console.log("AddressBookSynchronizer.synchronize(): Done synchronizing.");
     }
