@@ -49,9 +49,9 @@ class AddressBookSynchronizer {
         let serverContacts = await peopleAPI.getContacts();
         // Prepare the variables for the cycles.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Retrieving local changes since the last synchronization.");
-        let addedLocalContacts = targetAddressBook.getAddedItemsFromChangeLog();
-        let modifiedLocalContacts = targetAddressBook.getModifiedItemsFromChangeLog();
-        let deletedLocalContacts = targetAddressBook.getDeletedItemsFromChangeLog();
+        let addedLocalItems = targetAddressBook.getAddedItemsFromChangeLog();
+        let modifiedLocalItems = targetAddressBook.getModifiedItemsFromChangeLog();
+        let deletedLocalItems = targetAddressBook.getDeletedItemsFromChangeLog();
         // Cycle on the server contacts.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the server contacts.");
         for (let serverContact of serverContacts) {
@@ -64,7 +64,7 @@ class AddressBookSynchronizer {
             // If such a local contact is currently unavailable...
             if (null == localContact) {
                 // ...and if it was previously deleted locally...
-                if (deletedLocalContacts.includes(resourceName)) {
+                if (deletedLocalItems.includes(resourceName)) {
                     // Delete the server contact remotely.
                     await peopleAPI.deleteContact(resourceName);
                     console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was deleted remotely.");
@@ -75,7 +75,6 @@ class AddressBookSynchronizer {
                 else {
                     // Create a new local contact.
                     localContact = targetAddressBook.createNewCard();
-                    localContact.setProperty("isMailList", false);
                     // Import the server contact information into the local contact.
                     localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
                     localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
@@ -105,9 +104,12 @@ class AddressBookSynchronizer {
         }
         // Cycle on the locally added contacts.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally added contacts.");
-        for (let localContactKey of addedLocalContacts) {
-            // Retrieve the local contact.
+        for (let localContactKey of addedLocalItems) {
+            // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactKey);
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
             // Create a new server contact.
             let serverContact = {};
             // Import the local contact information into the server contact.
@@ -127,9 +129,12 @@ class AddressBookSynchronizer {
         }
         // Cycle on the locally modified contacts.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally modified contacts.");
-        for (let localContactKey of modifiedLocalContacts) {
-            // Retrieve the local contact.
+        for (let localContactKey of modifiedLocalItems) {
+            // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactKey);
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
             // Create a new server contact.
             let serverContact = {};
             serverContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
@@ -152,6 +157,10 @@ class AddressBookSynchronizer {
         // Determine all the contacts which were previously deleted remotely and delete them locally.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Determining all the remotely deleted contacts.");
         for (let localContact of targetAddressBook.getAllItems()) {
+            // Make sure the "local contact" is actually not a group.
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
             // Get the primary key value.
             let localContactKey = localContact.getProperty("X-GOOGLE-RESOURCENAME");
             let displayName = localContact.getProperty("DisplayName");
@@ -922,7 +931,164 @@ class AddressBookSynchronizer {
         if (null == targetAddressBook) {
             new Error("Invalid 'targetAddressBook': null.");
         }
-// TODO
+        // Retrieve all server contact groups.
+        let serverContactGroups = await peopleAPI.getContactGroups();
+        // Prepare the variables for the cycles.
+        console.log("AddressBookSynchronizer.synchronizeContactGroups(): Retrieving local changes since the last synchronization.");
+        let addedLocalItems = targetAddressBook.getAddedItemsFromChangeLog();
+        let modifiedLocalItems = targetAddressBook.getModifiedItemsFromChangeLog();
+        let deletedLocalItems = targetAddressBook.getDeletedItemsFromChangeLog();
+        // Cycle on the server contact groups.
+        console.log("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the server contact groups.");
+        for (let serverContactGroup of serverContactGroups) {
+            // Get the resource name (in the form 'contactGroup/group_id') and the name.
+            let resourceName = serverContactGroup.resourceName;
+            let name = serverContactGroup.name;
+            console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
+            // Try to match the server contact group locally.
+            let localContactGroup = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            // If such a local contact group is currently unavailable...
+            if (null == localContactGroup) {
+                // ...and if it was previously deleted locally...
+                if (deletedLocalItems.includes(resourceName)) {
+                    // Delete the server contact group remotely.
+/* TODO
+                    await peopleAPI.deleteContactGroup(resourceName);
+                    console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") was deleted remotely.");
+*/
+                    // Remove the resource name from the local changelog (deleted items).
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+                // ...and if it wasn't previously deleted locally...
+                else {
+                    // Create a new local contact group.
+                    localContactGroup = targetAddressBook.createNewList();
+                    // Import the server contact group information into the local contact group.
+                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                    // Add the local contact group locally.
+                    await targetAddressBook.addItem(localContactGroup, true);
+                    console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") was added locally.");
+                    // Remove the resource name from the local changelog (added items).
+                    // (This should be logically useless, but sometimes the changelog is filled with some of the contact groups added above.)
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+            }
+            // If such a local contact group is currently available...
+            else {
+                // ...and if the server one is more recent...
+                if (localContactGroup.getProperty("X-GOOGLE-ETAG") !== serverContactGroup.etag) {
+                    // Import the server contact group information into the local contact group.
+                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                    // Update the local contact group locally.
+                    await targetAddressBook.modifyItem(localContactGroup, true);
+                    console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") was updated locally.");
+                    // Remove the resource name from the local changelog (modified items).
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+            }
+        }
+/* TODO / FIXME: variable names.
+        // Cycle on the locally added contacts.
+        console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally added contacts.");
+        for (let localContactKey of addedLocalItems) {
+            // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
+            let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactKey);
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
+            // Create a new server contact.
+            let serverContact = {};
+            // Import the local contact information into the server contact.
+            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact);
+            // Add the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
+            serverContact = await peopleAPI.createContact(serverContact);
+            let resourceName = serverContact.resourceName;
+            let displayName = serverContact.names[0].displayName;
+            console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was added remotely.");
+            // Update the local contact locally.
+            localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+            await targetAddressBook.modifyItem(localContact, true);
+            // Remove the local contact key from the local changelog (added items).
+            targetAddressBook.removeItemFromChangeLog(localContactKey);
+        }
+*/
+/* TODO / FIXME: variable names.
+        // Cycle on the locally modified contacts.
+        console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally modified contacts.");
+        for (let localContactKey of modifiedLocalItems) {
+            // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
+            let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactKey);
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
+            // Create a new server contact.
+            let serverContact = {};
+            serverContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
+            serverContact.etag = localContact.getProperty("X-GOOGLE-ETAG");
+            // Import the local contact information into the server contact.
+            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact);
+            // Update the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
+            serverContact = await peopleAPI.updateContact(serverContact);
+            let resourceName = serverContact.resourceName;
+            let displayName = serverContact.names[0].displayName;
+            console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was updated remotely.");
+            // Update the local contact locally.
+            localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+            await targetAddressBook.modifyItem(localContact, true);
+            // Remove the local contact key from the local changelog (modified items).
+            targetAddressBook.removeItemFromChangeLog(localContactKey);
+        }
+*/
+/* TODO / FIXME: variable names.
+        // Determine all the contacts which were previously deleted remotely and delete them locally.
+        console.log("AddressBookSynchronizer.synchronizeContacts(): Determining all the remotely deleted contacts.");
+        for (let localContact of targetAddressBook.getAllItems()) {
+            // Make sure the "local contact" is actually not a group.
+            if (localContact.getProperty("isMailList")) {
+                continue;
+            }
+            // Get the primary key value.
+            let localContactKey = localContact.getProperty("X-GOOGLE-RESOURCENAME");
+            let displayName = localContact.getProperty("DisplayName");
+            // Check if the primary key value matches any of the resource names downloaded.
+            let localContactFoundAmongServerContacts = false;
+            for (let serverContact of serverContacts) {
+                if (localContactKey === serverContact.resourceName) {
+                    localContactFoundAmongServerContacts = true;
+                    break;
+                }
+            }
+            // Delete the local contact locally if necessary.
+            if (!localContactFoundAmongServerContacts) {
+                targetAddressBook.deleteItem(localContact, true);
+                console.log("AddressBookSynchronizer.synchronizeContacts(): " + localContactKey + " (" + displayName + ") was deleted locally.");
+            }
+        }
+*/
+    }
+
+    static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
+        if (null == localContactGroup) {
+            new Error("Invalid 'localContactGroup': null.");
+        }
+        if (null == serverContactGroup) {
+            new Error("Invalid 'serverContactGroup': null.");
+        }
+        // Reset all the properties managed by this method.
+        localContactGroup.deleteProperty("ListName");
+        // Set the name.
+        if (serverContactGroup.name) {
+            localContactGroup.setProperty("ListName", serverContactGroup.name);
+        }
+        //
+        return localContactGroup;
     }
 
     /* Contact group member synchronization. */
