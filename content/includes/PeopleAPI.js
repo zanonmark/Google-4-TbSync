@@ -288,11 +288,11 @@ class PeopleAPI {
         let contactCreationRequestData = contact;
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("POST", contactCreationRequestURL, contactCreationRequestData);
-        // Retrieve the contact.
-        contact = responseData;
+        // Retrieve the response contact.
+        let responseContact = responseData;
         //
-        console.log("PeopleAPI.createContact(): contact = " + JSON.stringify(contact));
-        return contact;
+        console.log("PeopleAPI.createContact(): contact = " + JSON.stringify(responseContact));
+        return responseContact;
     }
 
     async updateContact(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
@@ -313,11 +313,11 @@ class PeopleAPI {
         let contactUpdateRequestData = contact;
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("PATCH", contactUpdateRequestURL, contactUpdateRequestData);
-        // Retrieve the contact.
-        contact = responseData;
+        // Retrieve the response contact.
+        let responseContact = responseData;
         //
-        console.log("PeopleAPI.updateContact(): contact = " + JSON.stringify(contact));
-        return contact;
+        console.log("PeopleAPI.updateContact(): contact = " + JSON.stringify(responseContact));
+        return responseContact;
     }
 
     async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
