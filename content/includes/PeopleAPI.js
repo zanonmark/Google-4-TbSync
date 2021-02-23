@@ -13,6 +13,8 @@ const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.goo
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies";
 const CONTACT_PAGE_SIZE = 1000;
+const CONTACT_GROUP_FIELDS = "name";
+const CONTACT_GROUP_PAGE_SIZE = 1000;
 
 class PeopleAPI {
 
@@ -336,6 +338,47 @@ class PeopleAPI {
         console.log("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
         return true;
     }
+
+    /* Contact groups. */
+
+    async getContactGroups() { // https://developers.google.com/people/api/rest/v1/contactGroups/list
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Retrieve the contact groups page by page.
+        let contactGroups = [];
+        let nextPageToken = null;
+        while (true) {
+            console.log("PeopleAPI.getContactGroups(): nextPageToken = " + nextPageToken);
+            // Prepare the partial contact group request URL and data.
+            let partialContactGroupRequestURL = SERVICE_ENDPOINT + "/v1/contactGroups";
+            partialContactGroupRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+                groupFields: CONTACT_GROUP_FIELDS,
+                pageSize: CONTACT_GROUP_PAGE_SIZE,
+                access_token: accessToken,
+            });
+            if (null != nextPageToken) {
+                partialContactGroupRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
+            }
+            let partialContactGroupRequestData = null;
+            // Perform the request and retrieve the response data.
+            let responseData = await this.getResponseData("GET", partialContactGroupRequestURL, partialContactGroupRequestData);
+            // Retrieve the partial contact groups.
+            let partialContactGroups = responseData.connections;
+            // Concatenate the partial contact groups with the contact groups.
+            contactGroups = contactGroups.concat(partialContactGroups);
+            // Retrieve the next page token, necessary to retrieve the next page.
+            nextPageToken = responseData.nextPageToken;
+            // Check if this was the last page.
+            if (null == nextPageToken) {
+                break;
+            }
+        }
+        //
+        console.log("PeopleAPI.getContactGroups(): contactGroups = " + JSON.stringify(contactGroups));
+        return contactGroups;
+    }
+
+    /* Connection tests. */
 
     checkConnection() {
         (async () => {
