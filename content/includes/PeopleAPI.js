@@ -363,7 +363,7 @@ class PeopleAPI {
             // Perform the request and retrieve the response data.
             let responseData = await this.getResponseData("GET", partialContactGroupRequestURL, partialContactGroupRequestData);
             // Retrieve the partial contact groups.
-            let partialContactGroups = responseData.connections;
+            let partialContactGroups = responseData.contactGroups;
             // Concatenate the partial contact groups with the contact groups.
             contactGroups = contactGroups.concat(partialContactGroups);
             // Retrieve the next page token, necessary to retrieve the next page.
