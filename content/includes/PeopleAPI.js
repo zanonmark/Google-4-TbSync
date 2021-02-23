@@ -212,8 +212,6 @@ class PeopleAPI {
         }
     }
 
-    /* People. */
-
     async getAuthenticatedUser() { // https://developers.google.com/people/api/rest/v1/people/get
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -232,6 +230,8 @@ class PeopleAPI {
         console.log("PeopleAPI.getAuthenticatedUser(): authenticatedUser = " + JSON.stringify(authenticatedUser));
         return authenticatedUser;
     }
+
+    /* Contacts. */
 
     async getContacts() { // https://developers.google.com/people/api/rest/v1/people.connections/list
         // Get a new access token.
@@ -271,9 +271,9 @@ class PeopleAPI {
         return contacts;
     }
 
-    async createContact(serverContact) { // https://developers.google.com/people/api/rest/v1/people/createContact
-        if (null == serverContact) {
-            throw new Error("Invalid 'serverContact': null.");
+    async createContact(contact) { // https://developers.google.com/people/api/rest/v1/people/createContact
+        if (null == contact) {
+            throw new Error("Invalid 'contact': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -283,24 +283,24 @@ class PeopleAPI {
             personFields: CONTACT_PERSON_FIELDS,
             access_token: accessToken,
         });
-        let contactCreationRequestData = serverContact;
+        let contactCreationRequestData = contact;
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("POST", contactCreationRequestURL, contactCreationRequestData);
         // Retrieve the contact.
-        let contact = responseData;
+        contact = responseData;
         //
         console.log("PeopleAPI.createContact(): contact = " + JSON.stringify(contact));
         return contact;
     }
 
-    async updateContact(serverContact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
-        if (null == serverContact) {
-            throw new Error("Invalid 'serverContact': null.");
+    async updateContact(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
+        if (null == contact) {
+            throw new Error("Invalid 'contact': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
         // Get the resource name.
-        let resourceName = serverContact.resourceName;
+        let resourceName = contact.resourceName;
         // Prepare the contact update request URL and data.
         let contactUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":updateContact";
         contactUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -308,11 +308,11 @@ class PeopleAPI {
             personFields: CONTACT_PERSON_FIELDS,
             access_token: accessToken,
         });
-        let contactUpdateRequestData = serverContact;
+        let contactUpdateRequestData = contact;
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("PATCH", contactUpdateRequestURL, contactUpdateRequestData);
         // Retrieve the contact.
-        let contact = responseData;
+        contact = responseData;
         //
         console.log("PeopleAPI.updateContact(): contact = " + JSON.stringify(contact));
         return contact;
