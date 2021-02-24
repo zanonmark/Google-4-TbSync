@@ -3,28 +3,43 @@
         "message": "Provider for Google"
     },
     "extensionDescription": {
-        "message": "Add synchronization support for Google accounts to TbSync (currently contacts only, using Google's People API)."
+        "message": "Adds synchronization support for Google accounts to TbSync (currently contacts and contact groups only, using Google's People API)."
     },
 
     "menu.name": {
         "message": "Google's People API"
     },
 
+    "add.account.title": {
+        "message": "Enter the information for the new account"
+    },
+    "add.account.description": {
+        "message": "Please fill the following fields."
+    },
     "add.title": {
         "message": "Adding a Google account to TbSync"
     },
+
     "manager.tabs.accountsettings": {
         "message": "Account settings"
     },
     "manager.tabs.syncsettings": {
         "message": "Options"
     },
+
     "pref.AccountName": {
         "message": "Account name"
     },
-    "pref.UserName": {
-        "message": "User name"
+    "pref.CheckConnection": {
+        "message": "Check connection"
     },
+    "pref.ClientID": {
+        "message": "Client ID"
+    },
+    "pref.ClientSecret": {
+        "message": "Client secret"
+    },
+
     "pref.contactoptions": {
         "message": "Contact options"
     },

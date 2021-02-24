@@ -22,9 +22,9 @@
 
     <wizard id="tbsync.newaccount.wizard" title="__GOOGLE4TBSYNCMSG_add.title__">
 
-        <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.serverprofile.title__">
+        <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.account.title__">
             <vbox flex="1">
-                <description style="width: 450px; margin-top: 1em;">__GOOGLE4TBSYNCMSG_add.serverprofile.description__</description>
+                <description style="width: 450px; margin-top: 1em;">__GOOGLE4TBSYNCMSG_add.account.description__</description>
                 <grid style="margin-top: 1ex;">
                     <columns>
                         <column flex="1" />
@@ -33,19 +33,19 @@
                     <rows>
                         <row>
                             <vbox pack="center">
-                                <label value="Account name" />
+                                <label value="__GOOGLE4TBSYNCMSG_pref.AccountName__" />
                             </vbox>
                             <html:input id="tbsync.newaccount.accountName" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
                         <row>
                             <vbox pack="center">
-                                <label value="Client ID" />
+                                <label value="__GOOGLE4TBSYNCMSG_pref.ClientID__" />
                             </vbox>
                             <html:input id="tbsync.newaccount.clientID" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
                         <row>
                             <vbox pack="center">
-                                <label value="Client secret" />
+                                <label value="__GOOGLE4TBSYNCMSG_pref.ClientSecret__" />
                             </vbox>
                             <html:input id="tbsync.newaccount.clientSecret" oninput="tbSyncNewAccount.onUserTextInput();" />
                         </row>
