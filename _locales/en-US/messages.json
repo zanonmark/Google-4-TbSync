@@ -24,16 +24,16 @@
         "message": "Options"
     },
 
-    "pref.AccountName": {
+    "pref.accountName": {
         "message": "Account name"
     },
-    "pref.CheckConnection": {
+    "pref.checkConnection": {
         "message": "Check connection"
     },
-    "pref.ClientID": {
+    "pref.clientID": {
         "message": "Client ID"
     },
-    "pref.ClientSecret": {
+    "pref.clientSecret": {
         "message": "Client secret"
     }
 }
