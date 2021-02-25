@@ -35,12 +35,5 @@
     },
     "pref.ClientSecret": {
         "message": "Client secret"
-    },
-
-    "pref.contactoptions": {
-        "message": "Contact options"
-    },
-    "pref.generaloptions": {
-        "message": "General options"
     }
 }
