@@ -940,11 +940,18 @@ class AddressBookSynchronizer {
         let deletedLocalItems = targetAddressBook.getDeletedItemsFromChangeLog();
         // Cycle on the server contact groups.
         console.log("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the server contact groups.");
+        let includeSystemContactGroups = peopleAPI.getIncludeSystemContactGroups();
+        console.log("PeopleAPI.getContactGroups(): includeSystemContactGroups = " + includeSystemContactGroups);
         for (let serverContactGroup of serverContactGroups) {
             // Get the resource name (in the form 'contactGroup/group_id') and the name.
             let resourceName = serverContactGroup.resourceName;
             let name = serverContactGroup.name;
             console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
+            // Determine if the server contact group is a system one and if it should be discarded.
+            if (("SYSTEM_CONTACT_GROUP" === serverContactGroup.groupType) && (!includeSystemContactGroups)) {
+                console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and was ignored.");
+                continue;
+            }
             // Try to match the server contact group locally.
             let localContactGroup = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName);
             // If such a local contact group is currently unavailable...

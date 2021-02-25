@@ -182,6 +182,7 @@ var Base = class {
         let row = {
             clientID: "",
             clientSecret: "",
+            includeSystemContactGroups: false,
             refreshToken: null,
         };
         //

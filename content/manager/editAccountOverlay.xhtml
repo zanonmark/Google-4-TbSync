@@ -31,19 +31,25 @@
                         <vbox pack="center">
                             <label style="text-align: left;" control="tbsync.accountsettings.pref.accountname" value="__GOOGLE4TBSYNCMSG_pref.accountName__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.accountname" />
+                        <html:input id="tbsync.accountsettings.pref.accountname" onblur="tbSyncEditAccountOverlay.updateAccountProperty('accountName');" />
                     </row>
                     <row>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.clientID" value="__GOOGLE4TBSYNCMSG_pref.clientID__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.clientID" class="lockIfConnected" />
+                        <html:input id="tbsync.accountsettings.pref.clientID" class="lockIfConnected" onblur="tbSyncEditAccountOverlay.updateAccountProperty('clientID');" />
                     </row>
                     <row>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.clientSecret" value="__GOOGLE4TBSYNCMSG_pref.clientSecret__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.clientSecret" class="lockIfConnected" />
+                        <html:input id="tbsync.accountsettings.pref.clientSecret" class="lockIfConnected" onblur="tbSyncEditAccountOverlay.updateAccountProperty('clientSecret');" />
+                    </row>
+                    <row>
+                        <vbox pack="center">
+                            <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.includeSystemContactGroups" value="__GOOGLE4TBSYNCMSG_pref.includeSystemContactGroups__" />
+                        </vbox>
+                        <html:input id="tbsync.accountsettings.pref.includeSystemContactGroups" type="checkbox" class="lockIfConnected" onblur="tbSyncEditAccountOverlay.updateAccountProperty('includeSystemContactGroups');" />
                     </row>
                     <row>
                         <vbox />

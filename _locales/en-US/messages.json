@@ -35,5 +35,8 @@
     },
     "pref.clientSecret": {
         "message": "Client secret"
+    },
+    "pref.includeSystemContactGroups": {
+        "message": "Include system contact groups"
     }
 }

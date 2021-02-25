@@ -18,6 +18,7 @@ var tbSyncNewAccount = {
     accountNameWidget: null,
     clientIDWidget: null,
     clientSecretWidget: null,
+    includeSystemContactGroupsWidget: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -28,6 +29,7 @@ var tbSyncNewAccount = {
         this.accountNameWidget = document.getElementById("tbsync.newaccount.accountName");
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
+        this.includeSystemContactGroupsWidget = document.getElementById('tbsync.newaccount.includeSystemContactGroups');
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -52,16 +54,18 @@ var tbSyncNewAccount = {
         let accountName = this.accountNameWidget.value.trim();
         let clientID = this.clientIDWidget.value.trim();
         let clientSecret = this.clientSecretWidget.value.trim();
+        let includeSystemContactGroups = this.includeSystemContactGroupsWidget.checked;
         //
-        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret);
+        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups);
     },
 
-    addAccount: function(accountName, clientID, clientSecret) {
+    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
         newAccountEntry.clientID = clientID;
         newAccountEntry.clientSecret = clientSecret;
+        newAccountEntry.includeSystemContactGroups = includeSystemContactGroups;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         // Close the window.

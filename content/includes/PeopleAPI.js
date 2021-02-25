@@ -13,7 +13,7 @@ const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.goo
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies";
 const CONTACT_PAGE_SIZE = 1000;
-const CONTACT_GROUP_FIELDS = "name";
+const CONTACT_GROUP_FIELDS = "name,groupType";
 const CONTACT_GROUP_PAGE_SIZE = 1000;
 
 class PeopleAPI {
@@ -40,6 +40,10 @@ class PeopleAPI {
 
     getClientSecret() {
         return this.getAccountData().getAccountProperty("clientSecret");
+    }
+
+    getIncludeSystemContactGroups() {
+        return this.getAccountData().getAccountProperty("includeSystemContactGroups");
     }
 
     setRefreshToken(refreshToken) {
