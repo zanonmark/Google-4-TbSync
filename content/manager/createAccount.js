@@ -22,6 +22,9 @@ var tbSyncNewAccount = {
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
         //
+        document.getElementById('tbsync.newaccount.wizard')._adjustWizardHeader(); // https://bugzilla.mozilla.org/show_bug.cgi?id=1618252
+        document.getElementById("firstPage").label = TbSync.getString("__GOOGLE4TBSYNCMSG_add.account.title__", "google");
+        //
         this.accountNameWidget = document.getElementById("tbsync.newaccount.accountName");
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");

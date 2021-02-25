@@ -13,9 +13,6 @@
     "add.account.title": {
         "message": "Enter the information for the new account"
     },
-    "add.account.description": {
-        "message": "Please fill the following fields."
-    },
     "add.title": {
         "message": "Adding a Google account to TbSync"
     },
