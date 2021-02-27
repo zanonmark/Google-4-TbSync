@@ -57,7 +57,7 @@ class AddressBookSynchronizer {
         for (let serverContact of serverContacts) {
             // Get the resource name (in the form 'people/contact_id') and the display name.
             let resourceName = serverContact.resourceName;
-            let displayName = serverContact.names[0].displayName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
             console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ")");
             // Try to match the server contact locally.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", resourceName);
@@ -117,7 +117,7 @@ class AddressBookSynchronizer {
             // Add the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
             serverContact = await peopleAPI.createContact(serverContact);
             let resourceName = serverContact.resourceName;
-            let displayName = serverContact.names[0].displayName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
             console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was added remotely.");
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
@@ -144,7 +144,7 @@ class AddressBookSynchronizer {
             // Update the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
             serverContact = await peopleAPI.updateContact(serverContact);
             let resourceName = serverContact.resourceName;
-            let displayName = serverContact.names[0].displayName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
             console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was updated remotely.");
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
@@ -1013,7 +1013,7 @@ class AddressBookSynchronizer {
             // Add the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
             serverContact = await peopleAPI.createContact(serverContact);
             let resourceName = serverContact.resourceName;
-            let displayName = serverContact.names[0].displayName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
             console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was added remotely.");
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
@@ -1042,7 +1042,7 @@ class AddressBookSynchronizer {
             // Update the server contact remotely and get the resource name (in the form 'people/contact_id') and the display name.
             serverContact = await peopleAPI.updateContact(serverContact);
             let resourceName = serverContact.resourceName;
-            let displayName = serverContact.names[0].displayName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
             console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was updated remotely.");
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
