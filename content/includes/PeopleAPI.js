@@ -382,6 +382,25 @@ class PeopleAPI {
         return contactGroups;
     }
 
+    async deleteContactGroup(resourceName) { // https://developers.google.com/people/api/rest/v1/contactGroups/delete
+        if (null == resourceName) {
+            throw new Error("Invalid 'resourceName': null.");
+        }
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the contact group deletion request URL and data.
+        let contactGroupDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName;
+        contactGroupDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            access_token: accessToken,
+        });
+        let contactGroupDeletionRequestData = null;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("DELETE", contactGroupDeletionRequestURL, contactGroupDeletionRequestData);
+        //
+        console.log("PeopleAPI.deleteContactGroup(): contact group " + resourceName + " deleted.");
+        return true;
+    }
+
     /* Connection tests. */
 
     checkConnection() {

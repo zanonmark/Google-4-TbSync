@@ -959,10 +959,8 @@ class AddressBookSynchronizer {
                 // ...and if it was previously deleted locally...
                 if (deletedLocalItems.includes(resourceName)) {
                     // Delete the server contact group remotely.
-/* TODO
                     await peopleAPI.deleteContactGroup(resourceName);
                     console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") was deleted remotely.");
-*/
                     // Remove the resource name from the local changelog (deleted items).
                     targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
