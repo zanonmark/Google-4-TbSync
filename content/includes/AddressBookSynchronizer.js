@@ -949,7 +949,7 @@ class AddressBookSynchronizer {
             console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
             // Determine if the server contact group is a system one and if it should be discarded.
             if (("SYSTEM_CONTACT_GROUP" === serverContactGroup.groupType) && (!includeSystemContactGroups)) {
-                console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and was ignored.");
+                console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and was therefore ignored.");
                 continue;
             }
             // Try to match the server contact group locally.
