@@ -995,7 +995,7 @@ class AddressBookSynchronizer {
                 }
             }
         }
-/* TODO / FIXME: variable names.
+/* TODO / FIXME: variable names, negate isMailList check.
         // Cycle on the locally added contacts.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally added contacts.");
         for (let localContactKey of addedLocalItems) {
@@ -1022,7 +1022,7 @@ class AddressBookSynchronizer {
             targetAddressBook.removeItemFromChangeLog(localContactKey);
         }
 */
-/* TODO / FIXME: variable names.
+/* TODO / FIXME: variable names, negate isMailList check.
         // Cycle on the locally modified contacts.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally modified contacts.");
         for (let localContactKey of modifiedLocalItems) {
@@ -1051,7 +1051,7 @@ class AddressBookSynchronizer {
             targetAddressBook.removeItemFromChangeLog(localContactKey);
         }
 */
-/* TODO / FIXME: variable names.
+/* TODO / FIXME: variable names, negate isMailList check.
         // Determine all the contacts which were previously deleted remotely and delete them locally.
         console.log("AddressBookSynchronizer.synchronizeContacts(): Determining all the remotely deleted contacts.");
         for (let localContact of targetAddressBook.getAllItems()) {
