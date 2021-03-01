@@ -1124,6 +1124,7 @@ class AddressBookSynchronizer {
                 continue;
             }
             // Delete the local contact group locally.
+// FIXME: does not actually delete the contact group.
             targetAddressBook.deleteItem(localContactGroup, true);
             console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") was deleted locally.");
         }
