@@ -177,7 +177,7 @@ class AddressBookSynchronizer {
             // Get the local contact id and the display name.
             let localContactId = localContact.getProperty("X-GOOGLE-RESOURCENAME");
             let displayName = localContact.getProperty("DisplayName");
-            // Check if the primary key value matches any of the resource names downloaded.
+            // Check if the local contact id matches any of the resource names downloaded.
             let localContactFoundAmongServerContacts = false;
             for (let serverContact of serverContacts) {
                 if (localContactId === serverContact.resourceName) {
@@ -1064,7 +1064,30 @@ class AddressBookSynchronizer {
             // Remove the local contact group id from the local change log (modified items).
             targetAddressBook.removeItemFromChangeLog(localContactGroupId);
         }
-// TODO
+        // Determine all the contact groups which were previously deleted remotely and delete them locally.
+        console.log("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
+        for (let localContactGroup of targetAddressBook.getAllItems()) {
+            // Make sure the item is actually a real contact group.
+            if (!localContactGroup.isMailList) {
+                continue;
+            }
+            // Get the local contact group id and the name.
+            let localContactGroupId = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
+            let name = localContactGroup.getProperty("ListName");
+            // Check if the local contact group id matches any of the resource names downloaded.
+            let localContactGroupFoundAmongServerContactGroups = false;
+            for (let serverContactGroup of serverContactGroups) {
+                if (localContactGroupId === serverContactGroup.resourceName) {
+                    localContactGroupFoundAmongServerContactGroups = true;
+                    break;
+                }
+            }
+            // Delete the local contact group locally if necessary.
+            if (!localContactGroupFoundAmongServerContactGroups) {
+                targetAddressBook.deleteItem(localContactGroup, true);
+                console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") was deleted locally.");
+            }
+        }
     }
 
     static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
