@@ -382,6 +382,30 @@ class PeopleAPI {
         return contactGroups;
     }
 
+    async createContactGroup(contactGroup) { // https://developers.google.com/people/api/rest/v1/contactGroups/create
+        if (null == contactGroup) {
+            throw new Error("Invalid 'contactGroup': null.");
+        }
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Prepare the contact group creation request URL and data.
+        let contactGroupCreationRequestURL = SERVICE_ENDPOINT + "/v1/contactGroups";
+        contactGroupCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            access_token: accessToken,
+        });
+        let contactGroupCreationRequestData = {
+            "contactGroup": contactGroup,
+            "readGroupFields": CONTACT_GROUP_FIELDS,
+        };
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("POST", contactGroupCreationRequestURL, contactGroupCreationRequestData);
+        // Retrieve the response contact group.
+        let responseContactGroup = responseData;
+        //
+        console.log("PeopleAPI.createContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
+        return responseContactGroup;
+    }
+
     async deleteContactGroup(resourceName) { // https://developers.google.com/people/api/rest/v1/contactGroups/delete
         if (null == resourceName) {
             throw new Error("Invalid 'resourceName': null.");
