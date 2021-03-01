@@ -120,7 +120,7 @@ class AddressBookSynchronizer {
         for (let localContactId of addedLocalItems) {
             // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactId);
-            if (localContact.getProperty("isMailList")) {
+            if (localContact.isMailList) {
                 continue;
             }
             // Create a new server contact.
@@ -145,7 +145,7 @@ class AddressBookSynchronizer {
         for (let localContactId of modifiedLocalItems) {
             // Retrieve the local contact, and make sure such a "local contact" is actually not a group.
             let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", localContactId);
-            if (localContact.getProperty("isMailList")) {
+            if (localContact.isMailList) {
                 continue;
             }
             // Create a new server contact.
@@ -171,7 +171,7 @@ class AddressBookSynchronizer {
         console.log("AddressBookSynchronizer.synchronizeContacts(): Determining all the remotely deleted contacts.");
         for (let localContact of targetAddressBook.getAllItems()) {
             // Make sure the "local contact" is actually not a group.
-            if (localContact.getProperty("isMailList")) {
+            if (localContact.isMailList) {
                 continue;
             }
             // Get the local contact id and the display name.
