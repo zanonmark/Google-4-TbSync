@@ -1069,7 +1069,6 @@ class AddressBookSynchronizer {
             // Remove the local contact group id from the local change log (modified items).
             targetAddressBook.removeItemFromChangeLog(localContactGroupId);
         }
-/* FIXME
         // Determine all the contact groups which were previously deleted remotely and delete them locally.
         console.log("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
         for (let localContactGroup of targetAddressBook.getAllItems()) {
@@ -1094,7 +1093,6 @@ class AddressBookSynchronizer {
                 console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") was deleted locally.");
             }
         }
-*/
     }
 
     static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
