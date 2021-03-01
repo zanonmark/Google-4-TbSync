@@ -406,6 +406,33 @@ class PeopleAPI {
         return responseContactGroup;
     }
 
+    async updateContactGroup(contactGroup) { // https://developers.google.com/people/api/rest/v1/contactGroups/update
+        if (null == contactGroup) {
+            throw new Error("Invalid 'contactGroup': null.");
+        }
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Get the resource name.
+        let resourceName = contactGroup.resourceName;
+        // Prepare the contact group update request URL and data.
+        let contactGroupUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName;
+        contactGroupUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            access_token: accessToken,
+        });
+        let contactGroupUpdateRequestData = {
+            "contactGroup": contactGroup,
+            "updateGroupFields": CONTACT_GROUP_FIELDS,
+            "readGroupFields": CONTACT_GROUP_FIELDS,
+        };
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("PUT", contactGroupUpdateRequestURL, contactGroupUpdateRequestData);
+        // Retrieve the response contact group.
+        let responseContactGroup = responseData;
+        //
+        console.log("PeopleAPI.updateContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
+        return responseContactGroup;
+    }
+
     async deleteContactGroup(resourceName) { // https://developers.google.com/people/api/rest/v1/contactGroups/delete
         if (null == resourceName) {
             throw new Error("Invalid 'resourceName': null.");
