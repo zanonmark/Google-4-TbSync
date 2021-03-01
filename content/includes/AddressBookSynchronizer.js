@@ -1045,6 +1045,11 @@ class AddressBookSynchronizer {
             if (!localContactGroup.isMailList) {
                 continue;
             }
+            // Make sure the local contact group has a valid X-GOOGLE-ETAG property (if not, it is probably a system contact group, which cannot be updated).
+            if (!localContactGroup.getProperty("X-GOOGLE-ETAG")) {
+                console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " has no X-GOOGLE-ETAG property and was therefore ignored.");
+                continue;
+            }
             // Create a new server contact group.
             let serverContactGroup = {};
             serverContactGroup.resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
@@ -1064,6 +1069,7 @@ class AddressBookSynchronizer {
             // Remove the local contact group id from the local change log (modified items).
             targetAddressBook.removeItemFromChangeLog(localContactGroupId);
         }
+/* FIXME
         // Determine all the contact groups which were previously deleted remotely and delete them locally.
         console.log("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
         for (let localContactGroup of targetAddressBook.getAllItems()) {
@@ -1088,6 +1094,7 @@ class AddressBookSynchronizer {
                 console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") was deleted locally.");
             }
         }
+*/
     }
 
     static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
