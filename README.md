@@ -4,6 +4,18 @@ This provider add-on adds Google synchronization capabilities to TbSync. Only co
 
 The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by John Bieling himself.
 
+### Current status
+
+What already works:
+* Google-to-Thunderbird creation / update / deletion of contacts;
+* Thunderbird-to-Google creation / update / deletion of contacts;
+* Google-to-Thunderbird creation / update / deletion of contact groups;
+* Thunderbird-to-Google creation / update / deletion of contact groups.
+
+What is missing:
+* Google-to-Thunderbird creation / update / deletion of contact group members;
+* Thunderbird-to-Google creation / update / deletion of contact group members.
+
 ### Warning
 
 The project is still in its early development stage. **Backup both your Google and Thunderbird address books before running the software!**
@@ -12,7 +24,7 @@ The project is still in its early development stage. **Backup both your Google a
 
 In order to use this Thunderbird add-on, a Google API Console project is needed, and specifically its _Client ID_ and _Client Secret_ properties.
 
-As Google forbids open source projects to include such credentials (because they would be in clear), **every user must create a Google API Console project on its own before using this add-on**.
+As Google forbids open source projects to include such credentials (because they would be in clear), **every user must create a Google API Console project on his own before using this add-on**.
 
 The basic steps are the following.
 * Login to [Google API Console](https://console.developers.google.com).
