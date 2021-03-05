@@ -1124,8 +1124,10 @@ class AddressBookSynchronizer {
                 continue;
             }
             // Delete the local contact group locally.
-// FIXME: does not actually delete the contact group.
-            targetAddressBook.deleteItem(localContactGroup, true);
+// FIXME: .deleteItem() does not actually delete a contact group.
+//            targetAddressBook.deleteItem(localContactGroup, true);
+let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
+abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             console.log("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") was deleted locally.");
         }
     }
