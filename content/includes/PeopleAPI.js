@@ -18,7 +18,7 @@ const CONTACT_GROUP_PAGE_SIZE = 1000;
 
 class PeopleAPI {
 
-    accountData = null;
+    _accountData = null;
 
     /* */
 
@@ -27,11 +27,11 @@ class PeopleAPI {
             throw new Error("Invalid 'accountData': null.");
         }
         //
-        this.accountData = accountData;
+        this._accountData = accountData;
     }
 
     getAccountData() {
-        return this.accountData;
+        return this._accountData;
     }
 
     getClientID() {
