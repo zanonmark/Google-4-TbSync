@@ -10,17 +10,17 @@ What already works:
 * Google-to-Thunderbird creation / update / deletion of contacts;
 * Thunderbird-to-Google creation / update / deletion of contacts;
 * Google-to-Thunderbird creation / update / deletion of contact groups;
-* Thunderbird-to-Google creation / update / deletion of contact groups.
+* Thunderbird-to-Google creation / update / deletion of contact groups;
+* Google-to-Thunderbird creation / update / deletion of contact group members.
 
 What is missing:
-* Google-to-Thunderbird creation / update / deletion of contact group members;
-* Thunderbird-to-Google creation / update / deletion of contact group members.
+* Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first, only then this add-on will be partially rewritten and will be able to fully manage contact group members.
 
 ### Warning
 
 The project is still in its early development stage. **Backup both your Google and Thunderbird address books before running the software!**
 
-### Please note
+### About Google API Console project credentials
 
 In order to use this Thunderbird add-on, a Google API Console project is needed, and specifically its _Client ID_ and _Client Secret_ properties.
 
