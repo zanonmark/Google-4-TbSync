@@ -461,8 +461,9 @@ class PeopleAPI {
             let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
             //
             let contacts = await this.getContacts();
+            let contactGroups = await this.getContactGroups();
             //
-            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts.");
+            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + contactGroups.length + " contact groups.");
         })();
     }
 
