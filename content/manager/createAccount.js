@@ -20,6 +20,7 @@ var tbSyncNewAccount = {
     clientSecretWidget: null,
     includeSystemContactGroupsWidget: null,
     useFakeEmailAddresses: null,
+    readOnlyMode: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -32,6 +33,7 @@ var tbSyncNewAccount = {
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.newaccount.includeSystemContactGroups');
         this.useFakeEmailAddresses = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
+        this.readOnlyMode = document.getElementById('tbsync.newaccount.readOnlyMode');
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -58,11 +60,12 @@ var tbSyncNewAccount = {
         let clientSecret = this.clientSecretWidget.value.trim();
         let includeSystemContactGroups = this.includeSystemContactGroupsWidget.checked;
         let useFakeEmailAddresses = this.useFakeEmailAddressesWidget.checked;
+        let readOnlyMode = this.readOnlyModeWidget.checked;
         //
-        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses);
+        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode);
     },
 
-    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses) {
+    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
@@ -70,6 +73,7 @@ var tbSyncNewAccount = {
         newAccountEntry.clientSecret = clientSecret;
         newAccountEntry.includeSystemContactGroups = includeSystemContactGroups;
         newAccountEntry.useFakeEmailAddresses = useFakeEmailAddresses;
+        newAccountEntry.readOnlyMode = readOnlyMode;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         // Close the window.

@@ -58,6 +58,12 @@
                         <html:input id="tbsync.accountsettings.pref.useFakeEmailAddresses" type="checkbox" class="lockIfConnected" onblur="tbSyncEditAccountOverlay.updateAccountProperty('useFakeEmailAddresses');" />
                     </row>
                     <row>
+                        <vbox pack="center">
+                            <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.readOnlyMode" value="__GOOGLE4TBSYNCMSG_pref.readOnlyMode__" />
+                        </vbox>
+                        <html:input id="tbsync.accountsettings.pref.readOnlyMode" type="checkbox" class="lockIfConnected" onblur="tbSyncEditAccountOverlay.updateAccountProperty('readOnlyMode');" />
+                    </row>
+                    <row>
                         <vbox />
                         <html:input type="button" class="lockIfConnected" onclick="tbSyncEditAccountOverlay.onCheckConnection();" value="__GOOGLE4TBSYNCMSG_pref.checkConnection__" />
                     </row>

@@ -39,6 +39,9 @@
     "pref.includeSystemContactGroups": {
         "message": "Include system contact groups"
     },
+    "pref.readOnlyMode": {
+        "message": "Read-only mode"
+    },
     "pref.useFakeEmailAddresses": {
         "message": "Use fake email addresses"
     }

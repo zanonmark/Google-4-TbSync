@@ -28,8 +28,15 @@ class AddressBookSynchronizer {
         }
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
-        // Retrieve other properties.
+        // Retrieve other account properties.
         let useFakeEmailAddresses = syncData.accountData.getAccountProperty("useFakeEmailAddresses");
+        let readOnlyMode = syncData.accountData.getAccountProperty("readOnlyMode");
+        // Check for the read-only mode.
+        if (readOnlyMode) {
+            console.log("AddressBookSynchronizer.synchronize(): Read-only mode detected, clearing the change log.");
+            // Clear the change log.
+            await targetAddressBook.clearChangelog();
+        }
         // Prepare the variables for the cycles.
         console.log("AddressBookSynchronizer.synchronize(): Retrieving all the local changes since the last synchronization.");
         let addedLocalItemIds = targetAddressBook.getAddedItemsFromChangeLog();

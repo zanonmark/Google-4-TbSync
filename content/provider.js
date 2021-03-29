@@ -184,6 +184,7 @@ var Base = class {
             clientSecret: "",
             includeSystemContactGroups: false,
             useFakeEmailAddresses: false,
+            readOnlyMode: true,
             refreshToken: null,
         };
         //
