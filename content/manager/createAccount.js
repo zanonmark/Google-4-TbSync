@@ -19,6 +19,7 @@ var tbSyncNewAccount = {
     clientIDWidget: null,
     clientSecretWidget: null,
     includeSystemContactGroupsWidget: null,
+    useFakeEmailAddresses: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -30,6 +31,7 @@ var tbSyncNewAccount = {
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.newaccount.includeSystemContactGroups');
+        this.useFakeEmailAddresses = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -55,17 +57,19 @@ var tbSyncNewAccount = {
         let clientID = this.clientIDWidget.value.trim();
         let clientSecret = this.clientSecretWidget.value.trim();
         let includeSystemContactGroups = this.includeSystemContactGroupsWidget.checked;
+        let useFakeEmailAddresses = this.useFakeEmailAddressesWidget.checked;
         //
-        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups);
+        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses);
     },
 
-    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups) {
+    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
         newAccountEntry.clientID = clientID;
         newAccountEntry.clientSecret = clientSecret;
         newAccountEntry.includeSystemContactGroups = includeSystemContactGroups;
+        newAccountEntry.useFakeEmailAddresses = useFakeEmailAddresses;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         // Close the window.

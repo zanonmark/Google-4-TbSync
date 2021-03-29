@@ -183,6 +183,7 @@ var Base = class {
             clientID: "",
             clientSecret: "",
             includeSystemContactGroups: false,
+            useFakeEmailAddresses: false,
             refreshToken: null,
         };
         //

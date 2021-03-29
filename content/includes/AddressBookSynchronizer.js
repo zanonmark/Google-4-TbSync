@@ -11,6 +11,8 @@
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
 
+const FAKE_EMAIL_ADDRESS_DOMAIN = "bug1522453.thunderbird.example.com";
+
 class AddressBookSynchronizer {
 
     /* Main synchronization. */
@@ -26,6 +28,8 @@ class AddressBookSynchronizer {
         }
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
+        // Retrieve other properties.
+        let useFakeEmailAddresses = syncData.accountData.getAccountProperty("useFakeEmailAddresses");
         // Prepare the variables for the cycles.
         console.log("AddressBookSynchronizer.synchronize(): Retrieving all the local changes since the last synchronization.");
         let addedLocalItemIds = targetAddressBook.getAddedItemsFromChangeLog();
@@ -34,7 +38,7 @@ class AddressBookSynchronizer {
         // Synchronize contact groups.
         await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds);
         // Synchronize contacts.
-        let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds);
+        let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses);
         // Synchronize contact group members.
         await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook);
         // Fix the change log.
@@ -261,7 +265,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     /* Contact synchronization. */
 
-    static async synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds) {
+    static async synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses) {
         if (null == peopleAPI) {
             new Error("Invalid 'peopleAPI': null.");
         }
@@ -276,6 +280,9 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         }
         if (null == deletedLocalItemIds) {
             new Error("Invalid 'deletedLocalItemIds': null.");
+        }
+        if (null == useFakeEmailAddresses) {
+            new Error("Invalid 'useFakeEmailAddresses': null.");
         }
 // FIXME: temporary.
         // Prepare the variables for the cycles.
@@ -308,7 +315,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                     // Import the server contact information into the local contact.
                     localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
                     localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
                     // Add the local contact locally.
                     await targetAddressBook.addItem(localContact, true);
                     console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was added locally.");
@@ -326,7 +333,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                 if (localContact.getProperty("X-GOOGLE-ETAG") !== serverContact.etag) {
                     // Import the server contact information into the local contact.
                     localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
                     // Update the local contact locally.
                     await targetAddressBook.modifyItem(localContact, true);
                     console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was updated locally.");
@@ -354,7 +361,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             // Create a new server contact.
             let serverContact = {};
             // Import the local contact information into the server contact.
-            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact);
+            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses);
             // Add the server contact remotely and get the resource name (in the form 'people/personId') and the display name.
             serverContact = await peopleAPI.createContact(serverContact);
             let resourceName = serverContact.resourceName;
@@ -363,7 +370,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
             localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
             await targetAddressBook.modifyItem(localContact, true);
             // Add the resource name to the proper array.
             addedLocalItemResourceNames.push(resourceName);
@@ -386,7 +393,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             serverContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
             serverContact.etag = localContact.getProperty("X-GOOGLE-ETAG");
             // Import the local contact information into the server contact.
-            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact);
+            serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses);
             // Update the server contact remotely and get the resource name (in the form 'people/personId') and the display name.
             serverContact = await peopleAPI.updateContact(serverContact);
             let resourceName = serverContact.resourceName;
@@ -395,7 +402,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             // Update the local contact locally.
             localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
             localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
             await targetAddressBook.modifyItem(localContact, true);
             // Remove the local contact id from the local change log (modified items).
             targetAddressBook.removeItemFromChangeLog(localContactId);
@@ -437,12 +444,15 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         return contactGroupMemberMap;
     }
 
-    static fillLocalContactWithServerContactInformation(localContact, serverContact) {
+    static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
             new Error("Invalid 'localContact': null.");
         }
         if (null == serverContact) {
             new Error("Invalid 'serverContact': null.");
+        }
+        if (null == useFakeEmailAddresses) {
+            new Error("Invalid 'useFakeEmailAddresses': null.");
         }
         // Reset all the properties managed by this method.
         localContact.deleteProperty("FirstName");
@@ -515,6 +525,9 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             if (serverContact.emailAddresses[1] && serverContact.emailAddresses[1].value) {
                 localContact.setProperty("SecondEmail", serverContact.emailAddresses[1].value);
             }
+        }
+        else if (useFakeEmailAddresses) {
+            localContact.setProperty("PrimaryEmail", Date.now() + "." + Math.random() + "@" + FAKE_EMAIL_ADDRESS_DOMAIN);
         }
         // Set the phone numbers.
         if (serverContact.phoneNumbers) {
@@ -838,12 +851,15 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         return localContact;
     }
 
-    static fillServerContactWithLocalContactInformation(localContact, serverContact) {
+    static fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
             new Error("Invalid 'localContact': null.");
         }
         if (null == serverContact) {
             new Error("Invalid 'serverContact': null.");
+        }
+        if (null == useFakeEmailAddresses) {
+            new Error("Invalid 'useFakeEmailAddresses': null.");
         }
         // Reset all the properties managed by this method.
         delete serverContact.names;
@@ -887,20 +903,28 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let i = 0;
             //
             if (localContact.getProperty("PrimaryEmail")) {
-                serverContact.emailAddresses[i] = {};
-                //
-                serverContact.emailAddresses[i].value = localContact.getProperty("PrimaryEmail");
-                serverContact.emailAddresses[i].type = "other";
-                //
-                i++;
+                if (!((localContact.getProperty("PrimaryEmail").endsWith("@" + FAKE_EMAIL_ADDRESS_DOMAIN)) && (useFakeEmailAddresses))) {
+                    serverContact.emailAddresses[i] = {};
+                    //
+                    serverContact.emailAddresses[i].value = localContact.getProperty("PrimaryEmail");
+                    serverContact.emailAddresses[i].type = "other";
+                    //
+                    i++;
+                }
             }
             if (localContact.getProperty("SecondEmail")) {
-                serverContact.emailAddresses[i] = {};
-                //
-                serverContact.emailAddresses[i].value = localContact.getProperty("SecondEmail");
-                serverContact.emailAddresses[i].type = "other";
-                //
-                i++;
+                if (!((localContact.getProperty("SecondEmail").endsWith("@" + FAKE_EMAIL_ADDRESS_DOMAIN)) && (useFakeEmailAddresses))) {
+                    serverContact.emailAddresses[i] = {};
+                    //
+                    serverContact.emailAddresses[i].value = localContact.getProperty("SecondEmail");
+                    serverContact.emailAddresses[i].type = "other";
+                    //
+                    i++;
+                }
+            }
+            //
+            if (0 == serverContact.emailAddresses.length) {
+                delete serverContact.emailAddresses;
             }
         }
         // Set the phone numbers.

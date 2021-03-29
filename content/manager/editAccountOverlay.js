@@ -17,6 +17,7 @@ var tbSyncEditAccountOverlay = {
     clientIDWidget: null,
     clientSecretWidget: null,
     includeSystemContactGroupsWidget: null,
+    useFakeEmailAddresses: null,
 /*
     checkConnectionWidget: null,
 */
@@ -28,11 +29,13 @@ var tbSyncEditAccountOverlay = {
         this.clientIDWidget = document.getElementById("tbsync.accountsettings.pref.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.accountsettings.pref.clientSecret");
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.accountsettings.pref.includeSystemContactGroups');
+        this.useFakeEmailAddressesWidget = document.getElementById('tbsync.accountsettings.pref.useFakeEmailAddresses');
         //
         this.accountNameWidget.value = this.accountData.getAccountProperty("accountname");
         this.clientIDWidget.value = this.accountData.getAccountProperty("clientID");
         this.clientSecretWidget.value = this.accountData.getAccountProperty("clientSecret");
         this.includeSystemContactGroupsWidget.checked = ("true" === this.accountData.getAccountProperty("includeSystemContactGroups"));
+        this.useFakeEmailAddressesWidget.checked = ("true" === this.accountData.getAccountProperty("useFakeEmailAddresses"));
     },
 
     updateAccountProperty(accountProperty) {
@@ -48,6 +51,9 @@ var tbSyncEditAccountOverlay = {
                 break;
             case "includeSystemContactGroups":
                 this.accountData.setAccountProperty("includeSystemContactGroups", this.includeSystemContactGroupsWidget.checked);
+                break;
+            case "useFakeEmailAddresses":
+                this.accountData.setAccountProperty("useFakeEmailAddresses", this.useFakeEmailAddressesWidget.checked);
                 break;
             default:
                 break;
