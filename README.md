@@ -6,19 +6,10 @@ The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSyn
 
 ### Why another Google synchronization add-on
 
-Google has currently 3 ways to make contact synchronizations:
-1. Through the CardDAV protocol.
-This should be the preferred choice, because it's a standard protocol and there are already many interfaces for it.
-But the support by Google is broken, as it doesn't support synchronizing contact groups (aka labels).
-So, this is a no-go unless Google fixes it (which seems to be: never, as the ticket has been open for years).
-2. Through the Google Contacts API.
-This is what the gContactSync add-on was doing.
-But:
-a) the user interface of gContactSync is currently broken, and will probably not be fixed;
-b) even if it was, the Google Contacts API itself is deprecated and will stop working on June 15th 2021.
-And this leads us to the last method,
-3. Through the Google People API.
-This is exactly what my Google-4-TbSync add-on is doing.
+Google currently offers 3 ways to perform contact synchronizations:
+1. _Through the CardDAV protocol_. This should be the preferred choice, because it's a standard protocol and there are already many interfaces for it. But the support by Google is broken, as it doesn't support synchronizing contact groups (aka labels). So, this is a no-go unless Google fixes it (which seems to be: never, as the ticket has been open for years).
+2. _Through the Google Contacts API_. This is what the gContactSync add-on was doing. But: a) the user interface of gContactSync is currently broken, and will probably not be fixed; b) even if it was, the Google Contacts API itself is deprecated and will stop working on June 15th 2021.
+3. _Through the Google People API_. This is exactly what the Google-4-TbSync add-on is doing.
 
 ### Current status
 
@@ -34,9 +25,8 @@ What is missing:
 
 ### Warning
 
-The project is still in its early development stage. **Backup both your Google and Thunderbird address books before running the software!**
-
-Early reports seem to confirm the add-on is working.
+1. Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
+2. You are strongly suggested to enable the "Read-only mode" flag: not only because the software may still have bugs, but also because the Google address book structure is far richer than the one in Thunderbird, and using a bi-directional synchronization may lead to some data being lost or scrambled. You'd better do the full contact management on Google and then make a Google-to-Thunderbird read-only synchronization to update your local Thunderbird address book.
 
 ### About Google API Console project credentials
 
