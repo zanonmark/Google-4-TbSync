@@ -11,7 +11,7 @@ Google currently offers 3 ways to perform contact synchronizations:
 2. _Through the Google Contacts API_. This is what the gContactSync add-on was doing. But: a) the user interface of gContactSync is currently broken, and will probably not be fixed; b) even if it was, the Google Contacts API itself is deprecated and will stop working on June 15th 2021.
 3. _Through the Google People API_. This is exactly what the Google-4-TbSync add-on is doing.
 
-### Current status
+### Current status and roadmap
 
 What already works:
 * Google-to-Thunderbird creation / update / deletion of contact groups;
@@ -22,6 +22,14 @@ What already works:
 
 What is missing:
 * Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first: only then this add-on will be partially rewritten and will be able to fully manage contact group memberships.
+
+A full working version could probably be ready by June / July 2021.
+
+In the meanwhile, you can easily:
+* [grab the latest .zip package](https://github.com/zanonmark/Google-4-TbSync/archive/refs/heads/main.zip);
+* unzip it wherever you want;
+* load it as a temporary add-on from Thunderbird > Tools > Add-ons > cog icon > Debug Add-ons > Load Temporary Add-on (pick manifest.json for example);
+* test it in read-only mode (see below).
 
 ### Warning
 
