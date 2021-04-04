@@ -4,21 +4,39 @@ This provider add-on adds Google synchronization capabilities to TbSync. Only co
 
 The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by John Bieling himself.
 
+### Why another Google synchronization add-on
+
+Google has currently 3 ways to make contact synchronizations:
+1. Through the CardDAV protocol.
+This should be the preferred choice, because it's a standard protocol and there are already many interfaces for it.
+But the support by Google is broken, as it doesn't support synchronizing contact groups (aka labels).
+So, this is a no-go unless Google fixes it (which seems to be: never, as the ticket has been open for years).
+2. Through the Google Contacts API.
+This is what the gContactSync add-on was doing.
+But:
+a) the user interface of gContactSync is currently broken, and will probably not be fixed;
+b) even if it was, the Google Contacts API itself is deprecated and will stop working on June 15th 2021.
+And this leads us to the last method,
+3. Through the Google People API.
+This is exactly what my Google-4-TbSync add-on is doing.
+
 ### Current status
 
 What already works:
-* Google-to-Thunderbird creation / update / deletion of contacts;
-* Thunderbird-to-Google creation / update / deletion of contacts;
 * Google-to-Thunderbird creation / update / deletion of contact groups;
-* Thunderbird-to-Google creation / update / deletion of contact groups;
+* Google-to-Thunderbird creation / update / deletion of contacts;
 * Google-to-Thunderbird creation / update / deletion of contact group members.
+* Thunderbird-to-Google creation / update / deletion of contact groups;
+* Thunderbird-to-Google creation / update / deletion of contacts;
 
 What is missing:
-* Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first, only then this add-on will be partially rewritten and will be able to fully manage contact group members.
+* Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first: only then this add-on will be partially rewritten and will be able to fully manage contact group memberships.
 
 ### Warning
 
 The project is still in its early development stage. **Backup both your Google and Thunderbird address books before running the software!**
+
+Early reports seem to confirm the add-on is working.
 
 ### About Google API Console project credentials
 
