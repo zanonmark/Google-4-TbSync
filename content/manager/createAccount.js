@@ -19,8 +19,8 @@ var tbSyncNewAccount = {
     clientIDWidget: null,
     clientSecretWidget: null,
     includeSystemContactGroupsWidget: null,
-    useFakeEmailAddresses: null,
-    readOnlyMode: null,
+    useFakeEmailAddressesWidget: null,
+    readOnlyModeWidget: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -32,8 +32,8 @@ var tbSyncNewAccount = {
         this.clientIDWidget = document.getElementById("tbsync.newaccount.clientID");
         this.clientSecretWidget = document.getElementById("tbsync.newaccount.clientSecret");
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.newaccount.includeSystemContactGroups');
-        this.useFakeEmailAddresses = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
-        this.readOnlyMode = document.getElementById('tbsync.newaccount.readOnlyMode');
+        this.useFakeEmailAddressesWidget = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
+        this.readOnlyModeWidget = document.getElementById('tbsync.newaccount.readOnlyMode');
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
