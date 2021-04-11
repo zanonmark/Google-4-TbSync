@@ -1,9 +1,9 @@
 {
     "extensionName": {
-        "message": "Provider for Google"
+        "message": "Google-4-TbSync"
     },
     "extensionDescription": {
-        "message": "Adds synchronization support for Google accounts to TbSync (currently contacts and contact groups only, using Google's People API)."
+        "message": "This provider add-on adds Google synchronization capabilities to TbSync. Only contacts and contact groups are currently managed, using Google's People API."
     },
 
     "menu.name": {
