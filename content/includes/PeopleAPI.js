@@ -19,7 +19,9 @@ const CONTACT_GROUP_PAGE_SIZE = 1000;
 
 class PeopleAPI {
 
+/* FIXME: disabled as it is still not fully supported.
     _accountData = null;
+*/
 
     /* */
 
