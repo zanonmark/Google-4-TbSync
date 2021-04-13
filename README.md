@@ -29,7 +29,7 @@ A full working version could probably be ready by June / July 2021.
 
 #### Download an official release
 
-.xpi packages can be downloaded from [addons.thunderbird.net](https://addons.thunderbird.net) by searching for "Google-4-TbSync", or through the _Add-ons_ menu in Thunderbird.
+.xpi packages can be downloaded from [addons.thunderbird.net](https://addons.thunderbird.net/addon/google-4-tbsync), or through the _Add-ons_ menu in Thunderbird.
 
 #### Try the latest code
 
