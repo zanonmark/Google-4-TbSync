@@ -1,6 +1,6 @@
 # Google-4-TbSync
 
-This provider add-on adds Google synchronization capabilities to TbSync. Only contacts and contact groups are currently managed, using Google's People API.
+This provider add-on adds Google synchronization capabilities to [TbSync](https://github.com/jobisoft/TbSync). Only contacts and contact groups are currently managed, using Google's People API.
 
 The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by John Bieling himself.
 
@@ -29,7 +29,7 @@ A full working version could probably be ready by June / July 2021.
 
 #### Download an official release
 
-.xpi packages can be downloaded from [addons.thunderbird.net](https://addons.thunderbird.net/addon/google-4-tbsync), or through the _Add-ons_ menu in Thunderbird.
+.xpi packages can be downloaded from [Thunderbird Add-ons](https://addons.thunderbird.net/addon/google-4-tbsync), or through the _Add-ons_ menu in Thunderbird.
 
 #### Try the latest code
 
