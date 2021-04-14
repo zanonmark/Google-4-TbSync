@@ -24,19 +24,19 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 
 #### Download an official release
 
-.xpi packages can be downloaded from [Thunderbird Add-ons](https://addons.thunderbird.net/addon/google-4-tbsync), or through the Thunderbird > Tools > Add-ons menu.
+.xpi packages can be downloaded from [Thunderbird Add-ons](https://addons.thunderbird.net/addon/google-4-tbsync), or through the _Thunderbird_ > _Tools_ > _Add-ons_ menu.
 
 #### Test the latest code
 
 1. [Grab the latest .zip package](https://github.com/zanonmark/Google-4-TbSync/archive/refs/heads/main.zip).
 2. Unzip it wherever you want.
-3. Load it as a temporary add-on from Thunderbird > Tools > Add-ons > cog icon > Debug Add-ons > Load Temporary Add-on (pick manifest.json for example).
-4. Test it, preferably using the "Read-only mode" option (see below).
+3. Load it as a temporary add-on from _Thunderbird_ > _Tools_ > _Add-ons_ > cog icon > _Debug Add-ons_ > _Load Temporary Add-on_ (pick _manifest.json_ for example).
+4. Test it, preferably using the _Read-only mode_ option (see below).
 
 ### Warning
 
 * Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-* **You are strongly suggested to [use the "Read-only mode" option](https://github.com/zanonmark/Google-4-TbSync/wiki/Account-options#read-only-mode)**.
+* **You are strongly suggested to [use the _Read-only mode_ option](https://github.com/zanonmark/Google-4-TbSync/wiki/Account-options#read-only-mode)**.
 
 ### Additional information
 
