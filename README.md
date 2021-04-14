@@ -28,15 +28,15 @@ You first need to install [TbSync](https://addons.thunderbird.net/addon/tbsync) 
 
 #### Test the latest code
 
-* [Grab the latest .zip package](https://github.com/zanonmark/Google-4-TbSync/archive/refs/heads/main.zip).
-* Unzip it wherever you want.
-* Load it as a temporary add-on from Thunderbird > Tools > Add-ons > cog icon > Debug Add-ons > Load Temporary Add-on (pick manifest.json for example).
-* Test it, preferably in read-only mode (see below).
+1. [Grab the latest .zip package](https://github.com/zanonmark/Google-4-TbSync/archive/refs/heads/main.zip).
+2. Unzip it wherever you want.
+3. Load it as a temporary add-on from Thunderbird > Tools > Add-ons > cog icon > Debug Add-ons > Load Temporary Add-on (pick manifest.json for example).
+4. Test it, preferably in read-only mode (see below).
 
 ### Warning
 
-1. Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-2. **You are strongly suggested to enable the "Read-only mode" flag**: not only because the software may still have bugs, but also because the Google address book structure is far richer than the one in Thunderbird, and using a bi-directional synchronization may lead to some data being lost or scrambled. You'd better do the full contact management on Google and then make a Google-to-Thunderbird read-only synchronization to update your local Thunderbird address book.
+* Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
+* **You are strongly suggested to enable the "Read-only mode" flag**: not only because the software may still have bugs, but also because the Google address book structure is far richer than the one in Thunderbird, and using a bi-directional synchronization may lead to some data being lost or scrambled. You'd better do the full contact management on Google and then make a Google-to-Thunderbird read-only synchronization to update your local Thunderbird address book.
 
 ### Additional information
 
