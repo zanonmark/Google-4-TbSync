@@ -36,7 +36,7 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 ### Warning
 
 * Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-* **You are strongly suggested [not to disable the "Read-only mode" flag](https://github.com/zanonmark/Google-4-TbSync/wiki/Before-disabling-the-%22Read-only-mode%22-flag)**.
+* **You are strongly suggested to [use the "Read-only mode"](https://github.com/zanonmark/Google-4-TbSync/wiki/The-%22Read-only-mode%22-option)**.
 
 ### Additional information
 
