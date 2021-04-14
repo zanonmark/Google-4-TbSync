@@ -2,7 +2,7 @@
 
 This provider add-on adds Google synchronization capabilities to [TbSync](https://github.com/jobisoft/TbSync). Only contacts and contact groups are currently managed, using Google's People API.
 
-The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by John Bieling himself.
+The work is based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by [John Bieling](https://github.com/jobisoft) himself.
 
 ### Current status and roadmap
 
@@ -36,7 +36,7 @@ You first need to install [TbSync](https://addons.thunderbird.net/addon/tbsync) 
 ### Warning
 
 * Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-* **You are strongly suggested [not to disable the "Read-only mode" flag](https://github.com/zanonmark/Google-4-TbSync/wiki/Before-disabling-the-%22Read-only-mode%22)**.
+* **You are strongly suggested [not to disable the "Read-only mode"](https://github.com/zanonmark/Google-4-TbSync/wiki/Before-disabling-the-%22Read-only-mode%22)**.
 
 ### Additional information
 
