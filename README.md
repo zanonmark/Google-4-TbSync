@@ -31,12 +31,12 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 1. [Grab the latest .zip package](https://github.com/zanonmark/Google-4-TbSync/archive/refs/heads/main.zip).
 2. Unzip it wherever you want.
 3. Load it as a temporary add-on from Thunderbird > Tools > Add-ons > cog icon > Debug Add-ons > Load Temporary Add-on (pick manifest.json for example).
-4. Test it, preferably in read-only mode (see below).
+4. Test it, preferably using the "Read-only mode" option (see below).
 
 ### Warning
 
 * Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-* **You are strongly suggested to [use the "Read-only mode"](https://github.com/zanonmark/Google-4-TbSync/wiki/The-%22Read-only-mode%22-option)**.
+* **You are strongly suggested to [use the "Read-only mode" option](https://github.com/zanonmark/Google-4-TbSync/wiki/Account-options#read-only-mode)**.
 
 ### Additional information
 
