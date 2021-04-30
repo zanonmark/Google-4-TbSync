@@ -37,7 +37,7 @@
         "message": "Client-Passwort"
     },
     "pref.includeSystemContactGroups": {
-        "message": "Inkluder der Systemkontaktgruppen"
+        "message": "Inkl. der Systemkontaktgruppen"
     },
     "pref.readOnlyMode": {
         "message": "Schreibgeschützter Modus"
