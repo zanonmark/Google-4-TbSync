@@ -1,0 +1,48 @@
+{
+    "extensionName": {
+        "message": "Google-4-TbSync"
+    },
+    "extensionDescription": {
+        "message": "Dette add-on legger til Google-synkroniseringsfunksjoner i TbSync. Bare kontakter og kontaktgrupper administreres for øyeblikket ved hjelp av Googles People API."
+    },
+
+    "menu.name": {
+        "message": "Googles People API"
+    },
+
+    "add.account.title": {
+        "message": "Skriv inn informasjonen for den nye kontoen"
+    },
+    "add.title": {
+        "message": "Legge til en Google-konto i TbSync"
+    },
+
+    "manager.tabs.accountsettings": {
+        "message": "Kontoinnstillinger"
+    },
+    "manager.tabs.syncsettings": {
+        "message": "Instillinger"
+    },
+
+    "pref.accountName": {
+        "message": "Kontonavn"
+    },
+    "pref.checkConnection": {
+        "message": "Sjekk tilkoblingen"
+    },
+    "pref.clientID": {
+        "message": "Klient-ID"
+    },
+    "pref.clientSecret": {
+        "message": "Klient-passord"
+    },
+    "pref.includeSystemContactGroups": {
+        "message": "Inkluder systemkontaktgrupper"
+    },
+    "pref.readOnlyMode": {
+        "message": "Skrivebeskyttet modus"
+    },
+    "pref.useFakeEmailAddresses": {
+        "message": "Bruk genererte (fake) e-postadresser"
+    }
+}
