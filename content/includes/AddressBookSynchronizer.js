@@ -1271,6 +1271,10 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         }
         // Cycle on all contact memberships.
         for (let contactMembership of contactMemberships) {
+            // Discard useless items.
+            if (undefined == contactMembership.contactGroupMembership) {
+                continue;
+            }
             // Retrieve the contact group resource name.
             let contactGroupResourceName = contactMembership.contactGroupMembership.contactGroupResourceName;
             // If such a contact group is not already in the map, add it and its contact array.
