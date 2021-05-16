@@ -3,6 +3,7 @@
 
 ## Contributors
 * John Bieling (original TbSync add-on template and advices)
+* and all the nice people who helped beta-testing and bugfixing
 
 ## Translators
 * de: Sebastian Jentschke
