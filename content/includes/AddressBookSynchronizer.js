@@ -227,7 +227,7 @@ class AddressBookSynchronizer {
                 continue;
             }
             // Delete the local contact group locally.
-/* FIXME: .deleteItem() does not actually delete a contact group.
+/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
             targetAddressBook.deleteItem(localContactGroup, true);
 */
 let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
@@ -346,10 +346,10 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                     console.log("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") was updated locally.");
                     // Remove the resource name from the local change log (modified items).
                     targetAddressBook.removeItemFromChangeLog(resourceName);
-// FIXME: temporary.
-                    // Update the contact group member map.
-                    contactGroupMemberMap = AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
                 }
+// FIXME: temporary.
+                // Update the contact group member map.
+                contactGroupMemberMap = AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
             }
         }
         // Prepare the variables for the cycles.
@@ -1234,23 +1234,17 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
             let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
             // Clear the local contact group.
-//console.log("localContactGroupDirectory = " + localContactGroupDirectory); // FIXME
-//console.log("localContactGroupDirectory.childCards = " + localContactGroupDirectory.childCards); // FIXME
 // FIXME: temporary.
             if (undefined !== localContactGroupDirectory.childCards) {
                 while (0 < localContactGroupDirectory.childCards.length) {
-//console.log("del"); // FIXME
                     localContactGroupDirectory.childCards.pop();
                 }
             }
             // Fill the local contact group with the server contact group members.
-//console.log("contactGroupResourceName = " + localContactGroup.getProperty("X-GOOGLE-RESOURCENAME")); // FIXME
-//console.log(contactGroupMemberMap); // FIXME
 // FIXME: temporary.
             let contactResourceNames = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
             if (undefined !== contactResourceNames) {
                 for (let contactResourceName of contactResourceNames) {
-//console.log("contactResourceName = " + contactResourceName); // FIXME
                     let localContact = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", contactResourceName);
                     localContactGroupDirectory.addCard(localContact._card);
                 }
