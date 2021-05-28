@@ -36,12 +36,12 @@ var tbSyncEditAccountOverlay = {
         this.accountNameWidget.value = this.accountData.getAccountProperty("accountname");
         this.clientIDWidget.value = this.accountData.getAccountProperty("clientID");
         this.clientSecretWidget.value = this.accountData.getAccountProperty("clientSecret");
-        this.includeSystemContactGroupsWidget.checked = ("true" == this.accountData.getAccountProperty("includeSystemContactGroups"));
-        this.useFakeEmailAddressesWidget.checked = ("true" == this.accountData.getAccountProperty("useFakeEmailAddresses"));
-        this.readOnlyModeWidget.checked = ("true" == this.accountData.getAccountProperty("readOnlyMode"));
+        this.includeSystemContactGroupsWidget.checked = (true === this.accountData.getAccountProperty("includeSystemContactGroups"));
+        this.useFakeEmailAddressesWidget.checked = (true === this.accountData.getAccountProperty("useFakeEmailAddresses"));
+        this.readOnlyModeWidget.checked = (true === this.accountData.getAccountProperty("readOnlyMode"));
     },
 
-    updateAccountProperty(accountProperty) {
+    updateAccountProperty: function(accountProperty) {
         switch (accountProperty) {
             case "accountName":
                 this.accountData.setAccountProperty("accountname", this.accountNameWidget.value);

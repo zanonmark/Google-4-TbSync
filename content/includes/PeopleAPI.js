@@ -46,7 +46,7 @@ class PeopleAPI {
     }
 
     getIncludeSystemContactGroups() {
-        return ("true" === this.getAccountData().getAccountProperty("includeSystemContactGroups"));
+        return this.getAccountData().getAccountProperty("includeSystemContactGroups");
     }
 
     setRefreshToken(refreshToken) {
