@@ -267,7 +267,9 @@ class PeopleAPI {
             // Retrieve the partial contacts.
             let partialContacts = responseData.connections;
             // Concatenate the partial contacts with the contacts.
-            contacts = contacts.concat(partialContacts);
+            if (null != partialContacts) {
+                contacts = contacts.concat(partialContacts);
+            }
             // Retrieve the next page token, necessary to retrieve the next page.
             nextPageToken = responseData.nextPageToken;
             // Check if this was the last page.
@@ -372,7 +374,9 @@ class PeopleAPI {
             // Retrieve the partial contact groups.
             let partialContactGroups = responseData.contactGroups;
             // Concatenate the partial contact groups with the contact groups.
-            contactGroups = contactGroups.concat(partialContactGroups);
+            if (null != partialContactGroups) {
+                contactGroups = contactGroups.concat(partialContactGroups);
+            }
             // Retrieve the next page token, necessary to retrieve the next page.
             nextPageToken = responseData.nextPageToken;
             // Check if this was the last page.
