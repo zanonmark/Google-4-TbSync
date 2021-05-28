@@ -71,9 +71,9 @@ var tbSyncNewAccount = {
         // Override the default values.
         newAccountEntry.clientID = clientID;
         newAccountEntry.clientSecret = clientSecret;
-        newAccountEntry.includeSystemContactGroups = includeSystemContactGroups;
-        newAccountEntry.useFakeEmailAddresses = useFakeEmailAddresses;
-        newAccountEntry.readOnlyMode = readOnlyMode;
+        newAccountEntry.includeSystemContactGroups = "" + includeSystemContactGroups;
+        newAccountEntry.useFakeEmailAddresses = "" + useFakeEmailAddresses;
+        newAccountEntry.readOnlyMode = "" + readOnlyMode;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         // Close the window.
