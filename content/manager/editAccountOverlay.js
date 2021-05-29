@@ -17,8 +17,8 @@ var tbSyncEditAccountOverlay = {
     clientIDWidget: null,
     clientSecretWidget: null,
     includeSystemContactGroupsWidget: null,
-    useFakeEmailAddresses: null,
-    readOnlyMode: null,
+    useFakeEmailAddressesWidget: null,
+    readOnlyModeWidget: null,
 /*
     checkConnectionWidget: null,
 */
