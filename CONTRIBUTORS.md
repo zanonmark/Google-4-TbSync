@@ -10,3 +10,4 @@
 * en-US: John Bieling, Marco Zanon
 * it: Marco Zanon
 * nb-NO: Sebastian Jentschke
+* nl: Jeroen B.
