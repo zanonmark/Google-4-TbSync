@@ -1,0 +1,48 @@
+{
+    "extensionName": {
+        "message": "Google-4-TbSync"
+    },
+    "extensionDescription": {
+        "message": "Deze add-on voegt Google-syncronisatiemogelijkheden toe aan de 'TbSync' add-on. Op dit moment worden alleen contacten en contactgroepen ondersteund, door middel van Google's People API."
+    },
+
+    "menu.name": {
+        "message": "Google's People API"
+    },
+
+    "add.account.title": {
+        "message": "Voer de gegevens in voor het nieuwe account"
+    },
+    "add.title": {
+        "message": "Een Google account toevoegen aan TbSync"
+    },
+
+    "manager.tabs.accountsettings": {
+        "message": "Account-instellingen"
+    },
+    "manager.tabs.syncsettings": {
+        "message": "Opties"
+    },
+
+    "pref.accountName": {
+        "message": "Accountnaam"
+    },
+    "pref.checkConnection": {
+        "message": "Controleer verbinding"
+    },
+    "pref.clientID": {
+        "message": "Client ID"
+    },
+    "pref.clientSecret": {
+        "message": "Client secret"
+    },
+    "pref.includeSystemContactGroups": {
+        "message": "Inclusief Systeem contactgroepen"
+    },
+    "pref.readOnlyMode": {
+        "message": "Alleen-lezen modus"
+    },
+    "pref.useFakeEmailAddresses": {
+        "message": "Gebruik nep e-mailadressen"
+    }
+}
