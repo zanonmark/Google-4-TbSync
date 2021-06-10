@@ -547,6 +547,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             for (let phoneNumber of serverContact.phoneNumbers) {
                 switch (phoneNumber.type) {
                     case "work":
+                    case undefined:
                         if (workPhoneNumber) {
                             continue;
                         }
