@@ -4,7 +4,7 @@ This provider add-on adds Google synchronization capabilities to [TbSync](https:
 
 The work is partly based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by [John Bieling](https://github.com/jobisoft) himself.
 
-### Current status and roadmap
+### Current status and roadmap / Known limitations
 
 What already works:
 * Google-to-Thunderbird creation / update / deletion of contact groups;
