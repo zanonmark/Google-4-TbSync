@@ -470,7 +470,14 @@ class PeopleAPI {
             let contacts = await this.getContacts();
             let contactGroups = await this.getContactGroups();
             //
-            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + contactGroups.length + " contact groups.");
+            let systemContactGroupCount = 0;
+            for (let contactGroup of contactGroups) {
+                if ("SYSTEM_CONTACT_GROUP" === contactGroup.groupType) {
+                    systemContactGroupCount++;
+                }
+            }
+            //
+            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + (contactGroups.length - (this.getIncludeSystemContactGroups() ? 0 : systemContactGroupCount)) + " contact groups.");
         })();
     }
 
