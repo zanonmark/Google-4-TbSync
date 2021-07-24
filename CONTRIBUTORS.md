@@ -1,5 +1,3 @@
-# Contributors
-
 ## Development
 * Marco Zanon
 
