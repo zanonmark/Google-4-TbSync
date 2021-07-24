@@ -1,13 +1,17 @@
-## Creator
+## Development
 * Marco Zanon
 
-## Contributors
-* John Bieling (original TbSync add-on template and advices)
-* and all the nice people who helped beta-testing and bugfixing
+## Documentation
+* Marco Zanon
+* David Taber
 
-## Translators
+## Translations
 * de: Sebastian Jentschke
 * en-US: John Bieling, Marco Zanon
 * it: Marco Zanon
 * nb-NO: Sebastian Jentschke
 * nl: Jeroen B.
+
+## Other contributions
+* John Bieling (original TbSync add-on template and advices)
+* All the nice people who reported issues and helped beta-testing and bugfixing
