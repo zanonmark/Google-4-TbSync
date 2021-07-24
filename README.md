@@ -16,7 +16,7 @@ What already works:
 What is missing:
 * Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first: only then this add-on will be partially rewritten and will be able to fully manage contact group memberships.
 
-A full working version could probably be ready by ~~June / July 2021~~ September 2021.
+A full working version could probably be ready by ~~June / July 2021~~ ~~September~~ the end of 2021.
 
 ### How to use it
 
@@ -40,4 +40,4 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 
 ### Additional information
 
-Please refer to the [wiki section](https://github.com/zanonmark/Google-4-TbSync/wiki) for other useful information.
+Please refer to the [wiki section](https://github.com/zanonmark/Google-4-TbSync/wiki) for other useful information, including guides and user contributions.
