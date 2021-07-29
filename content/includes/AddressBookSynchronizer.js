@@ -9,7 +9,18 @@
 
 "use strict";
 
-Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
+if ("undefined" === typeof IllegalArgumentError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/IllegalArgumentError.js", this, "UTF-8");
+}
+if ("undefined" === typeof NetworkError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
+}
+if ("undefined" === typeof PeopleAPI) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
+}
+if ("undefined" === typeof ResponseError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
+}
 
 const FAKE_EMAIL_ADDRESS_DOMAIN = "bug1522453.thunderbird.example.com";
 
@@ -19,12 +30,12 @@ class AddressBookSynchronizer {
 
     static async synchronize(syncData) {
         if (null == syncData) {
-            new Error("Invalid 'syncData': null.");
+            throw new IllegalArgumentError("Invalid 'syncData': null.");
         }
         // Retrieve the target address book.
         let targetAddressBook = syncData.target;
         if (null == targetAddressBook) {
-            new Error("Invalid target address book: null.");
+            throw new IllegalArgumentError("Invalid target address book: null.");
         }
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
@@ -42,35 +53,51 @@ class AddressBookSynchronizer {
         let addedLocalItemIds = targetAddressBook.getAddedItemsFromChangeLog();
         let modifiedLocalItemIds = targetAddressBook.getModifiedItemsFromChangeLog();
         let deletedLocalItemIds = targetAddressBook.getDeletedItemsFromChangeLog();
-        // Synchronize contact groups.
-        await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds);
-        // Synchronize contacts.
-        let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses);
-        // Synchronize contact group members.
-        await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook);
-        // Fix the change log.
-        await AddressBookSynchronizer.fixChangeLog(targetAddressBook);
-        //
-        console.log("AddressBookSynchronizer.synchronize(): Done synchronizing.");
+        // Attempt the synchronization.
+        try {
+            // Synchronize contact groups.
+            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds);
+            // Synchronize contacts.
+            let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses);
+            // Synchronize contact group members.
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook);
+            // Fix the change log.
+            await AddressBookSynchronizer.fixChangeLog(targetAddressBook);
+            //
+            console.log("AddressBookSynchronizer.synchronize(): Done synchronizing.");
+        }
+        catch (error) {
+            // If a network error was encountered...
+            if (error instanceof NetworkError) {
+                console.log("AddressBookSynchronizer.synchronize(): Network error.");
+                // Propagate the error.
+                throw error;
+            }
+            // If the root reason is different...
+            else {
+                // Propagate the error.
+                throw error;
+            }
+        }
     }
 
     /* Contact group synchronization. */
 
     static async synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds) {
         if (null == peopleAPI) {
-            new Error("Invalid 'peopleAPI': null.");
+            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
         if (null == targetAddressBook) {
-            new Error("Invalid 'targetAddressBook': null.");
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
         if (null == addedLocalItemIds) {
-            new Error("Invalid 'addedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
         }
         if (null == modifiedLocalItemIds) {
-            new Error("Invalid 'modifiedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'modifiedLocalItemIds': null.");
         }
         if (null == deletedLocalItemIds) {
-            new Error("Invalid 'deletedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'deletedLocalItemIds': null.");
         }
         // Retrieve all server contact groups.
         let serverContactGroups = await peopleAPI.getContactGroups();
@@ -200,7 +227,7 @@ class AddressBookSynchronizer {
             }
             catch (error) {
                 // If the server contact group is no longer available (i.e.: it was deleted)...
-                if (error.message.includes("404")) { // FIXME: use specific exceptions.
+                if ((error instanceof ResponseError) && (error.message.includes(": 404:"))) {
                     // Get the resource name (in the form 'contactGroups/contactGroupId').
                     let resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
                     let name = localContactGroup.getProperty("ListName");
@@ -261,10 +288,10 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
         if (null == localContactGroup) {
-            new Error("Invalid 'localContactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
         }
         if (null == serverContactGroup) {
-            new Error("Invalid 'serverContactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
         }
         // Reset all the properties managed by this method.
         localContactGroup.deleteProperty("ListName");
@@ -278,10 +305,10 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup) {
         if (null == localContactGroup) {
-            new Error("Invalid 'localContactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
         }
         if (null == serverContactGroup) {
-            new Error("Invalid 'serverContactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
         }
         // Reset all the properties managed by this method.
         delete serverContactGroup.name;
@@ -297,22 +324,22 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static async synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses) {
         if (null == peopleAPI) {
-            new Error("Invalid 'peopleAPI': null.");
+            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
         if (null == targetAddressBook) {
-            new Error("Invalid 'targetAddressBook': null.");
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
         if (null == addedLocalItemIds) {
-            new Error("Invalid 'addedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
         }
         if (null == modifiedLocalItemIds) {
-            new Error("Invalid 'modifiedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'modifiedLocalItemIds': null.");
         }
         if (null == deletedLocalItemIds) {
-            new Error("Invalid 'deletedLocalItemIds': null.");
+            throw new IllegalArgumentError("Invalid 'deletedLocalItemIds': null.");
         }
         if (null == useFakeEmailAddresses) {
-            new Error("Invalid 'useFakeEmailAddresses': null.");
+            throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
         }
 // FIXME: temporary.
         // Prepare the variables for the cycles.
@@ -439,7 +466,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             }
             catch (error) {
                 // If the server contact is no longer available (i.e.: it was deleted)...
-                if (error.message.includes("404")) { // FIXME: use specific exceptions.
+                if ((error instanceof ResponseError) && (error.message.includes("404"))) {
                     // Get the resource name (in the form 'people/personId').
                     let resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
                     let displayName = (localContact.getProperty("DisplayName") ? localContact.getProperty("DisplayName") : "-");
@@ -495,13 +522,13 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
-            new Error("Invalid 'localContact': null.");
+            throw new IllegalArgumentError("Invalid 'localContact': null.");
         }
         if (null == serverContact) {
-            new Error("Invalid 'serverContact': null.");
+            throw new IllegalArgumentError("Invalid 'serverContact': null.");
         }
         if (null == useFakeEmailAddresses) {
-            new Error("Invalid 'useFakeEmailAddresses': null.");
+            throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
         }
         // Reset all the properties managed by this method.
         localContact.deleteProperty("FirstName");
@@ -903,13 +930,13 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
-            new Error("Invalid 'localContact': null.");
+            throw new IllegalArgumentError("Invalid 'localContact': null.");
         }
         if (null == serverContact) {
-            new Error("Invalid 'serverContact': null.");
+            throw new IllegalArgumentError("Invalid 'serverContact': null.");
         }
         if (null == useFakeEmailAddresses) {
-            new Error("Invalid 'useFakeEmailAddresses': null.");
+            throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
         }
         // Reset all the properties managed by this method.
         delete serverContact.names;
@@ -1257,10 +1284,10 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static async synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
         if (null == contactGroupMemberMap) {
-            new Error("Invalid 'contactGroupMemberMap': null.");
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
         if (null == targetAddressBook) {
-            new Error("Invalid 'targetAddressBook': null.");
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
 // FIXME: temporary (Google-to-Thunderbird only synchronization).
         // Cycle on the local contact groups.
@@ -1298,13 +1325,13 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static updateContactGroupMemberMap(contactGroupMemberMap, contactResourceName, contactMemberships) {
         if (null == contactGroupMemberMap) {
-            new Error("Invalid 'contactGroupMemberMap': null.");
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
         if (null == contactResourceName) {
-            new Error("Invalid 'contactResourceName': null.");
+            throw new IllegalArgumentError("Invalid 'contactResourceName': null.");
         }
         if (null == contactMemberships) {
-            new Error("Invalid 'contactMemberships': null.");
+            throw new IllegalArgumentError("Invalid 'contactMemberships': null.");
         }
         // Cycle on all contact memberships.
         for (let contactMembership of contactMemberships) {
@@ -1329,7 +1356,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     static async fixChangeLog(targetAddressBook) {
         if (null == targetAddressBook) {
-            new Error("Invalid 'targetAddressBook': null.");
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
         // Cycle on all the items in the change log.
         console.log("AddressBookSynchronizer.synchronize(): Fixing the change log.");

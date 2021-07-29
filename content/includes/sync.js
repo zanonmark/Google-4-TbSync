@@ -10,6 +10,9 @@
 "use strict";
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AddressBookSynchronizer.js", this, "UTF-8");
+if ("undefined" === typeof NetworkError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
+}
 
 var sync = {
     
@@ -58,38 +61,53 @@ var sync = {
     },
 
     folderList: async function(syncData) {
-        // Retrieve information about the authenticated user.
-        let peopleAPI = new PeopleAPI(syncData.accountData);
-        let authenticatedUser = await peopleAPI.getAuthenticatedUser();
-        let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
-        // Simulation of folders retrieved from Server.
-        let foundFolders = [
-            {UID: 1, name: authenticatedUserEmail},
-        ];
-        //
-        for (let folder of foundFolders) {
-            let existingFolder = syncData.accountData.getFolder("UID", folder.UID);
+        try {
+            // Retrieve information about the authenticated user.
+            let peopleAPI = new PeopleAPI(syncData.accountData);
+            let authenticatedUser = await peopleAPI.getAuthenticatedUser();
+            let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
+            // Simulation of folders retrieved from Server.
+            let foundFolders = [
+                {UID: 1, name: authenticatedUserEmail},
+            ];
             //
-            if (existingFolder) {
-                // We know this folder, update changed properties.
-                // foldername is a default FolderProperty.
-                existingFolder.setFolderProperty("foldername", folder.name);
-            }
-            else {
-                // Create the folder object for the new folder settings.
-                let newFolder = syncData.accountData.createNewFolder();
-                // foldername is a default FolderProperty.
-                newFolder.setFolderProperty("foldername", folder.name);
-                // targetType is a default FolderProperty and is used to select a TargetData implementation.
-                newFolder.setFolderProperty("targetType", "addressbook");
-                // UID is a custom FolderProperty (defined at getDefaultFolderEntries).
-                newFolder.setFolderProperty("UID", folder.UID);
-                // Do we have a cached folder?
-                let cachedFolderData = syncData.accountData.getFolderFromCache("UID", folder.UID);
-                if (cachedFolderData) {
-                    // Copy fields from cache which we want to re-use.
-                    newFolder.setFolderProperty("downloadonly", cachedFolderData.getFolderProperty("downloadonly"));
+            for (let folder of foundFolders) {
+                let existingFolder = syncData.accountData.getFolder("UID", folder.UID);
+                //
+                if (existingFolder) {
+                    // We know this folder, update changed properties.
+                    // foldername is a default FolderProperty.
+                    existingFolder.setFolderProperty("foldername", folder.name);
                 }
+                else {
+                    // Create the folder object for the new folder settings.
+                    let newFolder = syncData.accountData.createNewFolder();
+                    // foldername is a default FolderProperty.
+                    newFolder.setFolderProperty("foldername", folder.name);
+                    // targetType is a default FolderProperty and is used to select a TargetData implementation.
+                    newFolder.setFolderProperty("targetType", "addressbook");
+                    // UID is a custom FolderProperty (defined at getDefaultFolderEntries).
+                    newFolder.setFolderProperty("UID", folder.UID);
+                    // Do we have a cached folder?
+                    let cachedFolderData = syncData.accountData.getFolderFromCache("UID", folder.UID);
+                    if (cachedFolderData) {
+                        // Copy fields from cache which we want to re-use.
+                        newFolder.setFolderProperty("downloadonly", cachedFolderData.getFolderProperty("downloadonly"));
+                    }
+                }
+            }
+        }
+        catch (error) {
+            // If a network error was encountered...
+            if (error instanceof NetworkError) {
+                console.log("sync.folderList(): Network error.");
+                // Propagate the error.
+                throw error;
+            }
+            // If the root reason is different...
+            else {
+                // Propagate the error.
+                throw error;
             }
         }
     },

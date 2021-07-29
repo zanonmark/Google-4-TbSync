@@ -9,6 +9,19 @@
 
 "use strict";
 
+if ("undefined" === typeof AuthorizationCodeError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AuthorizationCodeError.js", this, "UTF-8");
+}
+if ("undefined" === typeof IllegalArgumentError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/IllegalArgumentError.js", this, "UTF-8");
+}
+if ("undefined" === typeof NetworkError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
+}
+if ("undefined" === typeof ResponseError) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
+}
+
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
@@ -27,7 +40,7 @@ class PeopleAPI {
 
     constructor(accountData) {
         if (null == accountData) {
-            throw new Error("Invalid 'accountData': null.");
+            throw new IllegalArgumentError("Invalid 'accountData': null.");
         }
         //
         this._accountData = accountData;
@@ -117,7 +130,7 @@ class PeopleAPI {
                         // Stop the title interval.
                         authenticationWindow.clearInterval(titleInterval);
                         // Return an error.
-                        reject(new Error("Browser title: " + browserTitle));
+                        reject(new AuthorizationCodeError("Browser title: " + browserTitle));
                     }
                 }, 1000);
             };
@@ -126,7 +139,7 @@ class PeopleAPI {
                 authenticationWindow.clearInterval(titleInterval);
                 // Return an error if the browser window was closed before retrieving the authorization code.
                 if (!authorizationCodeRetrieved) {
-                    reject(new Error("Browser window closed before the authorization code was retrieved."));
+                    reject(new AuthorizationCodeError("Browser window closed before the authorization code was retrieved."));
                 }
             }
         });
@@ -136,26 +149,40 @@ class PeopleAPI {
 
     async getResponseData(method, requestURL, requestData) {
         if ((null == method) || ("" === method)) {
-            throw new Error("Invalid 'method': null or empty.");
+            throw new IllegalArgumentError("Invalid 'method': null or empty.");
         }
         if ((null == requestURL) || ("" === requestURL)) {
-            throw new Error("Invalid 'requestURL': null or empty.");
+            throw new IllegalArgumentError("Invalid 'requestURL': null or empty.");
         }
         //
         console.log("PeopleAPI.getResponseData(): requestURL = " + requestURL);
         console.log("PeopleAPI.getResponseData(): requestData = " + JSON.stringify(requestData));
         // Perform the request.
-        let response = await fetch(requestURL, {
-            method: method,
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: ((null == requestData) ? null : JSON.stringify(requestData)),
-        });
+        let response = null;
+        try {
+            response = await fetch(requestURL, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: ((null == requestData) ? null : JSON.stringify(requestData)),
+            });
+        }
+        catch (error) {
+            // If a network error was encountered...
+            if (("TypeError" === error.name) && (error.message.includes("NetworkError"))) {
+                throw new NetworkError(error.message);
+            }
+            // If the root reason is different...
+            else {
+                // Propagate the error.
+                throw error;
+            }
+        }
         // Check the response status.
         console.log("PeopleAPI.getResponseData(): responseStatus = " + response.status);
         if (200 != response.status) {
-            throw new Error("Invalid response: " + response.status + ": " + response.statusText);
+            throw new ResponseError("Invalid response: " + response.status + ": " + response.statusText);
         }
         // Retrieve the response data.
         let responseData = await response.json();
@@ -212,11 +239,24 @@ class PeopleAPI {
             return accessToken;
         }
         catch (error) {
-            // If the old refresh token was used, chances are it expired or was invalidated, so...
-            if (!retrieveNewRefreshToken) {
-                // Retry with a new refresh token.
-                console.log("Unable to get a new access token, retrying with a new refresh token first.");
-                return await this.getNewAccessToken(true);
+            // If a response error was encountered...
+            if (error instanceof ResponseError) {
+                // If the old refresh token was used, chances are it expired or was invalidated, so...
+                if (!retrieveNewRefreshToken) {
+                    // Retry with a new refresh token.
+                    console.log("Unable to get a new access token, retrying with a new refresh token first.");
+                    return await this.getNewAccessToken(true);
+                }
+                // If the new refresh token was used...
+                else {
+                    // Propagate the error.
+                    throw error;
+                }
+            }
+            // If the root reason is different...
+            else {
+                // Propagate the error.
+                throw error;
             }
         }
     }
@@ -284,7 +324,7 @@ class PeopleAPI {
 
     async createContact(contact) { // https://developers.google.com/people/api/rest/v1/people/createContact
         if (null == contact) {
-            throw new Error("Invalid 'contact': null.");
+            throw new IllegalArgumentError("Invalid 'contact': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -306,7 +346,7 @@ class PeopleAPI {
 
     async updateContact(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
         if (null == contact) {
-            throw new Error("Invalid 'contact': null.");
+            throw new IllegalArgumentError("Invalid 'contact': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -331,7 +371,7 @@ class PeopleAPI {
 
     async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
         if (null == resourceName) {
-            throw new Error("Invalid 'resourceName': null.");
+            throw new IllegalArgumentError("Invalid 'resourceName': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -391,7 +431,7 @@ class PeopleAPI {
 
     async createContactGroup(contactGroup) { // https://developers.google.com/people/api/rest/v1/contactGroups/create
         if (null == contactGroup) {
-            throw new Error("Invalid 'contactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'contactGroup': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -415,7 +455,7 @@ class PeopleAPI {
 
     async updateContactGroup(contactGroup) { // https://developers.google.com/people/api/rest/v1/contactGroups/update
         if (null == contactGroup) {
-            throw new Error("Invalid 'contactGroup': null.");
+            throw new IllegalArgumentError("Invalid 'contactGroup': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -442,7 +482,7 @@ class PeopleAPI {
 
     async deleteContactGroup(resourceName) { // https://developers.google.com/people/api/rest/v1/contactGroups/delete
         if (null == resourceName) {
-            throw new Error("Invalid 'resourceName': null.");
+            throw new IllegalArgumentError("Invalid 'resourceName': null.");
         }
         // Get a new access token.
         let accessToken = await this.getNewAccessToken();
@@ -463,21 +503,37 @@ class PeopleAPI {
 
     checkConnection() {
         (async () => {
-            let authenticatedUser = await this.getAuthenticatedUser();
-            let authenticatedUserName = authenticatedUser.names[0].displayName;
-            let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
-            //
-            let contacts = await this.getContacts();
-            let contactGroups = await this.getContactGroups();
-            //
-            let systemContactGroupCount = 0;
-            for (let contactGroup of contactGroups) {
-                if ("SYSTEM_CONTACT_GROUP" === contactGroup.groupType) {
-                    systemContactGroupCount++;
+            // Attempt the connection.
+            try {
+                let authenticatedUser = await this.getAuthenticatedUser();
+                let authenticatedUserName = authenticatedUser.names[0].displayName;
+                let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
+                //
+                let contacts = await this.getContacts();
+                let contactGroups = await this.getContactGroups();
+                //
+                let systemContactGroupCount = 0;
+                for (let contactGroup of contactGroups) {
+                    if ("SYSTEM_CONTACT_GROUP" === contactGroup.groupType) {
+                        systemContactGroupCount++;
+                    }
+                }
+                //
+                alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + (contactGroups.length - (this.getIncludeSystemContactGroups() ? 0 : systemContactGroupCount)) + " contact groups.");
+            }
+            catch (error) {
+                // If a network error was encountered...
+                if (error instanceof NetworkError) {
+                    console.log("PeopleAPI.checkConnection(): Network error.");
+                    // Alert the user.
+                    alert("Network error, connection aborted!");
+                }
+                // If the root reason is different...
+                else {
+                    // Propagate the error.
+                    throw error;
                 }
             }
-            //
-            alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + (contactGroups.length - (this.getIncludeSystemContactGroups() ? 0 : systemContactGroupCount)) + " contact groups.");
         })();
     }
 
