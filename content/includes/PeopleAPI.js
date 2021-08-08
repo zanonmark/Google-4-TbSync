@@ -87,15 +87,9 @@ class PeopleAPI {
                 response_type: "code",
             });
             console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
-            // Open the browser window.
-            let authenticationWindow = null;
-            try {
-                authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "centerscreen,all");
-            }
-            catch (error) {
-                let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
-                authenticationWindow = windowWatcher.openWindow(null, "chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen", null);
-            }
+            // Open the browser window and set the event handlers.
+            let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
+            let authenticationWindow = windowWatcher.openWindow(null, "chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen", null);
             let browserWidget = null;
             let titleInterval = null;
             let authorizationCodeRetrieved = false;
