@@ -21,54 +21,90 @@
     <tabpanel id="manager.tabpanels.accountsettings" appendto="manager.tabpanels" flex="1" orient="vertical"> <!-- Account settings. -->
         <vbox flex="1">
             <label id="tbsync.accountsettings.label.config" class="header lockIfConnected" style="margin-left: 0; margin-bottom: 1ex;" value="" />                
-            <grid flex="1">
-                <columns>
-                    <column flex="0" style="margin-right: 1ex;" />
-                    <column flex="1" />
-                </columns>
-                <rows>
-                    <row>
+            <html:table>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label style="text-align: left;" control="tbsync.accountsettings.pref.accountname" value="__GOOGLE4TBSYNCMSG_pref.accountName__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.accountname" onchange="tbSyncEditAccountOverlay.updateAccountProperty('accountName');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <html:input id="tbsync.accountsettings.pref.accountname" onchange="tbSyncEditAccountOverlay.updateAccountProperty('accountName');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.clientID" value="__GOOGLE4TBSYNCMSG_pref.clientID__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.clientID" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('clientID');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <html:input id="tbsync.accountsettings.pref.clientID" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('clientID');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.clientSecret" value="__GOOGLE4TBSYNCMSG_pref.clientSecret__" />
                         </vbox>
-                        <html:input id="tbsync.accountsettings.pref.clientSecret" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('clientSecret');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <html:input id="tbsync.accountsettings.pref.clientSecret" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('clientSecret');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.includeSystemContactGroups" value="__GOOGLE4TBSYNCMSG_pref.includeSystemContactGroups__" />
                         </vbox>
-                        <checkbox id="tbsync.accountsettings.pref.includeSystemContactGroups" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('includeSystemContactGroups');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <checkbox id="tbsync.accountsettings.pref.includeSystemContactGroups" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('includeSystemContactGroups');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.useFakeEmailAddresses" value="__GOOGLE4TBSYNCMSG_pref.useFakeEmailAddresses__" />
                         </vbox>
-                        <checkbox id="tbsync.accountsettings.pref.useFakeEmailAddresses" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('useFakeEmailAddresses');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <checkbox id="tbsync.accountsettings.pref.useFakeEmailAddresses" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('useFakeEmailAddresses');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox pack="center">
                             <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.readOnlyMode" value="__GOOGLE4TBSYNCMSG_pref.readOnlyMode__" />
                         </vbox>
-                        <checkbox id="tbsync.accountsettings.pref.readOnlyMode" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('readOnlyMode');" />
-                    </row>
-                    <row>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <checkbox id="tbsync.accountsettings.pref.readOnlyMode" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('readOnlyMode');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox />
-                        <html:input type="button" onclick="tbSyncEditAccountOverlay.onCheckConnection();" value="__GOOGLE4TBSYNCMSG_pref.checkConnection__" />
-                    </row>
-                </rows>
-            </grid>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <html:input type="button" onclick="tbSyncEditAccountOverlay.onCheckConnection();" value="__GOOGLE4TBSYNCMSG_pref.checkConnection__" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+            </html:table>
             <vbox flex="1" />
             <vbox class="showIfConnected">
                 <hbox>

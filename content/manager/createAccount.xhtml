@@ -24,50 +24,80 @@
 
         <wizardpage id="firstPage" onFirstPage="true" label="__GOOGLE4TBSYNCMSG_add.account.title__">
             <vbox flex="1">
-                <grid style="margin-top: 1ex;">
-                    <columns>
-                        <column flex="1" />
-                        <column flex="2" />
-                    </columns>
-                    <rows>
-                        <row>
+                <html:table>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.accountName__" />
                             </vbox>
-                            <html:input id="tbsync.newaccount.accountName" oninput="tbSyncNewAccount.onUserTextInput();" />
-                        </row>
-                        <row>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <html:input id="tbsync.newaccount.accountName" oninput="tbSyncNewAccount.onUserTextInput();" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.clientID__" />
                             </vbox>
-                            <html:input id="tbsync.newaccount.clientID" oninput="tbSyncNewAccount.onUserTextInput();" />
-                        </row>
-                        <row>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <html:input id="tbsync.newaccount.clientID" oninput="tbSyncNewAccount.onUserTextInput();" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.clientSecret__" />
                             </vbox>
-                            <html:input id="tbsync.newaccount.clientSecret" oninput="tbSyncNewAccount.onUserTextInput();" />
-                        </row>
-                        <row>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <html:input id="tbsync.newaccount.clientSecret" oninput="tbSyncNewAccount.onUserTextInput();" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.includeSystemContactGroups__" />
                             </vbox>
-                            <checkbox id="tbsync.newaccount.includeSystemContactGroups" />
-                        </row>
-                        <row>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <checkbox id="tbsync.newaccount.includeSystemContactGroups" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.useFakeEmailAddresses__" />
                             </vbox>
-                            <checkbox id="tbsync.newaccount.useFakeEmailAddresses" />
-                        </row>
-                        <row>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <checkbox id="tbsync.newaccount.useFakeEmailAddresses" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                    <html:tr>
+                        <html:td>
                             <vbox pack="center">
                                 <label value="__GOOGLE4TBSYNCMSG_pref.readOnlyMode__" />
                             </vbox>
-                            <checkbox id="tbsync.newaccount.readOnlyMode" />
-                        </row>
-                    </rows>
-                </grid>
+                        </html:td>
+                        <html:td>
+                            <vbox pack="center">
+                                <checkbox id="tbsync.newaccount.readOnlyMode" />
+                            </vbox>
+                        </html:td>
+                    </html:tr>
+                </html:table>
             </vbox>
         </wizardpage>
 

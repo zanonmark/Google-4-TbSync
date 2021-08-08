@@ -22,6 +22,8 @@ if ("undefined" === typeof ResponseError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
 }
 
+let { MailE10SUtils } = ChromeUtils.import("resource:///modules/MailE10SUtils.jsm");
+
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
@@ -88,7 +90,7 @@ class PeopleAPI {
             // Open the browser window.
             let authenticationWindow = null;
             try {
-                authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen");
+                authenticationWindow = window.open("chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "centerscreen,all");
             }
             catch (error) {
                 let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
@@ -101,7 +103,7 @@ class PeopleAPI {
                 // Set the browser widget.
                 browserWidget = authenticationWindow.document.getElementById("browser");
                 // Load the URL.
-                browserWidget.setAttribute("src", authorizationCodeRequestURL);
+                MailE10SUtils.loadURI(browserWidget, authorizationCodeRequestURL);
                 // Check the response every 1s.
                 titleInterval = authenticationWindow.setInterval(function() {
                     // Retrieve the browser title.
