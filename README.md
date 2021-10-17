@@ -40,4 +40,4 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 
 ## Additional information
 
-Please refer to the [wiki section](https://github.com/zanonmark/Google-4-TbSync/wiki) for other useful information, including guides and user contributions.
+Please refer to the [wiki section](https://github.com/zanonmark/Google-4-TbSync/wiki) for other useful information, including FAQ, guides and user contributions.
