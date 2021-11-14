@@ -35,6 +35,11 @@ var tbSyncNewAccount = {
         this.useFakeEmailAddressesWidget = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
         this.readOnlyModeWidget = document.getElementById('tbsync.newaccount.readOnlyMode');
         //
+        this.accountNameWidget.value = "";
+        this.clientIDWidget.value = "";
+        this.clientSecretWidget.value = "";
+        this.includeSystemContactGroupsWidget.checked = false;
+        this.useFakeEmailAddressesWidget.checked = false;
         this.readOnlyModeWidget.checked = true;
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
