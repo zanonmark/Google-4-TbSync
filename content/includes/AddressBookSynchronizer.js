@@ -1332,11 +1332,14 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
             // Clear the local contact group.
 // FIXME: temporary.
+/* FIXME: childCards.pop() seems to not always pop actually, resulting in an infinite loop...
             if (undefined !== localContactGroupDirectory.childCards) {
                 while (0 < localContactGroupDirectory.childCards.length) {
                     localContactGroupDirectory.childCards.pop();
                 }
             }
+*/
+localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
             // Fill the local contact group with the server contact group members.
 // FIXME: temporary.
             let contactResourceNames = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
