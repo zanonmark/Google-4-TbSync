@@ -21,6 +21,7 @@ var tbSyncNewAccount = {
     includeSystemContactGroupsWidget: null,
     useFakeEmailAddressesWidget: null,
     readOnlyModeWidget: null,
+    verboseLoggingWidget: null,
 
     onLoad: function() {
         this.providerData = new TbSync.ProviderData("google");
@@ -34,6 +35,7 @@ var tbSyncNewAccount = {
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.newaccount.includeSystemContactGroups');
         this.useFakeEmailAddressesWidget = document.getElementById('tbsync.newaccount.useFakeEmailAddresses');
         this.readOnlyModeWidget = document.getElementById('tbsync.newaccount.readOnlyMode');
+        this.verboseLoggingWidget = document.getElementById('tbsync.newaccount.verboseLogging');
         //
         this.accountNameWidget.value = "";
         this.clientIDWidget.value = "";
@@ -41,6 +43,7 @@ var tbSyncNewAccount = {
         this.includeSystemContactGroupsWidget.checked = false;
         this.useFakeEmailAddressesWidget.checked = false;
         this.readOnlyModeWidget.checked = true;
+        this.verboseLoggingWidget.checked = false;
         //
         document.getElementById("tbsync.newaccount.wizard").canRewind = false;
         document.getElementById("tbsync.newaccount.wizard").canAdvance = false;
@@ -68,11 +71,12 @@ var tbSyncNewAccount = {
         let includeSystemContactGroups = this.includeSystemContactGroupsWidget.checked;
         let useFakeEmailAddresses = this.useFakeEmailAddressesWidget.checked;
         let readOnlyMode = this.readOnlyModeWidget.checked;
+        let verboseLogging = this.verboseLoggingWidget.checked;
         //
-        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode);
+        tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode, verboseLogging);
     },
 
-    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode) {
+    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode, verboseLogging) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
@@ -81,6 +85,7 @@ var tbSyncNewAccount = {
         newAccountEntry.includeSystemContactGroups = includeSystemContactGroups;
         newAccountEntry.useFakeEmailAddresses = useFakeEmailAddresses;
         newAccountEntry.readOnlyMode = readOnlyMode;
+        newAccountEntry.verboseLogging = verboseLogging;
         // Add the new account.
         let newAccountData = this.providerData.addAccount(accountName, newAccountEntry);
         // Close the window.

@@ -15,6 +15,9 @@ if ("undefined" === typeof AuthorizationCodeError) {
 if ("undefined" === typeof IllegalArgumentError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/IllegalArgumentError.js", this, "UTF-8");
 }
+if ("undefined" === typeof Logger) {
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/Logger.js", this, "UTF-8");
+}
 if ("undefined" === typeof NetworkError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
 }
@@ -46,6 +49,10 @@ class PeopleAPI {
         }
         //
         this._accountData = accountData;
+        //
+        if (null == logger) {
+            logger = new Logger(true);
+        }
     }
 
     getAccountData() {
@@ -86,7 +93,7 @@ class PeopleAPI {
                 scope: SCOPES,
                 response_type: "code",
             });
-            console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
+            logger.log1("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
             // Open the browser window and set the event handlers.
             let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
             let authenticationWindow = windowWatcher.openWindow(null, "chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen", null);
@@ -109,7 +116,7 @@ class PeopleAPI {
                         // ...and if the authorization code could be retrieved...
                         if (null != group) {
                             let authorizationCode = group[1];
-                            console.log("PeopleAPI.getNewAuthorizationCode(): authorizationCode = " + authorizationCode);
+                            logger.log1("PeopleAPI.getNewAuthorizationCode(): authorizationCode = " + authorizationCode);
                             // Close the browser window.
                             authenticationWindow.close();
                             // Stop the title interval.
@@ -151,8 +158,8 @@ class PeopleAPI {
             throw new IllegalArgumentError("Invalid 'requestURL': null or empty.");
         }
         //
-        console.log("PeopleAPI.getResponseData(): requestURL = " + requestURL);
-        console.log("PeopleAPI.getResponseData(): requestData = " + JSON.stringify(requestData));
+        logger.log1("PeopleAPI.getResponseData(): requestURL = " + requestURL);
+        logger.log1("PeopleAPI.getResponseData(): requestData = " + JSON.stringify(requestData));
         // Perform the request.
         let response = null;
         try {
@@ -176,13 +183,13 @@ class PeopleAPI {
             }
         }
         // Check the response status.
-        console.log("PeopleAPI.getResponseData(): responseStatus = " + response.status);
+        logger.log1("PeopleAPI.getResponseData(): responseStatus = " + response.status);
         if (200 != response.status) {
             throw new ResponseError("Invalid response: " + response.status + ": " + response.statusText);
         }
         // Retrieve the response data.
         let responseData = await response.json();
-        console.log("PeopleAPI.getResponseData(): responseData = " + JSON.stringify(responseData));
+        logger.log1("PeopleAPI.getResponseData(): responseData = " + JSON.stringify(responseData));
         //
         return responseData;
     }
@@ -203,13 +210,13 @@ class PeopleAPI {
         let responseData = await this.getResponseData("POST", refreshTokenRequestURL, refreshTokenRequestData);
         // Retrieve the refresh token.
         let refreshToken = responseData.refresh_token;
-        console.log("PeopleAPI.retrieveNewRefreshToken(): refreshToken = " + refreshToken);
+        logger.log1("PeopleAPI.retrieveNewRefreshToken(): refreshToken = " + refreshToken);
         // Save the refresh token to the account data.
         this.setRefreshToken(refreshToken);
     }
 
     async getNewAccessToken(retrieveNewRefreshToken = false) {
-        console.log("PeopleAPI.getNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
+        logger.log1("PeopleAPI.getNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
         // Retrieve a new refresh token if necessary.
         if (retrieveNewRefreshToken) {
             await this.retrieveNewRefreshToken();
@@ -230,7 +237,7 @@ class PeopleAPI {
             let responseData = await this.getResponseData("POST", accessTokenRequestURL, accessTokenRequestData);
             // Retrieve the access token.
             let accessToken = responseData.access_token;
-            console.log("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
+            logger.log1("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
             //
             return accessToken;
         }
@@ -240,7 +247,7 @@ class PeopleAPI {
                 // If the old refresh token was used, chances are it expired or was invalidated, so...
                 if (!retrieveNewRefreshToken) {
                     // Retry with a new refresh token.
-                    console.log("Unable to get a new access token, retrying with a new refresh token first.");
+                    logger.log1("Unable to get a new access token, retrying with a new refresh token first.");
                     return await this.getNewAccessToken(true);
                 }
                 // If the new refresh token was used...
@@ -272,7 +279,7 @@ class PeopleAPI {
         // Retrieve the authenticated user.
         let authenticatedUser = responseData;
         //
-        console.log("PeopleAPI.getAuthenticatedUser(): authenticatedUser = " + JSON.stringify(authenticatedUser));
+        logger.log1("PeopleAPI.getAuthenticatedUser(): authenticatedUser = " + JSON.stringify(authenticatedUser));
         return authenticatedUser;
     }
 
@@ -285,7 +292,7 @@ class PeopleAPI {
         let contacts = [];
         let nextPageToken = null;
         while (true) {
-            console.log("PeopleAPI.getContacts(): nextPageToken = " + nextPageToken);
+            logger.log1("PeopleAPI.getContacts(): nextPageToken = " + nextPageToken);
             // Prepare the partial contact request URL and data.
             let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
             partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -314,7 +321,7 @@ class PeopleAPI {
             }
         }
         //
-        console.log("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
+        logger.log1("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
         return contacts;
     }
 
@@ -336,7 +343,7 @@ class PeopleAPI {
         // Retrieve the response contact.
         let responseContact = responseData;
         //
-        console.log("PeopleAPI.createContact(): contact = " + JSON.stringify(responseContact));
+        logger.log1("PeopleAPI.createContact(): contact = " + JSON.stringify(responseContact));
         return responseContact;
     }
 
@@ -361,7 +368,7 @@ class PeopleAPI {
         // Retrieve the response contact.
         let responseContact = responseData;
         //
-        console.log("PeopleAPI.updateContact(): contact = " + JSON.stringify(responseContact));
+        logger.log1("PeopleAPI.updateContact(): contact = " + JSON.stringify(responseContact));
         return responseContact;
     }
 
@@ -380,7 +387,7 @@ class PeopleAPI {
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("DELETE", contactDeletionRequestURL, contactDeletionRequestData);
         //
-        console.log("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
+        logger.log1("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
         return true;
     }
 
@@ -393,7 +400,7 @@ class PeopleAPI {
         let contactGroups = [];
         let nextPageToken = null;
         while (true) {
-            console.log("PeopleAPI.getContactGroups(): nextPageToken = " + nextPageToken);
+            logger.log1("PeopleAPI.getContactGroups(): nextPageToken = " + nextPageToken);
             // Prepare the partial contact group request URL and data.
             let partialContactGroupRequestURL = SERVICE_ENDPOINT + "/v1/contactGroups";
             partialContactGroupRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -421,7 +428,7 @@ class PeopleAPI {
             }
         }
         //
-        console.log("PeopleAPI.getContactGroups(): contactGroups = " + JSON.stringify(contactGroups));
+        logger.log1("PeopleAPI.getContactGroups(): contactGroups = " + JSON.stringify(contactGroups));
         return contactGroups;
     }
 
@@ -445,7 +452,7 @@ class PeopleAPI {
         // Retrieve the response contact group.
         let responseContactGroup = responseData;
         //
-        console.log("PeopleAPI.createContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
+        logger.log1("PeopleAPI.createContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
         return responseContactGroup;
     }
 
@@ -472,7 +479,7 @@ class PeopleAPI {
         // Retrieve the response contact group.
         let responseContactGroup = responseData;
         //
-        console.log("PeopleAPI.updateContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
+        logger.log1("PeopleAPI.updateContactGroup(): contactGroup = " + JSON.stringify(responseContactGroup));
         return responseContactGroup;
     }
 
@@ -491,7 +498,7 @@ class PeopleAPI {
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("DELETE", contactGroupDeletionRequestURL, contactGroupDeletionRequestData);
         //
-        console.log("PeopleAPI.deleteContactGroup(): contact group " + resourceName + " deleted.");
+        logger.log1("PeopleAPI.deleteContactGroup(): contact group " + resourceName + " deleted.");
         return true;
     }
 
@@ -520,7 +527,7 @@ class PeopleAPI {
             catch (error) {
                 // If a network error was encountered...
                 if (error instanceof NetworkError) {
-                    console.log("PeopleAPI.checkConnection(): Network error.");
+                    logger.log1("PeopleAPI.checkConnection(): Network error.");
                     // Alert the user.
                     alert("Network error, connection aborted!");
                 }

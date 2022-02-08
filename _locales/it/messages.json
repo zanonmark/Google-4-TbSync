@@ -44,5 +44,8 @@
     },
     "pref.useFakeEmailAddresses": {
         "message": "Usa indirizzi email fittizi"
+    },
+    "pref.verboseLogging": {
+        "message": "Log dettagliato"
     }
 }

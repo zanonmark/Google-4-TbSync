@@ -19,6 +19,7 @@ var tbSyncEditAccountOverlay = {
     includeSystemContactGroupsWidget: null,
     useFakeEmailAddressesWidget: null,
     readOnlyModeWidget: null,
+    verboseLoggingWidget: null,
 /*
     checkConnectionWidget: null,
 */
@@ -32,6 +33,7 @@ var tbSyncEditAccountOverlay = {
         this.includeSystemContactGroupsWidget = document.getElementById('tbsync.accountsettings.pref.includeSystemContactGroups');
         this.useFakeEmailAddressesWidget = document.getElementById('tbsync.accountsettings.pref.useFakeEmailAddresses');
         this.readOnlyModeWidget = document.getElementById('tbsync.accountsettings.pref.readOnlyMode');
+        this.verboseLoggingWidget = document.getElementById('tbsync.accountsettings.pref.verboseLogging');
         //
         this.accountNameWidget.value = this.accountData.getAccountProperty("accountname");
         this.clientIDWidget.value = this.accountData.getAccountProperty("clientID");
@@ -39,6 +41,7 @@ var tbSyncEditAccountOverlay = {
         this.includeSystemContactGroupsWidget.checked = this.accountData.getAccountProperty("includeSystemContactGroups");
         this.useFakeEmailAddressesWidget.checked = this.accountData.getAccountProperty("useFakeEmailAddresses");
         this.readOnlyModeWidget.checked = this.accountData.getAccountProperty("readOnlyMode");
+        this.verboseLoggingWidget.checked = this.accountData.getAccountProperty("verboseLogging");
     },
 
     updateAccountProperty: function(accountProperty) {
@@ -60,6 +63,9 @@ var tbSyncEditAccountOverlay = {
                 break;
             case "readOnlyMode":
                 this.accountData.setAccountProperty("readOnlyMode", this.readOnlyModeWidget.checked);
+                break;
+            case "verboseLogging":
+                this.accountData.setAccountProperty("verboseLogging", this.verboseLoggingWidget.checked);
                 break;
             default:
                 break;

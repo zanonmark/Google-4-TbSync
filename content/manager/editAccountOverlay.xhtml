@@ -96,6 +96,18 @@
                 </html:tr>
                 <html:tr>
                     <html:td>
+                        <vbox pack="center">
+                            <label class="lockIfConnected" style="text-align: left;" control="tbsync.accountsettings.pref.verboseLogging" value="__GOOGLE4TBSYNCMSG_pref.verboseLogging__" />
+                        </vbox>
+                    </html:td>
+                    <html:td>
+                        <vbox pack="center">
+                            <html:input type="checkbox" id="tbsync.accountsettings.pref.verboseLogging" class="lockIfConnected" onchange="tbSyncEditAccountOverlay.updateAccountProperty('verboseLogging');" />
+                        </vbox>
+                    </html:td>
+                </html:tr>
+                <html:tr>
+                    <html:td>
                         <vbox />
                     </html:td>
                     <html:td>

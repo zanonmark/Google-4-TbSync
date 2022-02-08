@@ -185,6 +185,7 @@ var Base = class {
             includeSystemContactGroups: false,
             useFakeEmailAddresses: false,
             readOnlyMode: true,
+            verboseLogging: false,
             refreshToken: null,
         };
         //
