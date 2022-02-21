@@ -315,7 +315,8 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         localContactGroup.deleteProperty("ListName");
         // Set the name.
         if (serverContactGroup.name) {
-            localContactGroup.setProperty("ListName", serverContactGroup.name);
+            let finalName = serverContactGroup.name.replace(/[<>;,"]/g, '_');
+            localContactGroup.setProperty("ListName", finalName);
         }
         //
         return localContactGroup;
