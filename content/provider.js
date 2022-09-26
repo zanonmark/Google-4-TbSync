@@ -56,7 +56,7 @@ var Base = class {
      *
      */
     static getApiVersion() {
-        return "2.4";
+        return "2.5";
     }
 
     /**
@@ -558,4 +558,3 @@ var TargetData_addressbook = class extends TbSync.addressbook.AdvancedTargetData
 }
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/sync.js", this, "UTF-8");
-Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/addressbook.js", this, "UTF-8");

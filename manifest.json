@@ -2,14 +2,14 @@
     "manifest_version": 2,
     "name": "__MSG_extensionName__",
     "description": "__MSG_extensionDescription__",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "author": "Marco Zanon",
     "default_locale": "en-US",
     "applications": {
         "gecko": {
             "id": "google-4-tbsync@marcozanon.com",
-            "strict_min_version": "91.0a1",
-            "strict_max_version": "91.*"
+            "strict_min_version": "102.0",
+            "strict_max_version": "102.*"
         }
     },
     "icons": {
