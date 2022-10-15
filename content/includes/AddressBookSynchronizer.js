@@ -864,10 +864,16 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                 x_custom4_values[0] = serverContact.userDefined[3].value;
             }
             //
+/* FIXME: temporary workaround.
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom1", {}, "array", x_custom1_values));
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom2", {}, "array", x_custom2_values));
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom3", {}, "array", x_custom3_values));
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", {}, "array", x_custom4_values));
+*/
+localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom1", {}, "array", x_custom1_values[0]));
+localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom2", {}, "array", x_custom2_values[0]));
+localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom3", {}, "array", x_custom3_values[0]));
+localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", {}, "array", x_custom4_values[0]));
         }
         //
         return localContact;
