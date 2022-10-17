@@ -18,7 +18,7 @@ What is missing:
 
 A full working version ~~could probably be ready by~~ ~~June / July 2021~~ ~~September~~ ~~the end of 2021~~ will be ready a few months after the new TbSync is released.
 
-**Thunderbird 102+ users please note**: Google-4-TbSync 0.4.x runs much slower than 0.3.0 (in my tests it performs 7x slower!), but I suppose this is mainly due to Thunderbird recently switching to vCard to manage addressbook contacts, which seems to have slowed the underlying code a lot. There is no real solution at the moment. The issue can be mitigated by turning off the "Include system contact groups" and "Verbose logging" options.
+**Thunderbird 102+ users please note**: Google-4-TbSync 0.4.x runs much slower than 0.3.0 (in my tests it performs 7x slower!), but I suppose this is mainly due to Thunderbird recently switching to vCard to manage addressbook contacts, which seems to have slowed the underlying code a lot. There is no real solution at the moment. The issue can be mitigated by turning off the _Include system contact groups_ and _Verbose logging_ options.
 
 ## How to use it
 
