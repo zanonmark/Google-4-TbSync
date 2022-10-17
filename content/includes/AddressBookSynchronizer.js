@@ -817,7 +817,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let note_values = [ "" ];
             //
             if (serverContact.biographies[0] && serverContact.biographies[0].value) {
-                note_values[0] = serverContact.biographies[0].value;
+                note_values[0] = serverContact.biographies[0].value.replace(/(\r\n|\n|\r)/gm, " - ");;
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("note", {}, "array", note_values));
