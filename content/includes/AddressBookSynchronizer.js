@@ -693,13 +693,13 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                     adr_values[2] = [];
                 }
                 if (address.streetAddress) {
-                    adr_values[2][0] = address.streetAddress.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[2][0] = address.streetAddress.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.extendedAddress) {
                     if (!address.streetAddress) {
                         adr_values[2][0] = "-";
                     }
-                    adr_values[2][1] = address.extendedAddress.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[2][1] = address.extendedAddress.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.city) {
                     adr_values[3] = address.city;
@@ -817,7 +817,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let note_values = [ "" ];
             //
             if (serverContact.biographies[0] && serverContact.biographies[0].value) {
-                note_values[0] = serverContact.biographies[0].value.replace(/(\r\n|\n|\r)/gm, " - ");;
+                note_values[0] = serverContact.biographies[0].value.replace(/(\r\n|\n|\r)/gm, " - ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("note", {}, "array", note_values));
@@ -1038,10 +1038,10 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     let adr_values_2_values = (Array.isArray(adr_values[2]) ? adr_values[2] : [ adr_values[2] ]); // adr_values[2]: string or array
                     //
                     if (adr_values_2_values[0]) {
-                        serverContact.addresses[i].streetAddress = adr_values_2_values[0].replaceAll(", ", " ").replaceAll(",", " ");
+                        serverContact.addresses[i].streetAddress = adr_values_2_values[0];
                     }
                     if (adr_values_2_values[1]) {
-                        serverContact.addresses[i].extendedAddress = adr_values_2_values[1].replaceAll(", ", " ").replaceAll(",", " ");
+                        serverContact.addresses[i].extendedAddress = adr_values_2_values[1];
                     }
                 }
                 if (adr_values[3]) {
