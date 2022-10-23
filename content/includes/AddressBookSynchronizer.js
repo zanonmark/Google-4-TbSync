@@ -32,8 +32,6 @@ XPCOMUtils.defineLazyModuleGetters(this, {
 
 const FAKE_EMAIL_ADDRESS_DOMAIN = "bug1522453.thunderbird.example.com";
 
-let targetAddressBookItemMap = null;
-
 class AddressBookSynchronizer {
 
     /* Main synchronization. */
@@ -48,7 +46,7 @@ class AddressBookSynchronizer {
             throw new IllegalArgumentError("Invalid target address book: null.");
         }
         // Prepare the target address book item map.
-        targetAddressBookItemMap = new Map();
+        let targetAddressBookItemMap = new Map();
         let i = 0;
         for (let targetAddressBookItem of await targetAddressBook.getAllItems()) {
             let key = targetAddressBookItem.getProperty("X-GOOGLE-RESOURCENAME");
@@ -80,13 +78,13 @@ class AddressBookSynchronizer {
         try {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
             // Synchronize contacts.
-            let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+            let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
             // Synchronize contact groups.
-            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
+            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contact group members.
-            await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, readOnlyMode);
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, targetAddressBookItemMap, readOnlyMode);
             // Fix the change log.
-            await AddressBookSynchronizer.fixChangeLog(targetAddressBook);
+            await AddressBookSynchronizer.fixChangeLog(targetAddressBook, targetAddressBookItemMap);
             //
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization finished.");
         }
@@ -107,12 +105,15 @@ class AddressBookSynchronizer {
 
     /* Contacts. */
 
-    static async synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode) {
+    static async synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == targetAddressBookItemMap) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
         }
         if (null == addedLocalItemIds) {
             throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
@@ -1110,12 +1111,15 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
 
     /* Contact groups. */
 
-    static async synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode) {
+    static async synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == targetAddressBookItemMap) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
         }
         if (null == addedLocalItemIds) {
             throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
@@ -1371,12 +1375,15 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     /* Contact group members. */
 
-    static async synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
+    static async synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, targetAddressBookItemMap, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
         if (null == contactGroupMemberMap) {
             throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == targetAddressBookItemMap) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
         }
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
@@ -1449,9 +1456,12 @@ localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
 
     /* Change log. */
 
-    static async fixChangeLog(targetAddressBook) {
+    static async fixChangeLog(targetAddressBook, targetAddressBookItemMap) {
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == targetAddressBookItemMap) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
         }
         // Cycle on all the items in the change log.
         logger.log0("AddressBookSynchronizer.synchronize(): Fixing the change log.");
