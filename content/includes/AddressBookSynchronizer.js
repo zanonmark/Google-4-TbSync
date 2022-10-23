@@ -79,10 +79,10 @@ class AddressBookSynchronizer {
         // Attempt the synchronization.
         try {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
-            // Synchronize contact groups.
-            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contacts.
             let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+            // Synchronize contact groups.
+            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contact group members.
             await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, readOnlyMode);
             // Fix the change log.
@@ -105,268 +105,7 @@ class AddressBookSynchronizer {
         }
     }
 
-    /* Contact group synchronization. */
-
-    static async synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode) {
-        if (null == peopleAPI) {
-            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
-        }
-        if (null == targetAddressBook) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
-        }
-        if (null == addedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
-        }
-        if (null == modifiedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'modifiedLocalItemIds': null.");
-        }
-        if (null == deletedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'deletedLocalItemIds': null.");
-        }
-        if (null == readOnlyMode) {
-            throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
-        }
-        // Retrieve all server contact groups.
-        let serverContactGroups = await peopleAPI.getContactGroups();
-        // Cycle on the server contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the server contact groups.");
-        let includeSystemContactGroups = peopleAPI.getIncludeSystemContactGroups();
-        logger.log1("PeopleAPI.getContactGroups(): includeSystemContactGroups = " + includeSystemContactGroups);
-        for (let serverContactGroup of serverContactGroups) {
-            // Get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-            let resourceName = serverContactGroup.resourceName;
-            let name = serverContactGroup.name;
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
-            // Determine if the server contact group is a system one and if it should be discarded.
-            if (("SYSTEM_CONTACT_GROUP" === serverContactGroup.groupType) && (!includeSystemContactGroups)) {
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and has therefore been ignored.");
-                continue;
-            }
-            // Try to match the server contact group locally.
-            let localContactGroup = targetAddressBookItemMap.get(resourceName);
-            // If such a local contact group is currently unavailable...
-            if (undefined === localContactGroup) {
-                // ...and if it was previously deleted locally...
-                if (deletedLocalItemIds.includes(resourceName)) {
-                    // Check we are not in read-only mode, then...
-                    if (!readOnlyMode) {
-                        // Delete the server contact group remotely.
-                        await peopleAPI.deleteContactGroup(resourceName);
-                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted remotely.");
-                    }
-                    // Remove the resource name from the local change log (deleted items).
-                    targetAddressBook.removeItemFromChangeLog(resourceName);
-                }
-                // ...and if it wasn't previously deleted locally...
-                else {
-                    // Create a new local contact group.
-                    localContactGroup = targetAddressBook.createNewList();
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Add the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.addItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added locally.");
-                    // Remove the resource name from the local change log (added items).
-                    // (This should be logically useless, but sometimes the change log is filled with some of the contact groups added above.)
-                    targetAddressBook.removeItemFromChangeLog(resourceName);
-                }
-            }
-            // If such a local contact group is currently available...
-            else {
-                // ...and if the server one is more recent, or if we are in read-only mode...
-                if ((localContactGroup.getProperty("X-GOOGLE-ETAG") !== serverContactGroup.etag) || (readOnlyMode)) {
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Update the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.modifyItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated locally.");
-                    // Remove the resource name from the local change log (modified items).
-                    targetAddressBook.removeItemFromChangeLog(resourceName);
-                }
-            }
-        }
-        // Prepare the variables for the cycles.
-        let addedLocalItemResourceNames = [];
-        // Cycle on the locally added contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally added contact groups.");
-        for (let localContactGroupId of addedLocalItemIds) {
-            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
-            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
-            if (undefined === localContactGroup) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
-            // Check we are not in read-only mode, then...
-            if (!readOnlyMode) {
-                // Create a new server contact group.
-                let serverContactGroup = {};
-                // Import the local contact group information into the server contact group.
-                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
-                // Add the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-                serverContactGroup = await peopleAPI.createContactGroup(serverContactGroup);
-                let resourceName = serverContactGroup.resourceName;
-                let name = serverContactGroup.name;
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added remotely.");
-                // Import the server contact group information into the local contact group.
-                localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                // Update the local contact group locally, and keep the target address book item map up-to-date.
-                await targetAddressBook.modifyItem(localContactGroup, true);
-                targetAddressBookItemMap.set(resourceName, localContactGroup);
-                // Add the resource name to the proper array.
-                addedLocalItemResourceNames.push(resourceName);
-            }
-            // Remove the local contact group id from the local change log (added items).
-            targetAddressBook.removeItemFromChangeLog(localContactGroupId);
-        }
-        // Cycle on the locally modified contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally modified contact groups.");
-        for (let localContactGroupId of modifiedLocalItemIds) {
-            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
-            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
-            if (undefined === localContactGroup) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
-            // Check we are not in read-only mode, then...
-            if (!readOnlyMode) {
-                // Make sure the local contact group has a valid X-GOOGLE-ETAG property (if not, it is probably a system contact group, which cannot be updated).
-                if (!localContactGroup.getProperty("X-GOOGLE-ETAG")) {
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " has no X-GOOGLE-ETAG property and has therefore been ignored.");
-                    continue;
-                }
-                // Create a new server contact group.
-                let serverContactGroup = {};
-                serverContactGroup.resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-                serverContactGroup.etag = localContactGroup.getProperty("X-GOOGLE-ETAG");
-                // Import the local contact group information into the server contact group.
-                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
-                // Update the server contact group remotely or delete the local contact group locally.
-                try {
-                    // Update the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-                    serverContactGroup = await peopleAPI.updateContactGroup(serverContactGroup);
-                    let resourceName = serverContactGroup.resourceName;
-                    let name = serverContactGroup.name;
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated remotely.");
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Update the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.modifyItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
-                }
-                catch (error) {
-                    // If the server contact group is no longer available (i.e.: it was deleted)...
-                    if ((error instanceof ResponseError) && (error.message.includes(": 404:"))) {
-                        // Get the resource name (in the form 'contactGroups/contactGroupId').
-                        let resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-                        let name = localContactGroup.getProperty("ListName");
-                        // Delete the local contact group locally, and keep the target address book item map up-to-date.
-/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
-                        targetAddressBook.deleteItem(localContactGroup, true);
-*/
-let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
-abManager.deleteAddressBook(localContactGroup._card.mailListURI);
-                        targetAddressBookItemMap.delete(resourceName);
-                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted locally.");
-                    }
-                    // If the root reason is different...
-                    else {
-                        // Propagate the error.
-                        throw error;
-                    }
-                }
-            }
-            // Remove the local contact group id from the local change log (modified items).
-            targetAddressBook.removeItemFromChangeLog(localContactGroupId);
-        }
-        // Determine all the contact groups which were previously deleted remotely and delete them locally.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
-        for (let localContactGroup of targetAddressBookItemMap.values()) {
-            // Make sure the item is actually valid and a real contact group.
-            if (undefined === targetAddressBookItemMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"))) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
-            // Get the local contact group id and the name.
-            let localContactGroupId = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-            let name = localContactGroup.getProperty("ListName");
-            // Check if the local contact group id matches any of the locally added contact groups.
-            if (addedLocalItemResourceNames.includes(localContactGroupId)) {
-                continue;
-            }
-            // Check if the local contact group id matches any of the resource names downloaded.
-            let localContactGroupFoundAmongServerContactGroups = false;
-            for (let serverContactGroup of serverContactGroups) {
-                if (localContactGroupId === serverContactGroup.resourceName) {
-                    localContactGroupFoundAmongServerContactGroups = true;
-                    break;
-                }
-            }
-            if (localContactGroupFoundAmongServerContactGroups) {
-                continue;
-            }
-            // Delete the local contact group locally, and keep the target address book item map up-to-date.
-/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
-            targetAddressBook.deleteItem(localContactGroup, true);
-*/
-let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
-abManager.deleteAddressBook(localContactGroup._card.mailListURI);
-            targetAddressBookItemMap.delete(localContactGroupId);
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") has been deleted locally.");
-        }
-    }
-
-    static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
-        if (null == localContactGroup) {
-            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
-        }
-        if (null == serverContactGroup) {
-            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
-        }
-        // Reset all the properties managed by this method.
-        localContactGroup.deleteProperty("ListName");
-        // Set the name.
-        if (serverContactGroup.name) {
-            let name = serverContactGroup.name.replace(/[<>;,"]/g, '_');
-            //
-            localContactGroup.setProperty("ListName", name);
-        }
-        //
-        return localContactGroup;
-    }
-
-    static fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup) {
-        if (null == localContactGroup) {
-            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
-        }
-        if (null == serverContactGroup) {
-            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
-        }
-        // Reset all the properties managed by this method.
-        delete serverContactGroup.name;
-        // Set the name.
-        if (localContactGroup.getProperty("ListName")) {
-            serverContactGroup.name = localContactGroup.getProperty("ListName");
-        }
-        //
-        return serverContactGroup;
-    }
-
-    /* Contact synchronization. */
+    /* Contacts. */
 
     static async synchronizeContacts(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode) {
         if (null == peopleAPI) {
@@ -1369,7 +1108,268 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         return serverContact;
     }
 
-    /* Contact group member synchronization. */
+    /* Contact groups. */
+
+    static async synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode) {
+        if (null == peopleAPI) {
+            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
+        }
+        if (null == targetAddressBook) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == addedLocalItemIds) {
+            throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
+        }
+        if (null == modifiedLocalItemIds) {
+            throw new IllegalArgumentError("Invalid 'modifiedLocalItemIds': null.");
+        }
+        if (null == deletedLocalItemIds) {
+            throw new IllegalArgumentError("Invalid 'deletedLocalItemIds': null.");
+        }
+        if (null == readOnlyMode) {
+            throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
+        }
+        // Retrieve all server contact groups.
+        let serverContactGroups = await peopleAPI.getContactGroups();
+        // Cycle on the server contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the server contact groups.");
+        let includeSystemContactGroups = peopleAPI.getIncludeSystemContactGroups();
+        logger.log1("PeopleAPI.getContactGroups(): includeSystemContactGroups = " + includeSystemContactGroups);
+        for (let serverContactGroup of serverContactGroups) {
+            // Get the resource name (in the form 'contactGroups/contactGroupId') and the name.
+            let resourceName = serverContactGroup.resourceName;
+            let name = serverContactGroup.name;
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
+            // Determine if the server contact group is a system one and if it should be discarded.
+            if (("SYSTEM_CONTACT_GROUP" === serverContactGroup.groupType) && (!includeSystemContactGroups)) {
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and has therefore been ignored.");
+                continue;
+            }
+            // Try to match the server contact group locally.
+            let localContactGroup = targetAddressBookItemMap.get(resourceName);
+            // If such a local contact group is currently unavailable...
+            if (undefined === localContactGroup) {
+                // ...and if it was previously deleted locally...
+                if (deletedLocalItemIds.includes(resourceName)) {
+                    // Check we are not in read-only mode, then...
+                    if (!readOnlyMode) {
+                        // Delete the server contact group remotely.
+                        await peopleAPI.deleteContactGroup(resourceName);
+                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted remotely.");
+                    }
+                    // Remove the resource name from the local change log (deleted items).
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+                // ...and if it wasn't previously deleted locally...
+                else {
+                    // Create a new local contact group.
+                    localContactGroup = targetAddressBook.createNewList();
+                    // Import the server contact group information into the local contact group.
+                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                    // Add the local contact group locally, and keep the target address book item map up-to-date.
+                    await targetAddressBook.addItem(localContactGroup, true);
+                    targetAddressBookItemMap.set(resourceName, localContactGroup);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added locally.");
+                    // Remove the resource name from the local change log (added items).
+                    // (This should be logically useless, but sometimes the change log is filled with some of the contact groups added above.)
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+            }
+            // If such a local contact group is currently available...
+            else {
+                // ...and if the server one is more recent, or if we are in read-only mode...
+                if ((localContactGroup.getProperty("X-GOOGLE-ETAG") !== serverContactGroup.etag) || (readOnlyMode)) {
+                    // Import the server contact group information into the local contact group.
+                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                    // Update the local contact group locally, and keep the target address book item map up-to-date.
+                    await targetAddressBook.modifyItem(localContactGroup, true);
+                    targetAddressBookItemMap.set(resourceName, localContactGroup);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated locally.");
+                    // Remove the resource name from the local change log (modified items).
+                    targetAddressBook.removeItemFromChangeLog(resourceName);
+                }
+            }
+        }
+        // Prepare the variables for the cycles.
+        let addedLocalItemResourceNames = [];
+        // Cycle on the locally added contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally added contact groups.");
+        for (let localContactGroupId of addedLocalItemIds) {
+            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
+            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
+            if (undefined === localContactGroup) {
+                continue;
+            }
+            if (!localContactGroup.isMailList) {
+                continue;
+            }
+            // Check we are not in read-only mode, then...
+            if (!readOnlyMode) {
+                // Create a new server contact group.
+                let serverContactGroup = {};
+                // Import the local contact group information into the server contact group.
+                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
+                // Add the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
+                serverContactGroup = await peopleAPI.createContactGroup(serverContactGroup);
+                let resourceName = serverContactGroup.resourceName;
+                let name = serverContactGroup.name;
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added remotely.");
+                // Import the server contact group information into the local contact group.
+                localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                // Update the local contact group locally, and keep the target address book item map up-to-date.
+                await targetAddressBook.modifyItem(localContactGroup, true);
+                targetAddressBookItemMap.set(resourceName, localContactGroup);
+                // Add the resource name to the proper array.
+                addedLocalItemResourceNames.push(resourceName);
+            }
+            // Remove the local contact group id from the local change log (added items).
+            targetAddressBook.removeItemFromChangeLog(localContactGroupId);
+        }
+        // Cycle on the locally modified contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally modified contact groups.");
+        for (let localContactGroupId of modifiedLocalItemIds) {
+            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
+            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
+            if (undefined === localContactGroup) {
+                continue;
+            }
+            if (!localContactGroup.isMailList) {
+                continue;
+            }
+            // Check we are not in read-only mode, then...
+            if (!readOnlyMode) {
+                // Make sure the local contact group has a valid X-GOOGLE-ETAG property (if not, it is probably a system contact group, which cannot be updated).
+                if (!localContactGroup.getProperty("X-GOOGLE-ETAG")) {
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " has no X-GOOGLE-ETAG property and has therefore been ignored.");
+                    continue;
+                }
+                // Create a new server contact group.
+                let serverContactGroup = {};
+                serverContactGroup.resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
+                serverContactGroup.etag = localContactGroup.getProperty("X-GOOGLE-ETAG");
+                // Import the local contact group information into the server contact group.
+                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
+                // Update the server contact group remotely or delete the local contact group locally.
+                try {
+                    // Update the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
+                    serverContactGroup = await peopleAPI.updateContactGroup(serverContactGroup);
+                    let resourceName = serverContactGroup.resourceName;
+                    let name = serverContactGroup.name;
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated remotely.");
+                    // Import the server contact group information into the local contact group.
+                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
+                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
+                    // Update the local contact group locally, and keep the target address book item map up-to-date.
+                    await targetAddressBook.modifyItem(localContactGroup, true);
+                    targetAddressBookItemMap.set(resourceName, localContactGroup);
+                }
+                catch (error) {
+                    // If the server contact group is no longer available (i.e.: it was deleted)...
+                    if ((error instanceof ResponseError) && (error.message.includes(": 404:"))) {
+                        // Get the resource name (in the form 'contactGroups/contactGroupId').
+                        let resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
+                        let name = localContactGroup.getProperty("ListName");
+                        // Delete the local contact group locally, and keep the target address book item map up-to-date.
+/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
+                        targetAddressBook.deleteItem(localContactGroup, true);
+*/
+let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
+abManager.deleteAddressBook(localContactGroup._card.mailListURI);
+                        targetAddressBookItemMap.delete(resourceName);
+                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted locally.");
+                    }
+                    // If the root reason is different...
+                    else {
+                        // Propagate the error.
+                        throw error;
+                    }
+                }
+            }
+            // Remove the local contact group id from the local change log (modified items).
+            targetAddressBook.removeItemFromChangeLog(localContactGroupId);
+        }
+        // Determine all the contact groups which were previously deleted remotely and delete them locally.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
+        for (let localContactGroup of targetAddressBookItemMap.values()) {
+            // Make sure the item is actually valid and a real contact group.
+            if (undefined === targetAddressBookItemMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"))) {
+                continue;
+            }
+            if (!localContactGroup.isMailList) {
+                continue;
+            }
+            // Get the local contact group id and the name.
+            let localContactGroupId = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
+            let name = localContactGroup.getProperty("ListName");
+            // Check if the local contact group id matches any of the locally added contact groups.
+            if (addedLocalItemResourceNames.includes(localContactGroupId)) {
+                continue;
+            }
+            // Check if the local contact group id matches any of the resource names downloaded.
+            let localContactGroupFoundAmongServerContactGroups = false;
+            for (let serverContactGroup of serverContactGroups) {
+                if (localContactGroupId === serverContactGroup.resourceName) {
+                    localContactGroupFoundAmongServerContactGroups = true;
+                    break;
+                }
+            }
+            if (localContactGroupFoundAmongServerContactGroups) {
+                continue;
+            }
+            // Delete the local contact group locally, and keep the target address book item map up-to-date.
+/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
+            targetAddressBook.deleteItem(localContactGroup, true);
+*/
+let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
+abManager.deleteAddressBook(localContactGroup._card.mailListURI);
+            targetAddressBookItemMap.delete(localContactGroupId);
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") has been deleted locally.");
+        }
+    }
+
+    static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
+        if (null == localContactGroup) {
+            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
+        }
+        if (null == serverContactGroup) {
+            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
+        }
+        // Reset all the properties managed by this method.
+        localContactGroup.deleteProperty("ListName");
+        // Set the name.
+        if (serverContactGroup.name) {
+            let name = serverContactGroup.name.replace(/[<>;,"]/g, '_');
+            //
+            localContactGroup.setProperty("ListName", name);
+        }
+        //
+        return localContactGroup;
+    }
+
+    static fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup) {
+        if (null == localContactGroup) {
+            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
+        }
+        if (null == serverContactGroup) {
+            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
+        }
+        // Reset all the properties managed by this method.
+        delete serverContactGroup.name;
+        // Set the name.
+        if (localContactGroup.getProperty("ListName")) {
+            serverContactGroup.name = localContactGroup.getProperty("ListName");
+        }
+        //
+        return serverContactGroup;
+    }
+
+    /* Contact group members. */
 
     static async synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
         if (null == contactGroupMemberMap) {
