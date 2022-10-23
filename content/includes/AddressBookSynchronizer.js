@@ -78,6 +78,7 @@ class AddressBookSynchronizer {
         let deletedLocalItemIds = targetAddressBook.getDeletedItemsFromChangeLog();
         // Attempt the synchronization.
         try {
+            logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
             // Synchronize contact groups.
             await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contacts.
@@ -87,7 +88,7 @@ class AddressBookSynchronizer {
             // Fix the change log.
             await AddressBookSynchronizer.fixChangeLog(targetAddressBook);
             //
-            logger.log0("AddressBookSynchronizer.synchronize(): Done synchronizing.");
+            logger.log0("AddressBookSynchronizer.synchronize(): Synchronization finished.");
         }
         catch (error) {
             // If a network error was encountered...
