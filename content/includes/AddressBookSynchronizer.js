@@ -45,18 +45,6 @@ class AddressBookSynchronizer {
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid target address book: null.");
         }
-        // Prepare the target address book item map.
-        let targetAddressBookItemMap = new Map();
-        let i = 0;
-        for (let targetAddressBookItem of await targetAddressBook.getAllItems()) {
-            let key = targetAddressBookItem.getProperty("X-GOOGLE-RESOURCENAME");
-            if (("" == key) || (null == key)) {
-                key = "_local_" + i;
-                i++;
-            }
-            //
-            targetAddressBookItemMap.set(key, targetAddressBookItem);
-        }
         // Create a new PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
         // Retrieve other account properties.
@@ -70,6 +58,20 @@ class AddressBookSynchronizer {
             logger.log0("AddressBookSynchronizer.synchronize(): Read-only mode detected.");
         }
         // Prepare the variables for the cycles.
+        logger.log0("AddressBookSynchronizer.synchronize(): Preparing the target address book item map.");
+        let targetAddressBookItemMap = new Map();
+        let i = 0;
+        for (let targetAddressBookItem of await targetAddressBook.getAllItems()) {
+            let key = targetAddressBookItem.getProperty("X-GOOGLE-RESOURCENAME");
+            if (("" == key) || (null == key)) {
+                key = "_local_" + i;
+                i++;
+            }
+            //
+            targetAddressBookItemMap.set(key, targetAddressBookItem);
+        }
+        logger.log0("AddressBookSynchronizer.synchronize(): Preparing the contact group member map.");
+        let contactGroupMemberMap = new Map();
         logger.log0("AddressBookSynchronizer.synchronize(): Retrieving all the local changes since the last synchronization.");
         let addedLocalItemIds = targetAddressBook.getAddedItemsFromChangeLog();
         let modifiedLocalItemIds = targetAddressBook.getModifiedItemsFromChangeLog();
@@ -78,11 +80,11 @@ class AddressBookSynchronizer {
         try {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
             // Synchronize contacts.
-            let contactGroupMemberMap = await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+            await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
             // Synchronize contact groups.
             await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contact group members.
-            await AddressBookSynchronizer.synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, targetAddressBookItemMap, readOnlyMode);
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode);
             // Fix the change log.
             await AddressBookSynchronizer.fixChangeLog(targetAddressBook, targetAddressBookItemMap);
             //
@@ -105,7 +107,7 @@ class AddressBookSynchronizer {
 
     /* Contacts. */
 
-    static async synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode) {
+    static async synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
@@ -114,6 +116,9 @@ class AddressBookSynchronizer {
         }
         if (null == targetAddressBookItemMap) {
             throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
+        }
+        if (null == contactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
         if (null == addedLocalItemIds) {
             throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
@@ -130,9 +135,6 @@ class AddressBookSynchronizer {
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
         }
-// FIXME: temporary.
-        // Prepare the variables for the cycles.
-        let contactGroupMemberMap = new Map();
         // Retrieve all server contacts.
         let serverContacts = await peopleAPI.getContacts();
         // Cycle on the server contacts.
@@ -172,9 +174,8 @@ class AddressBookSynchronizer {
                     // Remove the resource name from the local change log (added items).
                     // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
                     targetAddressBook.removeItemFromChangeLog(resourceName);
-// FIXME: temporary.
                     // Update the contact group member map.
-                    contactGroupMemberMap = AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                    AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
                 }
             }
             // If such a local contact is currently available...
@@ -191,9 +192,8 @@ class AddressBookSynchronizer {
                     // Remove the resource name from the local change log (modified items).
                     targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
-// FIXME: temporary.
                 // Update the contact group member map.
-                contactGroupMemberMap = AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
             }
         }
         // Prepare the variables for the cycles.
@@ -321,9 +321,6 @@ class AddressBookSynchronizer {
             targetAddressBookItemMap.delete(localContactId);
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + localContactId + " (" + displayName + ") has been deleted locally.");
         }
-// FIXME: temporary.
-        //
-        return contactGroupMemberMap;
     }
 
     static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
@@ -1375,15 +1372,15 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 
     /* Contact group members. */
 
-    static async synchronizeContactGroupMembers(contactGroupMemberMap, targetAddressBook, targetAddressBookItemMap, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
-        if (null == contactGroupMemberMap) {
-            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
-        }
+    static async synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
         if (null == targetAddressBookItemMap) {
             throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
+        }
+        if (null == contactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
@@ -1403,7 +1400,6 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
             let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
             // Clear the local contact group.
-// FIXME: temporary.
 /* FIXME: childCards.pop() seems to not always pop actually, resulting in an infinite loop...
             if (undefined !== localContactGroupDirectory.childCards) {
                 while (0 < localContactGroupDirectory.childCards.length) {
@@ -1413,7 +1409,6 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
 */
 localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
             // Fill the local contact group with the server contact group members.
-// FIXME: temporary.
             let contactResourceNames = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
             if (undefined !== contactResourceNames) {
                 for (let contactResourceName of contactResourceNames) {
@@ -1450,8 +1445,6 @@ localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
             // Add the contact to the map.
             contactGroupMemberMap.get(contactGroupResourceName).push(contactResourceName);
         }
-        //
-        return contactGroupMemberMap;
     }
 
     /* Change log. */
