@@ -1,25 +1,26 @@
 # Google-4-TbSync
 
 This provider add-on adds Google synchronization capabilities to [TbSync](https://github.com/jobisoft/TbSync).
-Only contacts and contact groups are currently managed, using Google's People API. There's currently no plan on supporting calendars. Please see FAQ for details.
 
-The work is partly based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and advices by [John Bieling](https://github.com/jobisoft) himself.
+Only contacts and contact groups are currently managed, using Google's People API. There's currently no plan on supporting calendars. Please see [FAQ](https://github.com/zanonmark/Google-4-TbSync/wiki/FAQ-(Frequently-Asked-Questions)) for details.
+
+The work is partly based on [EteSync4TbSync](https://github.com/etesync/EteSync-4-TbSync), [DAV4TbSync](https://github.com/jobisoft/DAV-4-TbSync), [gContactSync](https://github.com/jdgeenen/gcontactsync) and many advices by [John Bieling](https://github.com/jobisoft) himself.
 
 ## Current status and roadmap / Known limitations
 
 What already works:
-* Google-to-Thunderbird creation / update / deletion of contact groups;
 * Google-to-Thunderbird creation / update / deletion of contacts;
+* Google-to-Thunderbird creation / update / deletion of contact groups;
 * Google-to-Thunderbird creation / update / deletion of contact group members.
-* Thunderbird-to-Google creation / update / deletion of contact groups;
 * Thunderbird-to-Google creation / update / deletion of contacts;
+* Thunderbird-to-Google creation / update / deletion of contact groups;
 
 What is missing:
 * Thunderbird-to-Google creation / update / deletion of contact group members. Please note that for this to be fixed the undergoing port of TbSync to WebExtension must be completed first: only then this add-on will be partially rewritten and will be able to fully manage contact group memberships.
 
 A full working version ~~could probably be ready by~~ ~~June / July 2021~~ ~~September~~ ~~the end of 2021~~ will be ready a few months after the new TbSync is released.
 
-**Thunderbird 102+ users please note**: Google-4-TbSync 0.4.x runs much slower than 0.3.0 (in my tests it performs 7x slower!), but I suppose this is mainly due to Thunderbird recently switching to vCard to manage addressbook contacts, which seems to have slowed the underlying code a lot. There is no real solution at the moment. The issue can be mitigated by turning off the _Include system contact groups_ and _Verbose logging_ options.
+**Thunderbird 102+ users please note**. Google-4-TbSync 0.4.x runs much slower than 0.3.0 (in my tests it performs 7x slower!). This is a known issue. Please see [FAQ](https://github.com/zanonmark/Google-4-TbSync/wiki/FAQ-(Frequently-Asked-Questions)) for details.
 
 ## How to use it
 
@@ -38,8 +39,8 @@ You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) 
 
 ## Warning
 
-* Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **backup both your Google and Thunderbird address books before running the software!**
-* **You are strongly suggested to [use the _Read-only mode_ option](https://github.com/zanonmark/Google-4-TbSync/wiki/Account-options#read-only-mode)**.
+* Even if early reports seem to confirm the add-on is working properly, the project is still in its early development stage: **do regular backups of both your Google and Thunderbird address books!**
+* **You are strongly suggested to use the [_Read-only mode_ option](https://github.com/zanonmark/Google-4-TbSync/wiki/Account-options#read-only-mode)**.
 
 ## Additional information
 
