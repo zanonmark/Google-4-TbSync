@@ -24,7 +24,7 @@ A full working version ~~could probably be ready by~~ ~~June / July 2021~~ ~~Sep
 
 ## How to use it
 
-You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) and [generate your own Google API Console project credentials](https://github.com/zanonmark/Google-4-TbSync/wiki/How-to-generate-your-own-Google-API-Console-project-credentials). Then do one of the following:
+You first need to [install TbSync](https://addons.thunderbird.net/addon/tbsync) and [generate your own Google Cloud Console project credentials](https://github.com/zanonmark/Google-4-TbSync/wiki/How-to-generate-your-own-Google-Cloud-Console-project-credentials). Then do one of the following:
 
 ### Download an official release
 
