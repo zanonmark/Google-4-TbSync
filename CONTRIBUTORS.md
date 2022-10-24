@@ -14,4 +14,4 @@
 
 ## Other contributions
 * John Bieling (original TbSync add-on template and advices)
-* All the nice people who reported issues and helped beta-testing and bugfixing
+* All the nice people who reported issues and helped beta-testing, fixing bugs and improving the documentation
