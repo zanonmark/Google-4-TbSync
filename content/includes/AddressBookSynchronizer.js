@@ -1399,24 +1399,27 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             // Retrieve the local contact group directory.
             let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
             let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
-            // Clear the local contact group.
-/* FIXME: childCards.pop() seems to not always pop actually, resulting in an infinite loop...
-            if (undefined !== localContactGroupDirectory.childCards) {
-                while (0 < localContactGroupDirectory.childCards.length) {
-                    localContactGroupDirectory.childCards.pop();
+            // Retrieve the server contact group members.
+            let serverContactGroupMembers = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
+            // Synchronize the local contact group members with the (old) server contact group members.
+            for (let localContactGroupDirectoryCard of localContactGroupDirectory.childCards) {
+                let localContactGroupDirectoryCardResourceName = localContactGroupDirectoryCard.getProperty("X-GOOGLE-RESOURCENAME", null);
+                if ((undefined !== serverContactGroupMembers) && (serverContactGroupMembers.has(localContactGroupDirectoryCardResourceName))) {
+                    serverContactGroupMembers.delete(localContactGroupDirectoryCardResourceName);
+                }
+                else {
+                    localContactGroupDirectory.deleteCards([ localContactGroupDirectoryCard ]);
                 }
             }
-*/
-localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
-            // Fill the local contact group with the server contact group members.
-            let contactResourceNames = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
-            if (undefined !== contactResourceNames) {
-                for (let contactResourceName of contactResourceNames) {
-                    let localContact = targetAddressBookItemMap.get(contactResourceName);
+            // Fill the local contact group with the remaining (new) server contact group members.
+            if (undefined !== serverContactGroupMembers) {
+                for (let serverContactGroupMember of serverContactGroupMembers) {
+                    let localContact = targetAddressBookItemMap.get(serverContactGroupMember);
                     localContactGroupDirectory.addCard(localContact._card);
                 }
-                localContactGroupDirectory.editMailListToDatabase(localContactGroup);
             }
+            // Finalize the changes.
+            localContactGroupDirectory.editMailListToDatabase(localContactGroup);
         }
     }
 
