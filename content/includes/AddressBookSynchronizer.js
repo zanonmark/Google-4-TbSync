@@ -357,22 +357,22 @@ class AddressBookSynchronizer {
             let fn_values = [ "" ];
             //
             if (serverContact.names[0] && serverContact.names[0].honorificPrefix) {
-                n_values[3] = serverContact.names[0].honorificPrefix;
+                n_values[3] = serverContact.names[0].honorificPrefix.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.names[0] && serverContact.names[0].givenName) {
-                n_values[1] = serverContact.names[0].givenName;
+                n_values[1] = serverContact.names[0].givenName.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.names[0] && serverContact.names[0].middleName) {
-                n_values[2] = serverContact.names[0].middleName;
+                n_values[2] = serverContact.names[0].middleName.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.names[0] && serverContact.names[0].familyName) {
-                n_values[0] = serverContact.names[0].familyName;
+                n_values[0] = serverContact.names[0].familyName.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.names[0] && serverContact.names[0].honorificSuffix) {
-                n_values[4] = serverContact.names[0].honorificSuffix;
+                n_values[4] = serverContact.names[0].honorificSuffix.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.names[0] && serverContact.names[0].displayName) {
-                fn_values[0] = serverContact.names[0].displayName;
+                fn_values[0] = serverContact.names[0].displayName.replaceAll(", ", " ").replaceAll(",", " ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("n", {}, "array", n_values));
@@ -383,7 +383,7 @@ class AddressBookSynchronizer {
             let nickname_values = [ "" ];
             //
             if (serverContact.nicknames[0] && serverContact.nicknames[0].value) {
-                nickname_values[0] = serverContact.nicknames[0].value;
+                nickname_values[0] = serverContact.nicknames[0].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("nickname", {}, "array", nickname_values));
@@ -397,7 +397,7 @@ class AddressBookSynchronizer {
                 let email_type_param = "";
                 //
                 if (emailAddress.value) {
-                    email_values[0] = emailAddress.value;
+                    email_values[0] = emailAddress.value.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 switch (emailAddress.type) {
                     case "home":
@@ -434,7 +434,7 @@ class AddressBookSynchronizer {
                 let url_type_param = "";
                 //
                 if (url.value) {
-                    url_values[0] = url.value;
+                    url_values[0] = url.value.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 switch (url.type) {
                     case "work":
@@ -469,16 +469,16 @@ class AddressBookSynchronizer {
                     adr_values[2][1] = address.extendedAddress.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.city) {
-                    adr_values[3] = address.city;
+                    adr_values[3] = address.city.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 if (address.region) {
-                    adr_values[4] = address.region;
+                    adr_values[4] = address.region.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 if (address.postalCode) {
-                    adr_values[5] = address.postalCode;
+                    adr_values[5] = address.postalCode.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 if (address.country) {
-                    adr_values[6] = address.country;
+                    adr_values[6] = address.country.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 switch (address.type) {
                     case "home":
@@ -505,7 +505,7 @@ class AddressBookSynchronizer {
                 let tel_type_param = "";
                 //
                 if (phoneNumber.value) {
-                    tel_values[0] = phoneNumber.value;
+                    tel_values[0] = phoneNumber.value.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 switch (phoneNumber.type) {
                     case "home":
@@ -544,7 +544,7 @@ class AddressBookSynchronizer {
                 let impp_values = [ "" ];
                 //
                 if (imClient.protocol && imClient.username) {
-                    impp_values[0] = imClient.protocol + ":" + imClient.username;
+                    impp_values[0] = imClient.protocol.replaceAll(", ", " ").replaceAll(",", " ") + ":" + imClient.username.replaceAll(", ", " ").replaceAll(",", " ");
                 }
                 //
                 localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("impp", {}, "array", impp_values));
@@ -584,7 +584,7 @@ class AddressBookSynchronizer {
             let note_values = [ "" ];
             //
             if (serverContact.biographies[0] && serverContact.biographies[0].value) {
-                note_values[0] = serverContact.biographies[0].value.replace(/(\r\n|\n|\r)/gm, " - ");
+                note_values[0] = serverContact.biographies[0].value.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("note", {}, "array", note_values));
@@ -595,17 +595,17 @@ class AddressBookSynchronizer {
             let org_values = [ "" ];
             //
             if (serverContact.organizations[0] && serverContact.organizations[0].title) {
-                title_values[0] = serverContact.organizations[0].title;
+                title_values[0] = serverContact.organizations[0].title.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.organizations[0] && serverContact.organizations[0].name) {
-                org_values[0] = serverContact.organizations[0].name;
+                org_values[0] = serverContact.organizations[0].name.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.organizations[0] && serverContact.organizations[0].department) {
 // FIXME: temporary.
                 if (!serverContact.organizations[0].name) {
                     org_values[0] = "-"; // necessary because TB considers the first item to be the name
                 }
-                org_values[1] = serverContact.organizations[0].department;
+                org_values[1] = serverContact.organizations[0].department.replaceAll(", ", " ").replaceAll(",", " ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("title", {}, "array", title_values));
@@ -619,16 +619,16 @@ class AddressBookSynchronizer {
             let x_custom4_values = [ "" ];
             //
             if (serverContact.userDefined[0] && serverContact.userDefined[0].value) {
-                x_custom1_values[0] = serverContact.userDefined[0].value;
+                x_custom1_values[0] = serverContact.userDefined[0].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.userDefined[1] && serverContact.userDefined[1].value) {
-                x_custom2_values[0] = serverContact.userDefined[1].value;
+                x_custom2_values[0] = serverContact.userDefined[1].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.userDefined[2] && serverContact.userDefined[2].value) {
-                x_custom3_values[0] = serverContact.userDefined[2].value;
+                x_custom3_values[0] = serverContact.userDefined[2].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             if (serverContact.userDefined[3] && serverContact.userDefined[3].value) {
-                x_custom4_values[0] = serverContact.userDefined[3].value;
+                x_custom4_values[0] = serverContact.userDefined[3].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             //
 /* FIXME: temporary workaround for a TB bug.
