@@ -197,7 +197,7 @@ class AddressBookSynchronizer {
             }
         }
         // Prepare the variables for the cycles.
-        let addedLocalItemResourceNames = [];
+        let addedLocalItemResourceNames = new Set();
         // Cycle on the locally added contacts.
         logger.log0("AddressBookSynchronizer.synchronizeContacts(): Cycling on the locally added contacts.");
         for (let localContactId of addedLocalItemIds) {
@@ -227,8 +227,8 @@ class AddressBookSynchronizer {
                 // Update the local contact locally, and keep the target address book item map up-to-date.
                 await targetAddressBook.modifyItem(localContact, true);
                 targetAddressBookItemMap.set(resourceName, localContact);
-                // Add the resource name to the proper array.
-                addedLocalItemResourceNames.push(resourceName);
+                // Add the resource name to the proper set.
+                addedLocalItemResourceNames.add(resourceName);
             }
             // Remove the local contact id from the local change log (added items).
             await targetAddressBook.removeItemFromChangeLog(localContactId);
@@ -302,7 +302,7 @@ class AddressBookSynchronizer {
             let localContactId = localContact.getProperty("X-GOOGLE-RESOURCENAME");
             let displayName = localContact.getProperty("DisplayName");
             // Check if the local contact id matches any of the locally added contacts.
-            if (addedLocalItemResourceNames.includes(localContactId)) {
+            if (addedLocalItemResourceNames.has(localContactId)) {
                 continue;
             }
             // Check if the local contact id matches any of the resource names downloaded.
@@ -1195,7 +1195,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
             }
         }
         // Prepare the variables for the cycles.
-        let addedLocalItemResourceNames = [];
+        let addedLocalItemResourceNames = new Set();
         // Cycle on the locally added contact groups.
         logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally added contact groups.");
         for (let localContactGroupId of addedLocalItemIds) {
@@ -1225,8 +1225,8 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 // Update the local contact group locally, and keep the target address book item map up-to-date.
                 await targetAddressBook.modifyItem(localContactGroup, true);
                 targetAddressBookItemMap.set(resourceName, localContactGroup);
-                // Add the resource name to the proper array.
-                addedLocalItemResourceNames.push(resourceName);
+                // Add the resource name to the proper set.
+                addedLocalItemResourceNames.add(resourceName);
             }
             // Remove the local contact group id from the local change log (added items).
             await targetAddressBook.removeItemFromChangeLog(localContactGroupId);
@@ -1309,7 +1309,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             let localContactGroupId = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
             let name = localContactGroup.getProperty("ListName");
             // Check if the local contact group id matches any of the locally added contact groups.
-            if (addedLocalItemResourceNames.includes(localContactGroupId)) {
+            if (addedLocalItemResourceNames.has(localContactGroupId)) {
                 continue;
             }
             // Check if the local contact group id matches any of the resource names downloaded.
@@ -1438,12 +1438,12 @@ localContactGroupDirectory.deleteCards(localContactGroupDirectory.childCards);
             }
             // Retrieve the contact group resource name.
             let contactGroupResourceName = contactMembership.contactGroupMembership.contactGroupResourceName;
-            // If such a contact group is not already in the map, add it and its contact array.
+            // If such a contact group is not already in the map, add it and its set.
             if (undefined === contactGroupMemberMap.get(contactGroupResourceName)) {
-                contactGroupMemberMap.set(contactGroupResourceName, []);
+                contactGroupMemberMap.set(contactGroupResourceName, new Set());
             }
             // Add the contact to the map.
-            contactGroupMemberMap.get(contactGroupResourceName).push(contactResourceName);
+            contactGroupMemberMap.get(contactGroupResourceName).add(contactResourceName);
         }
     }
 
