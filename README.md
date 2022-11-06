@@ -20,7 +20,7 @@ What is missing:
 
 A full working version ~~could probably be ready by~~ ~~June / July 2021~~ ~~September~~ ~~the end of 2021~~ will be ready a few months after the new TbSync is released.
 
-**Thunderbird 102+ users please note**. Google-4-TbSync 0.4.x runs much slower than 0.3.0 (in my tests it performs 7x slower!). This is a known issue. Please see [FAQ](https://github.com/zanonmark/Google-4-TbSync/wiki/FAQ-(Frequently-Asked-Questions)) for details.
+**Thunderbird 102+ users please note**. Google-4-TbSync 0.4.x runs much slower than 0.3.x (in my tests it performs 7x slower!). This is a known issue, please see [FAQ](https://github.com/zanonmark/Google-4-TbSync/wiki/FAQ-(Frequently-Asked-Questions)) for details. Upgrading to 0.5.x will greatly improve things, especially when upgrading an addressbook.
 
 ## How to use it
 
