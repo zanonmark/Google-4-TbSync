@@ -7,6 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
 
+/*
+ * Copied and slightly adapted from other TbSync add-ons.
+ */
+
 "use strict";
 
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");

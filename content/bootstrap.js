@@ -7,6 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
 
+/*
+ * Copied and slightly adapted from other TbSync add-ons.
+ */
+
 // No need to create namespace, we are in a sandbox.
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
