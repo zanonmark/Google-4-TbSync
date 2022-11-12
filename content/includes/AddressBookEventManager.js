@@ -33,18 +33,13 @@ class AddressBookEventManager {
         }
 */
         //
-        let addressBookId = node.parentId;
         let contactId = node.id;
         //
-        if (undefined === this._addressBookEventMap.get(addressBookId)) {
-            this._addressBookEventMap.set(addressBookId, new Map());
+        if (undefined === this._addressBookEventMap.get("contacts.onCreated")) {
+            this._addressBookEventMap.set("contacts.onCreated", new Set());
         }
         //
-        if (undefined === this._addressBookEventMap.get(addressBookId).get("contacts.created")) {
-            this._addressBookEventMap.get(addressBookId).set("contacts.created", new Set());
-        }
-        //
-        this._addressBookEventMap.get(addressBookId).get("contacts.created").add(contactId);
+        this._addressBookEventMap.get("contacts.onCreated").add(contactId);
     }
 
     onContactUpdated(node, changedProperties) {
@@ -55,19 +50,14 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'changedProperties': null.");
         }
         //
-        let addressBookId = node.parentId;
         let contactId = node.id;
         //
-// FIXME: first check that 'contactId' is not already in the 'contacts.created' map.
-        if (undefined === this._addressBookEventMap.get(addressBookId)) {
-            this._addressBookEventMap.set(addressBookId, new Map());
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("contacts.onUpdated")) {
+            this._addressBookEventMap.set("contacts.onUpdated", new Set());
         }
         //
-        if (undefined === this._addressBookEventMap.get(addressBookId).get("contacts.updated")) {
-            this._addressBookEventMap.get(addressBookId).set("contacts.updated", new Set());
-        }
-        //
-        this._addressBookEventMap.get(addressBookId).get("contacts.updated").add(contactId);
+        this._addressBookEventMap.get("contacts.onUpdated").add(contactId);
     }
 
     onContactDeleted(parentId, id) {
@@ -78,19 +68,14 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
         //
-        let addressBookId = parentId;
         let contactId = id;
         //
-// FIXME: first check that 'contactId' is not already in the 'contacts.created' or 'contacts.updated' maps.
-        if (undefined === this._addressBookEventMap.get(addressBookId)) {
-            this._addressBookEventMap.set(addressBookId, new Map());
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("contacts.onDeleted")) {
+            this._addressBookEventMap.set("contacts.onDeleted", new Set());
         }
         //
-        if (undefined === this._addressBookEventMap.get(addressBookId).get("contacts.deleted")) {
-            this._addressBookEventMap.get(addressBookId).set("contacts.deleted", new Set());
-        }
-        //
-        this._addressBookEventMap.get(addressBookId).get("contacts.deleted").add(contactId);
+        this._addressBookEventMap.get("contacts.onDeleted").add(contactId);
     }
 
     onMailingListCreated(node) {
@@ -98,7 +83,14 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
         //
-// TODO.
+        let mailingListId = node.id;
+        //
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("mailingLists.onCreated")) {
+            this._addressBookEventMap.set("mailingLists.onCreated", new Set());
+        }
+        //
+        this._addressBookEventMap.get("mailingLists.onCreated").add(mailingListId);
     }
 
     onMailingListUpdated(node) {
@@ -106,7 +98,14 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
         //
-// TODO.
+        let mailingListId = node.id;
+        //
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("mailingLists.onUpdated")) {
+            this._addressBookEventMap.set("mailingLists.onUpdated", new Set());
+        }
+        //
+        this._addressBookEventMap.get("mailingLists.onUpdated").add(mailingListId);
     }
 
     onMailingListDeleted(parentId, id) {
@@ -117,7 +116,14 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
         //
-// TODO.
+        let mailingListId = id;
+        //
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("mailingLists.onDeleted")) {
+            this._addressBookEventMap.set("mailingLists.onDeleted", new Set());
+        }
+        //
+        this._addressBookEventMap.get("mailingLists.onDeleted").add(mailingListId);
     }
 
     onMailingListMemberAdded(node) {
@@ -125,7 +131,18 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
         //
-// TODO.
+        let mailingListId = node.parentId;
+        let contactId = node.id;
+        //
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("mailingLists.onMemberAdded")) {
+            this._addressBookEventMap.set("mailingLists.onMemberAdded", new Map());
+        }
+        if (undefined === this._addressBookEventMap.get("mailingLists.onMemberAdded").get(mailingListId)) {
+            this._addressBookEventMap.get("mailingLists.onMemberAdded").set(mailingListId, new Set());
+        }
+        //
+        this._addressBookEventMap.get("mailingLists.onMemberAdded").get(mailingListId).add(contactId);
     }
 
     onMailingListMemberRemoved(parentId, id) {
@@ -136,7 +153,18 @@ class AddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
         //
-// TODO.
+        let mailingListId = parentId;
+        let contactId = id;
+        //
+// FIXME / TODO: check for possible conflicts with other listeners.
+        if (undefined === this._addressBookEventMap.get("mailingLists.onMemberRemoved")) {
+            this._addressBookEventMap.set("mailingLists.onMemberRemoved", new Map());
+        }
+        if (undefined === this._addressBookEventMap.get("mailingLists.onMemberRemoved").get(mailingListId)) {
+            this._addressBookEventMap.get("mailingLists.onMemberRemoved").set(mailingListId, new Set());
+        }
+        //
+        this._addressBookEventMap.get("mailingLists.onMemberRemoved").get(mailingListId).add(contactId);
     }
 
 }
