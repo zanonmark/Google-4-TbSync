@@ -19,6 +19,7 @@
     },
     "background": {
         "scripts": [
+            "content/includes/IllegalArgumentError.js",
             "content/includes/AddressBookEventManager.js",
             "background.js"
         ]
