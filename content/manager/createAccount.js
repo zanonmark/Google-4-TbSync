@@ -9,7 +9,7 @@
  
 "use strict";
 
-var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
+let { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
 
 const google = TbSync.providers.google;
 

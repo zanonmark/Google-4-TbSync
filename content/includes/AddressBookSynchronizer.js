@@ -25,7 +25,7 @@ if ("undefined" === typeof ResponseError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
 }
 
-var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+let { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 XPCOMUtils.defineLazyModuleGetters(this, {
     VCardPropertyEntry: "resource:///modules/VCardUtils.jsm",
 });
