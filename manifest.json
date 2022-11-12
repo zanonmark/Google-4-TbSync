@@ -19,10 +19,12 @@
     },
     "background": {
         "scripts": [
+            "content/includes/AddressBookEventManager.js",
             "background.js"
         ]
     },
     "permissions": [
+        "addressBooks"
     ],
     "experiment_apis": {
         "BootstrapLoader": {

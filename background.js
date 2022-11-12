@@ -21,7 +21,16 @@ async function main() {
         ],
     ]);
     //
-    await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");  
+    await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");
+    //
+    messenger.contacts.onCreated.addListener(addressBookEventManager.onContactCreated);
+    messenger.contacts.onUpdated.addListener(addressBookEventManager.onContactUpdated);
+    messenger.contacts.onDeleted.addListener(addressBookEventManager.onContactDeleted);
+    messenger.mailingLists.onCreated.addListener(addressBookEventManager.onMailingListCreated);
+    messenger.mailingLists.onUpdated.addListener(addressBookEventManager.onMailingListUpdated);
+    messenger.mailingLists.onDeleted.addListener(addressBookEventManager.onMailingListDeleted);
+    messenger.mailingLists.onMemberAdded.addListener(addressBookEventManager.onMailingListMemberAdded);
+    messenger.mailingLists.onMemberRemoved.addListener(addressBookEventManager.onMailingListMemberRemoved);
 }
 
 main();
