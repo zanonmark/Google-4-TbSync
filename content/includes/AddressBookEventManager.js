@@ -153,6 +153,8 @@ class AddressBookEventManager {
         // Synchronize with other events for the same id(s).
         if ((undefined !== this._addressBookEventMap.get("mailingLists.onMemberRemoved")) && (undefined !== this._addressBookEventMap.get("mailingLists.onMemberRemoved").get(mailingListId))) {
             this._addressBookEventMap.get("mailingLists.onMemberRemoved").get(mailingListId).delete(contactId);
+            //
+            return;
         }
         // Prepare the event map.
         if (undefined === this._addressBookEventMap.get("mailingLists.onMemberAdded")) {
@@ -178,6 +180,8 @@ class AddressBookEventManager {
         // Synchronize with other events for the same id(s).
         if ((undefined !== this._addressBookEventMap.get("mailingLists.onMemberAdded")) && (undefined !== this._addressBookEventMap.get("mailingLists.onMemberAdded").get(mailingListId))) {
             this._addressBookEventMap.get("mailingLists.onMemberAdded").get(mailingListId).delete(contactId);
+            //
+            return;
         }
         // Prepare the event map.
         if (undefined === this._addressBookEventMap.get("mailingLists.onMemberRemoved")) {
