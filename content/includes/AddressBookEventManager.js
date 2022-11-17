@@ -41,6 +41,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("contacts.onCreated").add(contactId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onContactUpdated(node, changedProperties) {
@@ -62,6 +64,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("contacts.onUpdated").add(contactId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onContactDeleted(parentId, id) {
@@ -86,6 +90,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("contacts.onDeleted").add(contactId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onMailingListCreated(node) {
@@ -100,6 +106,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("mailingLists.onCreated").add(mailingListId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onMailingListUpdated(node) {
@@ -118,6 +126,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("mailingLists.onUpdated").add(mailingListId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onMailingListDeleted(parentId, id) {
@@ -142,6 +152,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("mailingLists.onDeleted").add(mailingListId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onMailingListMemberAdded(node) {
@@ -166,6 +178,8 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("mailingLists.onMemberAdded").get(mailingListId).add(contactId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
     }
 
     onMailingListMemberRemoved(parentId, id) {
@@ -193,8 +207,28 @@ class AddressBookEventManager {
         }
         // Update the event map.
         this._addressBookEventMap.get("mailingLists.onMemberRemoved").get(mailingListId).add(contactId);
+        // Save the event map.
+        this.saveAddressBookEventMap();
+    }
+
+    /* I/O. */
+
+    async loadAddressBookEventMap() {
+        // Search for a previous event map in the local storage.
+        let { addressBookEventMap } = await messenger.storage.local.get({ addressBookEventMap: undefined });
+        // If such a previous event map is found...
+        if (undefined !== addressBookEventMap) {
+            // Assign it to the current event map.
+            this._addressBookEventMap = addressBookEventMap;
+        }
+    }
+
+    async saveAddressBookEventMap() {
+        // Save the event map to the local storage.
+        await messenger.storage.local.set({ addressBookEventMap: this._addressBookEventMap });
     }
 
 }
 
 var addressBookEventManager = new AddressBookEventManager();
+addressBookEventManager.loadAddressBookEventMap();

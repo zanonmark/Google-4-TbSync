@@ -25,7 +25,8 @@
         ]
     },
     "permissions": [
-        "addressBooks"
+        "addressBooks",
+        "storage"
     ],
     "experiment_apis": {
         "BootstrapLoader": {
