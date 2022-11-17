@@ -18,6 +18,7 @@ class AddressBookEventManager {
     /* */
 
     constructor() {
+        // Initialize the event map.
         this._addressBookEventMap = new Map();
     }
 
