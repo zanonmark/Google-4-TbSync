@@ -541,8 +541,8 @@ class AddressBookSynchronizer {
                         tel_type_param = "cell";
                         //
                         break;
-                    case "Home Fax":
-                    case "Work Fax":
+                    case "homeFax":
+                    case "workFax":
                         tel_type_param = "fax";
                         //
                         break;
