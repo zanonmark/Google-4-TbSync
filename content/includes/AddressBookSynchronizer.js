@@ -353,46 +353,67 @@ class AddressBookSynchronizer {
         localContact._card.vCardProperties.clearValues("x-custom4");
         // Set the name and the display name.
         if (serverContact.names) {
-            let n_values = [ "", "", "", "", "" ];
-            let fn_values = [ "" ];
-            //
-            if (serverContact.names[0] && serverContact.names[0].honorificPrefix) {
-                n_values[3] = serverContact.names[0].honorificPrefix.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.names[0] && serverContact.names[0].givenName) {
-                n_values[1] = serverContact.names[0].givenName.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.names[0] && serverContact.names[0].middleName) {
-                n_values[2] = serverContact.names[0].middleName.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.names[0] && serverContact.names[0].familyName) {
-                n_values[0] = serverContact.names[0].familyName.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.names[0] && serverContact.names[0].honorificSuffix) {
-                n_values[4] = serverContact.names[0].honorificSuffix.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.names[0] && serverContact.names[0].displayName) {
-                fn_values[0] = serverContact.names[0].displayName.replaceAll(", ", " ").replaceAll(",", " ");
+            let name_found = false;
+            let name = null;
+            for (name of serverContact.names) {
+                if ("CONTACT" === name.metadata.source.type) {
+                    name_found = true;
+                    break;
+                }
             }
             //
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("n", {}, "array", n_values));
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("fn", {}, "text", fn_values[0]));
+            if (name_found) {
+                let n_values = [ "", "", "", "", "" ];
+                let fn_values = [ "" ];
+                //
+                if (name.honorificPrefix) {
+                    n_values[3] = name.honorificPrefix.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (name.givenName) {
+                    n_values[1] = name.givenName.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (name.middleName) {
+                    n_values[2] = name.middleName.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (name.familyName) {
+                    n_values[0] = name.familyName.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (name.honorificSuffix) {
+                    n_values[4] = name.honorificSuffix.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (name.displayName) {
+                    fn_values[0] = name.displayName.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                //
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("n", {}, "array", n_values));
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("fn", {}, "text", fn_values[0]));
+            }
         }
         // Set the nickname.
         if (serverContact.nicknames) {
-            let nickname_values = [ "" ];
+            let nickname_found = false;
+            let nickname = serverContact.nicknames[0];
+            nickname_found = true;
             //
-            if (serverContact.nicknames[0] && serverContact.nicknames[0].value) {
-                nickname_values[0] = serverContact.nicknames[0].value.replaceAll(", ", " ").replaceAll(",", " ");
+            if (nickname_found) {
+                let nickname_values = [ "" ];
+                //
+                if (nickname.value) {
+                    nickname_values[0] = nickname.value.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                //
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("nickname", {}, "array", nickname_values));
             }
-            //
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("nickname", {}, "array", nickname_values));
         }
         // Set the email addresses.
         if (serverContact.emailAddresses) {
             let pref_param = "1";
             //
             for (let emailAddress of serverContact.emailAddresses) {
+                if ("CONTACT" !== emailAddress.metadata.source.type) {
+                    continue;
+                }
+                //
                 let email_values = [ "" ];
                 let email_type_param = "";
                 //
@@ -520,8 +541,8 @@ class AddressBookSynchronizer {
                         tel_type_param = "cell";
                         //
                         break;
-                    case "Home Fax":
-                    case "Work Fax":
+                    case "homeFax":
+                    case "workFax":
                         tel_type_param = "fax";
                         //
                         break;
@@ -552,17 +573,23 @@ class AddressBookSynchronizer {
         }
         // Set the special dates.
         if (serverContact.birthdays) {
-            let bday_values = [ "" ];
+            let birthday_found = false;
+            let birthday = serverContact.birthdays[0];
+            birthday_found = true;
             //
-            if (serverContact.birthdays[0] && serverContact.birthdays[0].date) {
-                let year = (serverContact.birthdays[0].date.year ? String(serverContact.birthdays[0].date.year).padStart(4, "0") : "-");
-                let month = (serverContact.birthdays[0].date.month ? String(serverContact.birthdays[0].date.month).padStart(2, "0") : "-");
-                let day = (serverContact.birthdays[0].date.day ? String(serverContact.birthdays[0].date.day).padStart(2, "0") : "-");
+            if (birthday_found) {
+                let bday_values = [ "" ];
                 //
-                bday_values[0] = year + "-" + month + "-" + day;
+                if (birthday.date) {
+                    let year = (birthday.date.year ? String(birthday.date.year).padStart(4, "0") : "-");
+                    let month = (birthday.date.month ? String(birthday.date.month).padStart(2, "0") : "-");
+                    let day = (birthday.date.day ? String(birthday.date.day).padStart(2, "0") : "-");
+                    //
+                    bday_values[0] = year + "-" + month + "-" + day;
+                }
+                //
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("bday", {}, "date-and-or-time", bday_values[0]));
             }
-            //
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("bday", {}, "date-and-or-time", bday_values[0]));
         }
         if (serverContact.events) {
             for (let event of serverContact.events) {
@@ -591,25 +618,31 @@ class AddressBookSynchronizer {
         }
         // Set the organizational properties.
         if (serverContact.organizations) {
-            let title_values = [ "" ];
-            let org_values = [ "" ];
+            let organization_found = false;
+            let organization = serverContact.organizations[0];
+            organization_found = true;
             //
-            if (serverContact.organizations[0] && serverContact.organizations[0].title) {
-                title_values[0] = serverContact.organizations[0].title.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.organizations[0] && serverContact.organizations[0].name) {
-                org_values[0] = serverContact.organizations[0].name.replaceAll(", ", " ").replaceAll(",", " ");
-            }
-            if (serverContact.organizations[0] && serverContact.organizations[0].department) {
-// FIXME: temporary.
-                if (!serverContact.organizations[0].name) {
-                    org_values[0] = "-"; // necessary because TB considers the first item to be the name
+            if (organization_found) {
+                let title_values = [ "" ];
+                let org_values = [ "" ];
+                //
+                if (organization.title) {
+                    title_values[0] = organization.title.replaceAll(", ", " ").replaceAll(",", " ");
                 }
-                org_values[1] = serverContact.organizations[0].department.replaceAll(", ", " ").replaceAll(",", " ");
+                if (organization.name) {
+                    org_values[0] = organization.name.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                if (organization.department) {
+// FIXME: temporary.
+                    if (!organization.name) {
+                        org_values[0] = "-"; // necessary because TB considers the first item to be the name
+                    }
+                    org_values[1] = organization.department.replaceAll(", ", " ").replaceAll(",", " ");
+                }
+                //
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("title", {}, "array", title_values));
+                localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("org", {}, "array", org_values));
             }
-            //
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("title", {}, "array", title_values));
-            localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("org", {}, "array", org_values));
         }
         // Set the custom properties.
         if (serverContact.userDefined) {
