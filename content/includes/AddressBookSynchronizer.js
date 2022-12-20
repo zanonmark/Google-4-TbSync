@@ -490,16 +490,16 @@ class AddressBookSynchronizer {
                     adr_values[2][1] = address.extendedAddress.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.city) {
-                    adr_values[3] = address.city.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[3] = address.city.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.region) {
-                    adr_values[4] = address.region.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[4] = address.region.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.postalCode) {
-                    adr_values[5] = address.postalCode.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[5] = address.postalCode.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 if (address.country) {
-                    adr_values[6] = address.country.replaceAll(", ", " ").replaceAll(",", " ");
+                    adr_values[6] = address.country.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
                 }
                 switch (address.type) {
                     case "home":
