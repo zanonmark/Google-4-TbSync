@@ -31,6 +31,17 @@ async function main() {
     messenger.mailingLists.onDeleted.addListener( (parentId, id) => addressBookEventManager.onMailingListDeleted(parentId, id) );
     messenger.mailingLists.onMemberAdded.addListener( (node) => addressBookEventManager.onMailingListMemberAdded(node) );
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => addressBookEventManager.onMailingListMemberRemoved(parentId, id) );
+// FIXME: temporary.
+messenger.browserAction.onClicked.addListener(async (tab, info) => {
+    accountData = new Map();
+    accountData.set("clientID", "*** INSERT HERE ***");
+    accountData.set("clientSecret", "*** INSERT HERE ***");
+    accountData.set("includeSystemContactGroups", "true");
+    accountData.set("refreshToken", "");
+    //
+    let peopleAPI = new PeopleAPI(accountData);
+    peopleAPI.checkConnection();
+} );
 }
 
 main();

@@ -9,24 +9,6 @@
 
 "use strict";
 
-if ("undefined" === typeof AuthorizationCodeError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AuthorizationCodeError.js", this, "UTF-8");
-}
-if ("undefined" === typeof IllegalArgumentError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/IllegalArgumentError.js", this, "UTF-8");
-}
-if ("undefined" === typeof Logger) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/Logger.js", this, "UTF-8");
-}
-if ("undefined" === typeof NetworkError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
-}
-if ("undefined" === typeof ResponseError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
-}
-
-let { MailE10SUtils } = ChromeUtils.import("resource:///modules/MailE10SUtils.jsm");
-
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
@@ -60,95 +42,41 @@ class PeopleAPI {
     }
 
     getClientID() {
+/* FIXME: temporary.
         return this.getAccountData().getAccountProperty("clientID");
+*/
+return this.getAccountData().get("clientID");
     }
 
     getClientSecret() {
+/* FIXME: temporary.
         return this.getAccountData().getAccountProperty("clientSecret");
+*/
+return this.getAccountData().get("clientSecret");
     }
 
     getIncludeSystemContactGroups() {
+/* FIXME: temporary.
         return this.getAccountData().getAccountProperty("includeSystemContactGroups");
+*/
+return this.getAccountData().get("includeSystemContactGroups");
     }
 
     setRefreshToken(refreshToken) {
+/* FIXME: temporary.
         this.getAccountData().setAccountProperty("refreshToken", refreshToken);
+*/
+this.getAccountData().set("refreshToken", refreshToken);
     }
 
     getRefreshToken() {
+/* FIXME: temporary.
         return this.getAccountData().getAccountProperty("refreshToken");
+*/
+return this.getAccountData().get("refreshToken");
     }
 
-    /* Authentication and authorization. */
-
-    async getNewAuthorizationCode() {
-        let clientID = this.getClientID();
-        // Prepare a new promise.
-        let promise = new Promise(function(resolve, reject) {
-            // Prepare the authorization code request URL.
-            let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth";
-            authorizationCodeRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-                client_id: clientID,
-                redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
-                scope: SCOPES,
-                response_type: "code",
-            });
-            logger.log1("PeopleAPI.getNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
-            // Open the browser window and set the event handlers.
-            let windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
-            let authenticationWindow = windowWatcher.openWindow(null, "chrome://google-4-tbsync/content/manager/authenticate.xhtml", null, "chrome,centerscreen", null);
-            let browserWidget = null;
-            let titleInterval = null;
-            let authorizationCodeRetrieved = false;
-            authenticationWindow.onload = function() {
-                // Set the browser widget.
-                browserWidget = authenticationWindow.document.getElementById("browser");
-                // Load the URL.
-                MailE10SUtils.loadURI(browserWidget, authorizationCodeRequestURL);
-                // Check the response every 1s.
-                titleInterval = authenticationWindow.setInterval(function() {
-                    // Retrieve the browser title.
-                    let browserTitle = browserWidget.contentTitle;
-                    // If the browser title contains "Success"...
-                    if (browserTitle.startsWith("Success")) {
-                        let pattern = new RegExp("code=(.*)&", "i");
-                        let group = pattern.exec(browserTitle);
-                        // ...and if the authorization code could be retrieved...
-                        if (null != group) {
-                            let authorizationCode = group[1];
-                            logger.log1("PeopleAPI.getNewAuthorizationCode(): authorizationCode = " + authorizationCode);
-                            // Close the browser window.
-                            authenticationWindow.close();
-                            // Stop the title interval.
-                            authenticationWindow.clearInterval(titleInterval);
-                            // Return the authorization code.
-                            authorizationCodeRetrieved = true;
-                            resolve(authorizationCode);
-                        }
-                    }
-                    // If the browser title contains "Error"...
-                    else if (browserTitle.startsWith("Error")) {
-                        // Close the browser window.
-                        authenticationWindow.close();
-                        // Stop the title interval.
-                        authenticationWindow.clearInterval(titleInterval);
-                        // Return an error.
-                        reject(new AuthorizationCodeError("Browser title: " + browserTitle));
-                    }
-                }, 1000);
-            };
-            authenticationWindow.onclose = function() {
-                // Stop the title interval.
-                authenticationWindow.clearInterval(titleInterval);
-                // Return an error if the browser window was closed before retrieving the authorization code.
-                if (!authorizationCodeRetrieved) {
-                    reject(new AuthorizationCodeError("Browser window closed before the authorization code was retrieved."));
-                }
-            }
-        });
-        //
-        return promise;
-    }
+    /* HTTP requests. */
 
     async getResponseData(method, requestURL, requestData) {
         if ((null == method) || ("" === method)) {
@@ -194,17 +122,56 @@ class PeopleAPI {
         return responseData;
     }
 
+    /* Authentication and authorization. */
+
+    async retrieveNewAuthorizationCode() {
+        // Prepare the authorization code request URL.
+        let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth";
+        authorizationCodeRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            client_id: this.getClientID(),
+            redirect_uri: messenger.identity.getRedirectURL(),
+            scope: SCOPES,
+            response_type: "code",
+            prompt: "consent",
+            access_type: "offline",
+        });
+        logger.log1("PeopleAPI.retrieveNewAuthorizationCode(): authorizationCodeRequestURL = " + authorizationCodeRequestURL);
+        // Try retrieving the authorization code.
+        try {
+            // Open the authentication window and retrieve the data.
+            let authorizationCodeResponseURL = await messenger.identity.launchWebAuthFlow({
+                url: authorizationCodeRequestURL,
+                interactive: true,
+            });
+            // Retrieve the authorization code.
+            let pattern = new RegExp("code=(.*?)&", "i");
+            let group = pattern.exec(authorizationCodeResponseURL);
+            let authorizationCode = null;
+            if (null != group) {
+                authorizationCode = decodeURIComponent(group[1]);
+                logger.log1("PeopleAPI.retrieveNewAuthorizationCode(): authorizationCode = " + authorizationCode);
+            }
+            //
+            return authorizationCode;
+        }
+        catch (error) {
+            throw new AuthorizationCodeError("Invalid authorization code: " + error.message);
+        }
+    }
+
     async retrieveNewRefreshToken() {
-        // Get a new authorization code.
-        let authorizationCode = await this.getNewAuthorizationCode();
+        // Retrieve a new authorization code.
+        let authorizationCode = await this.retrieveNewAuthorizationCode();
         // Prepare the refresh token request URL and data.
         let refreshTokenRequestURL = "https://accounts.google.com/o/oauth2/token";
         let refreshTokenRequestData = {
             client_id: this.getClientID(),
             client_secret: this.getClientSecret(),
-            redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
+            redirect_uri: messenger.identity.getRedirectURL(),
+            scope: "", // useless?
             grant_type: "authorization_code",
             code: authorizationCode,
+            response_type: "refresh_token", // useless?
         };
         // Perform the request and retrieve the response data.
         let responseData = await this.getResponseData("POST", refreshTokenRequestURL, refreshTokenRequestData);
@@ -215,8 +182,8 @@ class PeopleAPI {
         this.setRefreshToken(refreshToken);
     }
 
-    async getNewAccessToken(retrieveNewRefreshToken = false) {
-        logger.log1("PeopleAPI.getNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
+    async retrieveNewAccessToken(retrieveNewRefreshToken = false) {
+        logger.log1("PeopleAPI.retrieveNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
         // Retrieve a new refresh token if necessary.
         if (retrieveNewRefreshToken) {
             await this.retrieveNewRefreshToken();
@@ -237,7 +204,7 @@ class PeopleAPI {
             let responseData = await this.getResponseData("POST", accessTokenRequestURL, accessTokenRequestData);
             // Retrieve the access token.
             let accessToken = responseData.access_token;
-            logger.log1("PeopleAPI.getNewAccessToken(): accessToken = " + accessToken);
+            logger.log1("PeopleAPI.retrieveNewAccessToken(): accessToken = " + accessToken);
             //
             return accessToken;
         }
@@ -248,7 +215,7 @@ class PeopleAPI {
                 if (!retrieveNewRefreshToken) {
                     // Retry with a new refresh token.
                     logger.log1("Unable to get a new access token, retrying with a new refresh token first.");
-                    return await this.getNewAccessToken(true);
+                    return await this.retrieveNewAccessToken(true);
                 }
                 // If the new refresh token was used...
                 else {
@@ -265,8 +232,8 @@ class PeopleAPI {
     }
 
     async getAuthenticatedUser() { // https://developers.google.com/people/api/rest/v1/people/get
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Prepare the authenticated user request URL and data.
         let authenticatedUserRequestURL = SERVICE_ENDPOINT + "/v1/people/me";
         authenticatedUserRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -286,8 +253,8 @@ class PeopleAPI {
     /* Contacts. */
 
     async getContacts() { // https://developers.google.com/people/api/rest/v1/people.connections/list
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Retrieve the contacts page by page.
         let contacts = [];
         let nextPageToken = null;
@@ -329,8 +296,8 @@ class PeopleAPI {
         if (null == contact) {
             throw new IllegalArgumentError("Invalid 'contact': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Prepare the contact creation request URL and data.
         let contactCreationRequestURL = SERVICE_ENDPOINT + "/v1/people:createContact";
         contactCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -351,8 +318,8 @@ class PeopleAPI {
         if (null == contact) {
             throw new IllegalArgumentError("Invalid 'contact': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Get the resource name.
         let resourceName = contact.resourceName;
         // Prepare the contact update request URL and data.
@@ -376,8 +343,8 @@ class PeopleAPI {
         if (null == resourceName) {
             throw new IllegalArgumentError("Invalid 'resourceName': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Prepare the contact deletion request URL and data.
         let contactDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":deleteContact";
         contactDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -394,8 +361,8 @@ class PeopleAPI {
     /* Contact groups. */
 
     async getContactGroups() { // https://developers.google.com/people/api/rest/v1/contactGroups/list
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Retrieve the contact groups page by page.
         let contactGroups = [];
         let nextPageToken = null;
@@ -436,8 +403,8 @@ class PeopleAPI {
         if (null == contactGroup) {
             throw new IllegalArgumentError("Invalid 'contactGroup': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Prepare the contact group creation request URL and data.
         let contactGroupCreationRequestURL = SERVICE_ENDPOINT + "/v1/contactGroups";
         contactGroupCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -460,8 +427,8 @@ class PeopleAPI {
         if (null == contactGroup) {
             throw new IllegalArgumentError("Invalid 'contactGroup': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Get the resource name.
         let resourceName = contactGroup.resourceName;
         // Prepare the contact group update request URL and data.
@@ -487,8 +454,8 @@ class PeopleAPI {
         if (null == resourceName) {
             throw new IllegalArgumentError("Invalid 'resourceName': null.");
         }
-        // Get a new access token.
-        let accessToken = await this.getNewAccessToken();
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
         // Prepare the contact group deletion request URL and data.
         let contactGroupDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName;
         contactGroupDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
