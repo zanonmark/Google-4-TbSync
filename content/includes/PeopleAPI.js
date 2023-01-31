@@ -124,7 +124,7 @@ return this.getAccountData().get("refreshToken");
 
     /* Authentication and authorization. */
 
-    async retrieveNewAuthorizationCode() {
+    async retrieveNewAuthorizationCode() { // https://developers.google.com/oauthplayground
         // Prepare the authorization code request URL.
         let authorizationCodeRequestURL = "https://accounts.google.com/o/oauth2/auth";
         authorizationCodeRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
@@ -159,7 +159,7 @@ return this.getAccountData().get("refreshToken");
         }
     }
 
-    async retrieveNewRefreshToken() {
+    async retrieveNewRefreshToken() { // https://developers.google.com/oauthplayground
         // Retrieve a new authorization code.
         let authorizationCode = await this.retrieveNewAuthorizationCode();
         // Prepare the refresh token request URL and data.
@@ -182,7 +182,7 @@ return this.getAccountData().get("refreshToken");
         this.setRefreshToken(refreshToken);
     }
 
-    async retrieveNewAccessToken(retrieveNewRefreshToken = false) {
+    async retrieveNewAccessToken(retrieveNewRefreshToken = false) { // https://developers.google.com/oauthplayground
         logger.log1("PeopleAPI.retrieveNewAccessToken(): retrieveNewRefreshToken = " + retrieveNewRefreshToken);
         // Retrieve a new refresh token if necessary.
         if (retrieveNewRefreshToken) {
