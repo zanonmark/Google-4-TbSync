@@ -23,7 +23,7 @@ async function main() {
     //
     await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");
     //
-    messenger.contacts.onCreated.addListener( (node, id) => addressBookEventManager.onContactCreated(node, id) );
+    messenger.contacts.onCreated.addListener( (node) => addressBookEventManager.onContactCreated(node) );
     messenger.contacts.onUpdated.addListener( (node, changedProperties) => addressBookEventManager.onContactUpdated(node, changedProperties) );
     messenger.contacts.onDeleted.addListener( (parentId, id) => addressBookEventManager.onContactDeleted(parentId, id) );
     messenger.mailingLists.onCreated.addListener( (node) => addressBookEventManager.onMailingListCreated(node) );
@@ -32,15 +32,29 @@ async function main() {
     messenger.mailingLists.onMemberAdded.addListener( (node) => addressBookEventManager.onMailingListMemberAdded(node) );
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => addressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
+await messenger.storage.local.clear();
+// FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
     accountData.set("clientID", "*** INSERT HERE ***");
     accountData.set("clientSecret", "*** INSERT HERE ***");
-    accountData.set("includeSystemContactGroups", "true");
     accountData.set("refreshToken", "");
-    //
-    let peopleAPI = new PeopleAPI(accountData);
-    peopleAPI.checkConnection();
+    accountData.set("includeSystemContactGroups", "true");
+    accountData.set("useFakeEmailAddresses", "true");
+    accountData.set("readOnlyMode", "true");
+    accountData.set("verboseLogging", "true");
+    syncData = {
+        accountData: accountData,
+        target: "53e04e69-57c7-4152-a313-16507e8ad9b6",
+    };
+    //~ // TEST #1.
+    //~ let peopleAPI = new PeopleAPI(accountData);
+    //~ peopleAPI.checkConnection();
+    //~ // TEST #2.
+    let addressBooks = await messenger.addressBooks.list(false);
+    console.log(addressBooks);
+    //~ // TEST #3.
+    //~ AddressBookSynchronizer.synchronize(syncData);
 } );
 }
 
