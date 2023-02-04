@@ -122,7 +122,7 @@ return this.getAccountData().get("refreshToken");
         return responseData;
     }
 
-    /* Authentication and authorization. */
+    /* OAuth authentication and authorization. */
 
     async retrieveNewAuthorizationCode() { // https://developers.google.com/oauthplayground
         // Prepare the authorization code request URL.
