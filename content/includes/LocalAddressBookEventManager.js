@@ -9,7 +9,7 @@
 
 "use strict";
 
-class AddressBookEventManager {
+class LocalAddressBookEventManager {
 
 /* FIXME: disabled as it is still not fully supported.
     _eventMap = null;
@@ -293,5 +293,5 @@ class AddressBookEventManager {
 
 }
 
-var addressBookEventManager = new AddressBookEventManager();
-addressBookEventManager.loadEventMap();
+var localAddressBookEventManager = new LocalAddressBookEventManager();
+localAddressBookEventManager.loadEventMap();

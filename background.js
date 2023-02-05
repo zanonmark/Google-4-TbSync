@@ -23,14 +23,14 @@ async function main() {
     //
     await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");
     //
-    messenger.contacts.onCreated.addListener( (node) => addressBookEventManager.onContactCreated(node) );
-    messenger.contacts.onUpdated.addListener( (node, changedProperties) => addressBookEventManager.onContactUpdated(node, changedProperties) );
-    messenger.contacts.onDeleted.addListener( (parentId, id) => addressBookEventManager.onContactDeleted(parentId, id) );
-    messenger.mailingLists.onCreated.addListener( (node) => addressBookEventManager.onMailingListCreated(node) );
-    messenger.mailingLists.onUpdated.addListener( (node) => addressBookEventManager.onMailingListUpdated(node) );
-    messenger.mailingLists.onDeleted.addListener( (parentId, id) => addressBookEventManager.onMailingListDeleted(parentId, id) );
-    messenger.mailingLists.onMemberAdded.addListener( (node) => addressBookEventManager.onMailingListMemberAdded(node) );
-    messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => addressBookEventManager.onMailingListMemberRemoved(parentId, id) );
+    messenger.contacts.onCreated.addListener( (node) => localAddressBookEventManager.onContactCreated(node) );
+    messenger.contacts.onUpdated.addListener( (node, changedProperties) => localAddressBookEventManager.onContactUpdated(node, changedProperties) );
+    messenger.contacts.onDeleted.addListener( (parentId, id) => localAddressBookEventManager.onContactDeleted(parentId, id) );
+    messenger.mailingLists.onCreated.addListener( (node) => localAddressBookEventManager.onMailingListCreated(node) );
+    messenger.mailingLists.onUpdated.addListener( (node) => localAddressBookEventManager.onMailingListUpdated(node) );
+    messenger.mailingLists.onDeleted.addListener( (parentId, id) => localAddressBookEventManager.onMailingListDeleted(parentId, id) );
+    messenger.mailingLists.onMemberAdded.addListener( (node) => localAddressBookEventManager.onMailingListMemberAdded(node) );
+    messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => localAddressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
 await messenger.storage.local.clear();
 // FIXME: temporary.
@@ -51,10 +51,10 @@ messenger.browserAction.onClicked.addListener(async (tab, info) => {
     //~ let peopleAPI = new PeopleAPI(accountData);
     //~ peopleAPI.checkConnection();
     //~ // TEST #2.
-    let addressBooks = await messenger.addressBooks.list(false);
-    console.log(addressBooks);
-    //~ // TEST #3.
-    //~ AddressBookSynchronizer.synchronize(syncData);
+    //~ let addressBooks = await messenger.addressBooks.list(false);
+    //~ console.log(addressBooks);
+    // TEST #3.
+    AddressBookSynchronizer.synchronize(syncData);
 } );
 }
 
