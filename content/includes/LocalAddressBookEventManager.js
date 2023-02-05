@@ -28,7 +28,7 @@ class LocalAddressBookEventManager {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
-        // Get the id(s).
+        // Get the ids.
         let contactId = node.id;
         let addressBookId = node.parentId;
         // Prepare the new item flag.
@@ -55,12 +55,12 @@ class LocalAddressBookEventManager {
         if (null == changedProperties) {
             throw new IllegalArgumentError("Invalid 'changedProperties': null.");
         }
-        // Get the id(s).
+        // Get the ids.
         let contactId = node.id;
         let addressBookId = node.parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onCreated")) && (this._eventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
             return;
         }
@@ -86,12 +86,12 @@ class LocalAddressBookEventManager {
         if ((null == id) || ("" === id)) {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
-        // Get the id(s).
+        // Get the ids.
         let contactId = id;
         let addressBookId = parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onCreated")) && (this._eventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
             this._eventMap.get(addressBookId).get("contacts.onCreated").delete(contactId);
             //
@@ -119,7 +119,7 @@ class LocalAddressBookEventManager {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
-        // Get the id(s).
+        // Get the ids.
         let mailingListId = node.id;
         let addressBookId = node.parentId;
         // Prepare the new item flag.
@@ -143,12 +143,12 @@ class LocalAddressBookEventManager {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
-        // Get the id(s).
+        // Get the ids.
         let mailingListId = node.id;
         let addressBookId = node.parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._eventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
             return;
         }
@@ -174,12 +174,12 @@ class LocalAddressBookEventManager {
         if ((null == id) || ("" === id)) {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
-        // Get the id(s).
+        // Get the ids.
         let mailingListId = id;
         let addressBookId = parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._eventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
             this._eventMap.get(addressBookId).get("mailingLists.onCreated").delete(mailingListId);
             //
@@ -207,13 +207,13 @@ class LocalAddressBookEventManager {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
-        // Get the id(s).
+        // Get the ids.
         let contactId = node.id;
         let mailingListId = node.parentId;
         let addressBookId = (await messenger.contacts.get(contactId)).parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved")) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").has(contactId))) {
             this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").delete(contactId);
             //
@@ -244,13 +244,13 @@ class LocalAddressBookEventManager {
         if ((null == id) || ("" === id)) {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
         }
-        // Get the id(s).
+        // Get the ids.
         let contactId = id;
         let mailingListId = parentId;
         let addressBookId = (await messenger.contacts.get(contactId)).parentId;
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Synchronize with other events for the same id(s).
+        // Synchronize with other events for the same ids.
         if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded")) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").has(contactId))) {
             this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").delete(contactId);
             //
