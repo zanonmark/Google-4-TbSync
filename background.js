@@ -35,6 +35,10 @@ async function main() {
 localAddressBookEventManager.clearEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 //~ localAddressBookEventManager.disableEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
+remoteItemPropertyManager.setProperties("rubr", "contact/12345", "88888", "12345");
+console.log(remoteItemPropertyManager);
+console.log(remoteItemPropertyManager.getProperties("rubr", "contact/12345"));
+// FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
     accountData.set("clientID", "*** INSERT HERE ***");
