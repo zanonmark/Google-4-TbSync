@@ -13,6 +13,7 @@ class LocalAddressBookEventManager {
 
 /* FIXME: disabled as it is still not fully supported.
     _eventMap = null;
+    _disabledAddressBookIdSet = null;
 */
 
     /* */
@@ -20,6 +21,26 @@ class LocalAddressBookEventManager {
     constructor() {
         // Initialize the event map.
         this._eventMap = new Map();
+        // Initialize the disabled address book id set.
+        this._disabledAddressBookIdSet = new Set();
+    }
+
+    /* Event disabling. */
+
+    enableEvents(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Update the disabled address book id set.
+        this._disabledAddressBookIdSet.delete(addressBookId);
+    }
+
+    disableEvents(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Update the disabled address book id set.
+        this._disabledAddressBookIdSet.add(addressBookId);
     }
 
     /* Event listeners. */
@@ -31,6 +52,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = node.id;
         let addressBookId = node.parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Prepare the event map.
@@ -58,6 +83,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = node.id;
         let addressBookId = node.parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
@@ -89,6 +118,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = id;
         let addressBookId = parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
@@ -122,6 +155,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let mailingListId = node.id;
         let addressBookId = node.parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Prepare the event map.
@@ -146,6 +183,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let mailingListId = node.id;
         let addressBookId = node.parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
@@ -177,6 +218,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let mailingListId = id;
         let addressBookId = parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
@@ -211,6 +256,10 @@ class LocalAddressBookEventManager {
         let contactId = node.id;
         let mailingListId = node.parentId;
         let addressBookId = (await messenger.contacts.get(contactId)).parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
@@ -248,6 +297,10 @@ class LocalAddressBookEventManager {
         let contactId = id;
         let mailingListId = parentId;
         let addressBookId = (await messenger.mailingLists.get(mailingListId)).parentId;
+        // Determine if events are currently disabled for the addressbook.
+        if (this._disabledAddressBookIdSet.has(addressBookId)) {
+            return;
+        }
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.

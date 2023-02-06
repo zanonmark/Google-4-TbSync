@@ -33,6 +33,7 @@ async function main() {
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => localAddressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
 localAddressBookEventManager.clearEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
+//~ localAddressBookEventManager.disableEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
