@@ -32,7 +32,7 @@ async function main() {
     messenger.mailingLists.onMemberAdded.addListener( (node) => localAddressBookEventManager.onMailingListMemberAdded(node) );
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => localAddressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
-await messenger.storage.local.clear();
+localAddressBookEventManager.clearEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
@@ -50,11 +50,22 @@ messenger.browserAction.onClicked.addListener(async (tab, info) => {
     //~ // TEST #1.
     //~ let peopleAPI = new PeopleAPI(accountData);
     //~ peopleAPI.checkConnection();
-    //~ // TEST #2.
+    // TEST #2.
     //~ let addressBooks = await messenger.addressBooks.list(false);
     //~ console.log(addressBooks);
     // TEST #3.
-    AddressBookSynchronizer.synchronize(syncData);
+    //~ console.log("TEST:");
+    //~ console.log(localAddressBookEventManager);
+    //~ console.log(localAddressBookEventManager.getCreatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getUpdatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getDeletedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getCreatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getUpdatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getDeletedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    //~ console.log(localAddressBookEventManager.getAddedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
+    //~ console.log(localAddressBookEventManager.getRemovedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
+    // TEST #4.
+    //~ AddressBookSynchronizer.synchronize(syncData);
 } );
 }
 
