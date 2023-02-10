@@ -327,7 +327,7 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    /* Event management. */
+    /* Event data. */
 
     getCreatedContactIdSet(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
