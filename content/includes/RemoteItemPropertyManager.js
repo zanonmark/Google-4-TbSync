@@ -95,6 +95,3 @@ class RemoteItemPropertyManager {
     }
 
 }
-
-var remoteItemPropertyManager = new RemoteItemPropertyManager();
-remoteItemPropertyManager.loadRemoteItemPropertyMap();
