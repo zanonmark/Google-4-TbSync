@@ -115,6 +115,14 @@ class LocalAddressBookItemExtraPropertyManager {
         this._localAddressBookItemExtraPropertyMap.get(addressBookId).delete(resourceName);
     }
 
+    deleteItemExtraProperties(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Update the local address book item extra property map.
+        this._localAddressBookItemExtraPropertyMap.delete(addressBookId);
+    }
+
     /* I/O. */
 
     async loadLocalAddressBookItemExtraPropertyMap() {
