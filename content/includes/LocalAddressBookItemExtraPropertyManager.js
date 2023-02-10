@@ -28,15 +28,36 @@ class LocalAddressBookItemExtraPropertyManager {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the resource name set.
-        let resourceNameSet = new Set();
+        // Prepare the item resource name set.
+        let itemResourceNameSet = new Set();
         if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
-            for (let key of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
-                resourceNameSet.add(key);
+            for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
+                itemResourceNameSet.add(itemResourceName);
             }
         }
         //
-        return resourceNameSet;
+        return itemResourceNameSet;
+    }
+
+    getDeletedItemResourceNameSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Retrieve the deleted item id sets.
+        let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
+        let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
+        // Prepare the deleted item resource name set.
+        let deletedItemResourceNameSet = new Set();
+        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
+            for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
+                let itemId = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName).id;
+                if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
+                    deletedItemResourceNameSet.add(key);
+                }
+            }
+        }
+        //
+        return deletedItemResourceNameSet;
     }
 
     /* Properties. */
