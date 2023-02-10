@@ -24,7 +24,7 @@ class RemoteItemPropertyManager {
 
     /* Property management. */
 
-    setProperties(addressBookId, resourceName, eTag, id) {
+    setRemoteItemProperties(addressBookId, resourceName, eTag, id) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -41,27 +41,29 @@ class RemoteItemPropertyManager {
         if (undefined === this._remoteItemPropertyMap.get(addressBookId)) {
             this._remoteItemPropertyMap.set(addressBookId, new Map());
         }
-        // Update the remote item property map.
-        this._remoteItemPropertyMap.get(addressBookId).set(resourceName, {
+        // Prepare the remote item property object.
+        let remoteItemProperties = {
             eTag: eTag,
             id: id
-        });
+        };
+        // Update the remote item property map.
+        this._remoteItemPropertyMap.get(addressBookId).set(resourceName, remoteItemProperties);
     }
 
-    getProperties(addressBookId, resourceName) {
+    getRemoteItemProperties(addressBookId, resourceName) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         if ((null == resourceName) || ("" === resourceName)) {
             throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
         }
-        // Prepare the property object.
-        let properties = undefined;
+        // Prepare the remote item property object.
+        let remoteItemProperties = undefined;
         if (undefined !== this._remoteItemPropertyMap.get(addressBookId)) {
-            properties = this._remoteItemPropertyMap.get(addressBookId).get(resourceName);
+            remoteItemProperties = this._remoteItemPropertyMap.get(addressBookId).get(resourceName);
         }
         //
-        return properties;
+        return remoteItemProperties;
     }
 
     /* I/O. */
