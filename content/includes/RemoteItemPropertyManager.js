@@ -66,6 +66,17 @@ class RemoteItemPropertyManager {
         return remoteItemProperties;
     }
 
+    deleteRemoteItemProperties(addressBookId, resourceName) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        if ((null == resourceName) || ("" === resourceName)) {
+            throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
+        }
+        // Update the remote item property map.
+        this._remoteItemPropertyMap.get(addressBookId).delete(resourceName);
+    }
+
     /* I/O. */
 
     async loadRemoteItemPropertyMap() {
