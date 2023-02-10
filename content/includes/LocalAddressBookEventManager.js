@@ -336,8 +336,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").keys()) {
-                idSet.add(key);
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").keys()) {
+                idSet.add(contactId);
             }
         }
         //
@@ -351,8 +351,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
-                idSet.add(key);
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
+                idSet.add(contactId);
             }
         }
         //
@@ -366,8 +366,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
-                idSet.add(key);
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
+                idSet.add(contactId);
             }
         }
         //
@@ -381,8 +381,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
-                idSet.add(key);
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
+                idSet.add(mailingListId);
             }
         }
         //
@@ -396,8 +396,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
-                idSet.add(key);
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
+                idSet.add(mailingListId);
             }
         }
         //
@@ -411,8 +411,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
-                idSet.add(key);
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
+                idSet.add(mailingListId);
             }
         }
         //
@@ -429,8 +429,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
-                idSet.add(key);
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
+                idSet.add(contactId);
             }
         }
         //
@@ -447,8 +447,8 @@ class LocalAddressBookEventManager {
         // Prepare the id set.
         let idSet = new Set();
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved"))) {
-            for (let key of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").keys()) {
-                idSet.add(key);
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").keys()) {
+                idSet.add(contactId);
             }
         }
         //
