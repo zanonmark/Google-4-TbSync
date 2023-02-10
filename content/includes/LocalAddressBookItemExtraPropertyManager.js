@@ -22,6 +22,23 @@ class LocalAddressBookItemExtraPropertyManager {
         this._localAddressBookItemExtraPropertyMap = new Map();
     }
 
+    /* Items. */
+
+    getItemResourceNameSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the resource name set.
+        let resourceNameSet = new Set();
+        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
+            for (let key of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
+                resourceNameSet.add(key);
+            }
+        }
+        //
+        return resourceNameSet;
+    }
+
     /* Properties. */
 
     setItemExtraProperties(addressBookId, resourceName, eTag, id) {
