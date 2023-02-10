@@ -35,12 +35,12 @@ async function main() {
 localAddressBookEventManager.clearEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 //~ localAddressBookEventManager.disableEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
-remoteItemPropertyManager.setRemoteItemProperties("rubr", "contact/12345", "88888", "12345");
-console.log(remoteItemPropertyManager);
-console.log(remoteItemPropertyManager.getRemoteItemProperties("rubr", "contact/12345"));
-console.log(remoteItemPropertyManager);
-remoteItemPropertyManager.deleteRemoteItemProperties("rubr", "contact/12345");
-console.log(remoteItemPropertyManager);
+//~ remoteItemPropertyManager.setRemoteItemProperties("rubr", "contact/12345", "88888", "12345");
+//~ console.log(remoteItemPropertyManager);
+//~ console.log(remoteItemPropertyManager.getRemoteItemProperties("rubr", "contact/12345"));
+//~ console.log(remoteItemPropertyManager);
+//~ remoteItemPropertyManager.deleteRemoteItemProperties("rubr", "contact/12345");
+//~ console.log(remoteItemPropertyManager);
 // FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
@@ -62,16 +62,16 @@ messenger.browserAction.onClicked.addListener(async (tab, info) => {
     //~ let addressBooks = await messenger.addressBooks.list(false);
     //~ console.log(addressBooks);
     // TEST #3.
-    //~ console.log("TEST:");
-    //~ console.log(localAddressBookEventManager);
-    //~ console.log(localAddressBookEventManager.getCreatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getUpdatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getDeletedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getCreatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getUpdatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getDeletedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
-    //~ console.log(localAddressBookEventManager.getAddedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
-    //~ console.log(localAddressBookEventManager.getRemovedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
+    console.log("TEST:");
+    console.log(localAddressBookEventManager);
+    console.log(localAddressBookEventManager.getCreatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getUpdatedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getDeletedContactIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getCreatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getUpdatedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getDeletedMailingListIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6"));
+    console.log(localAddressBookEventManager.getAddedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
+    console.log(localAddressBookEventManager.getRemovedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
     // TEST #4.
     //~ AddressBookSynchronizer.synchronize(syncData);
 } );

@@ -12,15 +12,15 @@
 class LocalAddressBookEventManager {
 
 /* FIXME: disabled as it is still not fully supported.
-    _eventMap = null;
+    _localAddressBookEventMap = null;
     _disabledAddressBookIdSet = null;
 */
 
     /* */
 
     constructor() {
-        // Initialize the event map.
-        this._eventMap = new Map();
+        // Initialize the local address book map.
+        this._localAddressBookEventMap = new Map();
         // Initialize the disabled address book id set.
         this._disabledAddressBookIdSet = new Set();
     }
@@ -58,19 +58,19 @@ class LocalAddressBookEventManager {
         }
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("contacts.onCreated")) {
-            this._eventMap.get(addressBookId).set("contacts.onCreated", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated")) {
+            this._localAddressBookEventMap.get(addressBookId).set("contacts.onCreated", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("contacts.onCreated").add(contactId);
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").add(contactId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     onContactUpdated(node, changedProperties) {
@@ -90,22 +90,22 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onCreated")) && (this._eventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated")) && (this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
             return;
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("contacts.onUpdated")) {
-            this._eventMap.get(addressBookId).set("contacts.onUpdated", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated")) {
+            this._localAddressBookEventMap.get(addressBookId).set("contacts.onUpdated", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("contacts.onUpdated").add(contactId);
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").add(contactId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     onContactDeleted(parentId, id) {
@@ -125,27 +125,27 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onCreated")) && (this._eventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
-            this._eventMap.get(addressBookId).get("contacts.onCreated").delete(contactId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated")) && (this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").has(contactId))) {
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").delete(contactId);
             //
             newItemRequired = false;
         }
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onUpdated")) && (this._eventMap.get(addressBookId).get("contacts.onUpdated").has(contactId))) {
-            this._eventMap.get(addressBookId).get("contacts.onUpdated").delete(contactId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated")) && (this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").has(contactId))) {
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").delete(contactId);
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("contacts.onDeleted")) {
-            this._eventMap.get(addressBookId).set("contacts.onDeleted", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted")) {
+            this._localAddressBookEventMap.get(addressBookId).set("contacts.onDeleted", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("contacts.onDeleted").add(contactId);
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").add(contactId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     onMailingListCreated(node) {
@@ -161,19 +161,19 @@ class LocalAddressBookEventManager {
         }
         // Prepare the new item flag.
         let newItemRequired = true;
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("mailingLists.onCreated")) {
-            this._eventMap.get(addressBookId).set("mailingLists.onCreated", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated")) {
+            this._localAddressBookEventMap.get(addressBookId).set("mailingLists.onCreated", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("mailingLists.onCreated").add(mailingListId);
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").add(mailingListId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     onMailingListUpdated(node) {
@@ -190,22 +190,22 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._eventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
             return;
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("mailingLists.onUpdated")) {
-            this._eventMap.get(addressBookId).set("mailingLists.onUpdated", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated")) {
+            this._localAddressBookEventMap.get(addressBookId).set("mailingLists.onUpdated", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("mailingLists.onUpdated").add(mailingListId);
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").add(mailingListId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     onMailingListDeleted(parentId, id) {
@@ -225,27 +225,27 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._eventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
-            this._eventMap.get(addressBookId).get("mailingLists.onCreated").delete(mailingListId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated")) && (this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").has(mailingListId))) {
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").delete(mailingListId);
             //
             newItemRequired = false;
         }
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onUpdated")) && (this._eventMap.get(addressBookId).get("mailingLists.onUpdated").has(mailingListId))) {
-            this._eventMap.get(addressBookId).get("mailingLists.onUpdated").delete(mailingListId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated")) && (this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").has(mailingListId))) {
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").delete(mailingListId);
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get("mailingLists.onDeleted")) {
-            this._eventMap.get(addressBookId).set("mailingLists.onDeleted", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted")) {
+            this._localAddressBookEventMap.get(addressBookId).set("mailingLists.onDeleted", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get("mailingLists.onDeleted").add(mailingListId);
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").add(mailingListId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     async onMailingListMemberAdded(node) {
@@ -263,27 +263,27 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved")) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").has(contactId))) {
-            this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").delete(contactId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved")) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").has(contactId))) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").delete(contactId);
             //
             newItemRequired = false;
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get(mailingListId)) {
-            this._eventMap.get(addressBookId).set(mailingListId, new Map());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) {
+            this._localAddressBookEventMap.get(addressBookId).set(mailingListId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded")) {
-            this._eventMap.get(addressBookId).get(mailingListId).set("mailingLists.onMemberAdded", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded")) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).set("mailingLists.onMemberAdded", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").add(contactId);
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").add(contactId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     async onMailingListMemberRemoved(parentId, id) {
@@ -304,27 +304,27 @@ class LocalAddressBookEventManager {
         // Prepare the new item flag.
         let newItemRequired = true;
         // Synchronize with other events for the same ids.
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded")) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").has(contactId))) {
-            this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").delete(contactId);
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded")) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").has(contactId))) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").delete(contactId);
             //
             newItemRequired = false;
         }
-        // Prepare the event map.
-        if (undefined === this._eventMap.get(addressBookId)) {
-            this._eventMap.set(addressBookId, new Map());
+        // Prepare the local address book map.
+        if (undefined === this._localAddressBookEventMap.get(addressBookId)) {
+            this._localAddressBookEventMap.set(addressBookId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get(mailingListId)) {
-            this._eventMap.get(addressBookId).set(mailingListId, new Map());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) {
+            this._localAddressBookEventMap.get(addressBookId).set(mailingListId, new Map());
         }
-        if (undefined === this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved")) {
-            this._eventMap.get(addressBookId).get(mailingListId).set("mailingLists.onMemberRemoved", new Set());
+        if (undefined === this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved")) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).set("mailingLists.onMemberRemoved", new Set());
         }
-        // Update the event map.
+        // Update the local address book map.
         if (newItemRequired) {
-            this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").add(contactId);
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").add(contactId);
         }
-        // Save the event map.
-        this.saveEventMap();
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     /* Event management. */
@@ -335,8 +335,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onCreated"))) {
-            for (let key of this._eventMap.get(addressBookId).get("contacts.onCreated").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").keys()) {
                 idSet.add(key);
             }
         }
@@ -350,8 +350,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onUpdated"))) {
-            for (let key of this._eventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
                 idSet.add(key);
             }
         }
@@ -365,8 +365,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("contacts.onDeleted"))) {
-            for (let key of this._eventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
                 idSet.add(key);
             }
         }
@@ -380,8 +380,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onCreated"))) {
-            for (let key of this._eventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
                 idSet.add(key);
             }
         }
@@ -395,8 +395,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
-            for (let key of this._eventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
                 idSet.add(key);
             }
         }
@@ -410,8 +410,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
-            for (let key of this._eventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
                 idSet.add(key);
             }
         }
@@ -428,8 +428,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
-            for (let key of this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
                 idSet.add(key);
             }
         }
@@ -446,8 +446,8 @@ class LocalAddressBookEventManager {
         }
         // Prepare the id set.
         let idSet = new Set();
-        if ((undefined !== this._eventMap.get(addressBookId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved"))) {
-            for (let key of this._eventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").keys()) {
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved"))) {
+            for (let key of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").keys()) {
                 idSet.add(key);
             }
         }
@@ -459,30 +459,30 @@ class LocalAddressBookEventManager {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Update the event map.
-        this._eventMap.delete(addressBookId);
-        // Save the event map.
-        this.saveEventMap();
+        // Update the local address book map.
+        this._localAddressBookEventMap.delete(addressBookId);
+        // Save the local address book map.
+        this.saveLocalAddressBookEventMap();
     }
 
     /* I/O. */
 
-    async loadEventMap() {
-        // Search for a previous event map in the local storage.
-        let { eventMap } = await messenger.storage.local.get({ eventMap: undefined });
-        // If such a previous event map is found...
-        if (undefined !== eventMap) {
-            // Assign it to the current event map.
-            this._eventMap = eventMap;
+    async loadLocalAddressBookEventMap() {
+        // Search for a previous local address book map in the local storage.
+        let { localAddressBookEventMap } = await messenger.storage.local.get({ localAddressBookEventMap: undefined });
+        // If such a previous local address book map is found...
+        if (undefined !== localAddressBookEventMap) {
+            // Assign it to the current local address book map.
+            this._localAddressBookEventMap = localAddressBookEventMap;
         }
     }
 
-    async saveEventMap() {
-        // Save the event map to the local storage.
-        await messenger.storage.local.set({ eventMap: this._eventMap });
+    async saveLocalAddressBookEventMap() {
+        // Save the local address book map to the local storage.
+        await messenger.storage.local.set({ localAddressBookEventMap: this._localAddressBookEventMap });
     }
 
 }
 
 var localAddressBookEventManager = new LocalAddressBookEventManager();
-localAddressBookEventManager.loadEventMap();
+localAddressBookEventManager.loadLocalAddressBookEventMap();
