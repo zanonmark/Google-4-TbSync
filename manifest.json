@@ -24,8 +24,8 @@
             "content/includes/NetworkError.js",
             "content/includes/ResponseError.js",
             "content/includes/Logger.js",
-            "content/includes/RemoteItemPropertyManager.js",
             "content/includes/LocalAddressBookEventManager.js",
+            "content/includes/LocalAddressBookItemExtraPropertyManager.js",
             "content/includes/PeopleAPI.js",
             "background.js"
         ]
