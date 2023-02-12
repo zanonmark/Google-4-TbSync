@@ -22,44 +22,6 @@ class LocalAddressBookItemExtraPropertyManager {
         this._localAddressBookItemExtraPropertyMap = new Map();
     }
 
-    /* Items. */
-
-    getItemResourceNameSet(addressBookId) {
-        if ((null == addressBookId) || ("" === addressBookId)) {
-            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
-        }
-        // Prepare the item resource name set.
-        let itemResourceNameSet = new Set();
-        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
-            for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
-                itemResourceNameSet.add(itemResourceName);
-            }
-        }
-        //
-        return itemResourceNameSet;
-    }
-
-    getDeletedItemResourceNameSet(addressBookId) {
-        if ((null == addressBookId) || ("" === addressBookId)) {
-            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
-        }
-        // Retrieve the deleted item id sets.
-        let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
-        let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
-        // Prepare the deleted item resource name set.
-        let deletedItemResourceNameSet = new Set();
-        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
-            for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
-                let itemId = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName).id;
-                if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
-                    deletedItemResourceNameSet.add(key);
-                }
-            }
-        }
-        //
-        return deletedItemResourceNameSet;
-    }
-
     /* Properties. */
 
     setItemExtraProperties(addressBookId, resourceName, eTag, id) {
@@ -138,6 +100,29 @@ class LocalAddressBookItemExtraPropertyManager {
     async saveLocalAddressBookItemExtraPropertyMap() {
         // Save the local address book item extra property map to the local storage.
         await messenger.storage.local.set({ localAddressBookItemExtraPropertyMap: this._localAddressBookItemExtraPropertyMap });
+    }
+
+    /* Helpers. */
+
+    getDeletedItemResourceNameSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Retrieve the deleted item id sets.
+        let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
+        let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
+        // Prepare the deleted item resource name set.
+        let deletedItemResourceNameSet = new Set();
+        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
+            for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
+                let itemId = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName).id;
+                if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
+                    deletedItemResourceNameSet.add(key);
+                }
+            }
+        }
+        //
+        return deletedItemResourceNameSet;
     }
 
 }
