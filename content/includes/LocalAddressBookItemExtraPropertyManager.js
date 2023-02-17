@@ -24,15 +24,15 @@ class LocalAddressBookItemExtraPropertyManager {
 
     /* Properties. */
 
-    setItemExtraProperties(addressBookId, resourceName, eTag, id) {
+    setItemExtraProperties(addressBookId, resourceName, etag, id) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         if ((null == resourceName) || ("" === resourceName)) {
             throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
         }
-        if ((null == eTag) || ("" === eTag)) {
-            throw new IllegalArgumentError("Invalid 'eTag': null or empty.");
+        if ((null == etag) || ("" === etag)) {
+            throw new IllegalArgumentError("Invalid 'etag': null or empty.");
         }
         if ((null == id) || ("" === id)) {
             throw new IllegalArgumentError("Invalid 'id': null or empty.");
@@ -43,7 +43,7 @@ class LocalAddressBookItemExtraPropertyManager {
         }
         // Prepare the item extra properties.
         let itemExtraProperties = {
-            eTag: eTag,
+            etag: etag,
             id: id
         };
         // Update the local address book item extra property map.
@@ -104,25 +104,37 @@ class LocalAddressBookItemExtraPropertyManager {
 
     /* Helpers. */
 
-    getDeletedItemResourceNameSet(addressBookId) {
+    getItemSynchronizationStructures(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
+        // Retrieve the updated item id sets.
+        let updatedMailingListIdSet = localAddressBookEventManager.getUpdatedMailingListIdSet(addressBookId);
+        let updatedContactIdSet = localAddressBookEventManager.getUpdatedContactIdSet(addressBookId);
         // Retrieve the deleted item id sets.
         let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
         let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
-        // Prepare the deleted item resource name set.
-        let deletedItemResourceNameSet = new Set();
+        // Prepare the item synchronization structures.
+        let updatedLocalItemIdMap = new Map();
+        let deletedLocalItemResourceNameSet = new Set();
         if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
             for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
-                let itemId = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName).id;
+                let entry = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName);
+                let itemId = entry.id;
+                let itemEtag = entry.etag;
+                if ((updatedMailingListIdSet.has(itemId)) || (updatedContactIdSet.has(itemId))) {
+                    updatedLocalItemIdMap.set(itemId, {
+                        resourceName: itemResourceName,
+                        etag: itemEtag
+                    });
+                }
                 if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
-                    deletedItemResourceNameSet.add(key);
+                    deletedLocalItemResourceNameSet.add(key);
                 }
             }
         }
         //
-        return deletedItemResourceNameSet;
+        return { updatedLocalItemIdMap, deletedLocalItemResourceNameSet };
     }
 
 }
