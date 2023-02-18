@@ -152,7 +152,7 @@ class LocalAddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         // Update the local address book synchronization mode set.
-        this._localAddressBookSynchronizationModeSet.delete(addressBookId);
+        this._localAddressBookSynchronizationModeSet.add(addressBookId);
     }
 
     disableSynchronizationMode(addressBookId) {
@@ -160,7 +160,7 @@ class LocalAddressBookEventManager {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         // Update the local address book synchronization mode set.
-        this._localAddressBookSynchronizationModeSet.add(addressBookId);
+        this._localAddressBookSynchronizationModeSet.delete(addressBookId);
         // Save the local address book event map.
         this.saveLocalAddressBookEventMap();
     }
