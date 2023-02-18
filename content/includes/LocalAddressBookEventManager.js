@@ -27,7 +27,7 @@ class LocalAddressBookEventManager {
 
     /* Event listeners. */
 
-    onContactCreated(node) {
+    async onContactCreated(node) {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
@@ -36,11 +36,11 @@ class LocalAddressBookEventManager {
         let addressBookId = node.parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addContactCreatedEventData(addressBookId, contactId);
+            await this.addContactCreatedEventData(addressBookId, contactId);
         }
     }
 
-    onContactUpdated(node, changedProperties) {
+    async onContactUpdated(node, changedProperties) {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
@@ -52,11 +52,11 @@ class LocalAddressBookEventManager {
         let addressBookId = node.parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addContactUpdatedEventData(addressBookId, contactId);
+            await this.addContactUpdatedEventData(addressBookId, contactId);
         }
     }
 
-    onContactDeleted(parentId, id) {
+    async onContactDeleted(parentId, id) {
         if ((null == parentId) || ("" === parentId)) {
             throw new IllegalArgumentError("Invalid 'parentId': null or empty.");
         }
@@ -68,11 +68,11 @@ class LocalAddressBookEventManager {
         let addressBookId = parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addContactDeletedEventData(addressBookId, contactId);
+            await this.addContactDeletedEventData(addressBookId, contactId);
         }
     }
 
-    onMailingListCreated(node) {
+    async onMailingListCreated(node) {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
@@ -81,11 +81,11 @@ class LocalAddressBookEventManager {
         let addressBookId = node.parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addMailingListCreatedEventData(addressBookId, mailingListId);
+            await this.addMailingListCreatedEventData(addressBookId, mailingListId);
         }
     }
 
-    onMailingListUpdated(node) {
+    async onMailingListUpdated(node) {
         if (null == node) {
             throw new IllegalArgumentError("Invalid 'node': null.");
         }
@@ -94,11 +94,11 @@ class LocalAddressBookEventManager {
         let addressBookId = node.parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addMailingListUpdatedEventData(addressBookId, mailingListId);
+            await this.addMailingListUpdatedEventData(addressBookId, mailingListId);
         }
     }
 
-    onMailingListDeleted(parentId, id) {
+    async onMailingListDeleted(parentId, id) {
         if ((null == parentId) || ("" === parentId)) {
             throw new IllegalArgumentError("Invalid 'parentId': null or empty.");
         }
@@ -110,7 +110,7 @@ class LocalAddressBookEventManager {
         let addressBookId = parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addMailingListDeletedEventData(addressBookId, mailingListId);
+            await this.addMailingListDeletedEventData(addressBookId, mailingListId);
         }
     }
 
@@ -121,10 +121,10 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = node.id;
         let mailingListId = node.parentId;
-        let addressBookId = (await messenger.contacts.get(contactId)).parentId;
+        let addressBookId = (await messenger.mailingLists.get(mailingListId)).parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addMailingListMemberAddedEventData(addressBookId, mailingListId, contactId);
+            await this.addMailingListMemberAddedEventData(addressBookId, mailingListId, contactId);
         }
     }
 
@@ -138,16 +138,20 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = id;
         let mailingListId = parentId;
+// FIXME: could fail
         let addressBookId = (await messenger.mailingLists.get(mailingListId)).parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId);
+            await this.addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId);
+        }
+        }
+        catch (error) {
         }
     }
 
     /* Synchronization mode. */
 
-    enableSynchronizationMode(addressBookId) {
+    async enableSynchronizationMode(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -155,19 +159,19 @@ class LocalAddressBookEventManager {
         this._localAddressBookSynchronizationModeSet.add(addressBookId);
     }
 
-    disableSynchronizationMode(addressBookId) {
+    async disableSynchronizationMode(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         // Update the local address book synchronization mode set.
         this._localAddressBookSynchronizationModeSet.delete(addressBookId);
         // Save the local address book event map.
-        this.saveLocalAddressBookEventMap();
+        await this.saveLocalAddressBookEventMap();
     }
 
     /* Event data. */
 
-    clearEventData(addressBookId) {
+    async clearEventData(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -175,11 +179,11 @@ class LocalAddressBookEventManager {
         this._localAddressBookEventMap.delete(addressBookId);
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addContactCreatedEventData(addressBookId, contactId) {
+    async addContactCreatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -201,11 +205,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearContactCreatedEventData(addressBookId, contactId) {
+    async clearContactCreatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -218,11 +222,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addContactUpdatedEventData(addressBookId, contactId) {
+    async addContactUpdatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -248,11 +252,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearContactUpdatedEventData(addressBookId, contactId) {
+    async clearContactUpdatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -265,11 +269,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addContactDeletedEventData(addressBookId, contactId) {
+    async addContactDeletedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -300,11 +304,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearContactDeletedEventData(addressBookId, contactId) {
+    async clearContactDeletedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -317,11 +321,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addMailingListCreatedEventData(addressBookId, mailingListId) {
+    async addMailingListCreatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -343,11 +347,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearMailingListCreatedEventData(addressBookId, mailingListId) {
+    async clearMailingListCreatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -360,11 +364,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addMailingListUpdatedEventData(addressBookId, mailingListId) {
+    async addMailingListUpdatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -390,11 +394,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearMailingListUpdatedEventData(addressBookId, mailingListId) {
+    async clearMailingListUpdatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -407,11 +411,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addMailingListDeletedEventData(addressBookId, mailingListId) {
+    async addMailingListDeletedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -442,11 +446,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearMailingListDeletedEventData(addressBookId, mailingListId) {
+    async clearMailingListDeletedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -459,11 +463,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
+    async addMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -497,11 +501,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
+    async clearMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -517,11 +521,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
+    async addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -555,11 +559,11 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
-    clearMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
+    async clearMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
@@ -575,7 +579,7 @@ class LocalAddressBookEventManager {
         }
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
-            this.saveLocalAddressBookEventMap();
+            await this.saveLocalAddressBookEventMap();
         }
     }
 
@@ -727,4 +731,6 @@ class LocalAddressBookEventManager {
 }
 
 var localAddressBookEventManager = new LocalAddressBookEventManager();
-localAddressBookEventManager.loadLocalAddressBookEventMap();
+(async () => {
+    await localAddressBookEventManager.loadLocalAddressBookEventMap();
+})();
