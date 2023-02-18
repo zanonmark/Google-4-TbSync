@@ -215,19 +215,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getCreatedContactIdSet(addressBookId) {
+    clearContactCreatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the created contact id set.
-        let createdContactIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
-            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").keys()) {
-                createdContactIdSet.add(contactId);
-            }
+        if ((null == contactId) || ("" === contactId)) {
+            throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
         //
-        return createdContactIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").delete(contactId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addContactUpdatedEventData(addressBookId, contactId) {
@@ -258,19 +258,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getUpdatedContactIdSet(addressBookId) {
+    clearContactUpdatedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the updated contact id set.
-        let updatedContactIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
-            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
-                updatedContactIdSet.add(contactId);
-            }
+        if ((null == contactId) || ("" === contactId)) {
+            throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
         //
-        return updatedContactIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").delete(contactId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addContactDeletedEventData(addressBookId, contactId) {
@@ -306,19 +306,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getDeletedContactIdSet(addressBookId) {
+    clearContactDeletedEventData(addressBookId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the deleted contact id set.
-        let deletedContactIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
-            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
-                deletedContactIdSet.add(contactId);
-            }
+        if ((null == contactId) || ("" === contactId)) {
+            throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
         //
-        return deletedContactIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").delete(contactId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addMailingListCreatedEventData(addressBookId, mailingListId) {
@@ -345,19 +345,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getCreatedMailingListIdSet(addressBookId) {
+    clearMailingListCreatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the created mailing-list id set.
-        let createdMailingListIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
-            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
-                createdMailingListIdSet.add(mailingListId);
-            }
+        if ((null == mailingListId) || ("" === mailingListId)) {
+            throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
         //
-        return createdMailingListIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").delete(mailingListId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addMailingListUpdatedEventData(addressBookId, mailingListId) {
@@ -388,19 +388,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getUpdatedMailingListIdSet(addressBookId) {
+    clearMailingListUpdatedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the updated mailing-list id set.
-        let updatedMailingListIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
-            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
-                updatedMailingListIdSet.add(mailingListId);
-            }
+        if ((null == mailingListId) || ("" === mailingListId)) {
+            throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
         //
-        return updatedMailingListIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").delete(mailingListId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addMailingListDeletedEventData(addressBookId, mailingListId) {
@@ -436,19 +436,19 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getDeletedMailingListIdSet(addressBookId) {
+    clearMailingListDeletedEventData(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Prepare the deleted mailing-list id set.
-        let deletedMailingListIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
-            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
-                deletedMailingListIdSet.add(mailingListId);
-            }
+        if ((null == mailingListId) || ("" === mailingListId)) {
+            throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
         //
-        return deletedMailingListIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
+            this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").delete(mailingListId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
@@ -487,22 +487,22 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
-    getAddedMailingListMemberIdSet(addressBookId, mailingListId) {
+    clearMailingListMemberAddedEventData(addressBookId, mailingListId, contactId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
         if ((null == mailingListId) || ("" === mailingListId)) {
             throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
-        // Prepare the added mailing-list member id set.
-        let addedMailingListMemberIdSet = new Set();
-        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
-            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
-                addedMailingListMemberIdSet.add(contactId);
-            }
+        if ((null == contactId) || ("" === contactId)) {
+            throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
         //
-        return addedMailingListMemberIdSet;
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").delete(contactId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
     }
 
     addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
@@ -541,6 +541,134 @@ class LocalAddressBookEventManager {
         this.saveLocalAddressBookEventMap();
     }
 
+    clearMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        if ((null == mailingListId) || ("" === mailingListId)) {
+            throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
+        }
+        if ((null == contactId) || ("" === contactId)) {
+            throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
+        }
+        //
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved"))) {
+            this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").delete(contactId);
+        }
+        // Save the local address book event map.
+        this.saveLocalAddressBookEventMap();
+    }
+
+    /* Synchronization structures. */
+
+    getCreatedContactIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the created contact id set.
+        let createdContactIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").keys()) {
+                createdContactIdSet.add(contactId);
+            }
+        }
+        //
+        return createdContactIdSet;
+    }
+
+    getUpdatedContactIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the updated contact id set.
+        let updatedContactIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").keys()) {
+                updatedContactIdSet.add(contactId);
+            }
+        }
+        //
+        return updatedContactIdSet;
+    }
+
+    getDeletedContactIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the deleted contact id set.
+        let deletedContactIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").keys()) {
+                deletedContactIdSet.add(contactId);
+            }
+        }
+        //
+        return deletedContactIdSet;
+    }
+
+    getCreatedMailingListIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the created mailing-list id set.
+        let createdMailingListIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").keys()) {
+                createdMailingListIdSet.add(mailingListId);
+            }
+        }
+        //
+        return createdMailingListIdSet;
+    }
+
+    getUpdatedMailingListIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the updated mailing-list id set.
+        let updatedMailingListIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").keys()) {
+                updatedMailingListIdSet.add(mailingListId);
+            }
+        }
+        //
+        return updatedMailingListIdSet;
+    }
+
+    getDeletedMailingListIdSet(addressBookId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        // Prepare the deleted mailing-list id set.
+        let deletedMailingListIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
+            for (let mailingListId of this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").keys()) {
+                deletedMailingListIdSet.add(mailingListId);
+            }
+        }
+        //
+        return deletedMailingListIdSet;
+    }
+
+    getAddedMailingListMemberIdSet(addressBookId, mailingListId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        if ((null == mailingListId) || ("" === mailingListId)) {
+            throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
+        }
+        // Prepare the added mailing-list member id set.
+        let addedMailingListMemberIdSet = new Set();
+        if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
+            for (let contactId of this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").keys()) {
+                addedMailingListMemberIdSet.add(contactId);
+            }
+        }
+        //
+        return addedMailingListMemberIdSet;
+    }
+
     getRemovedMailingListMemberIdSet(addressBookId, mailingListId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
@@ -574,8 +702,6 @@ class LocalAddressBookEventManager {
     async saveLocalAddressBookEventMap() {
         // Save the local address book event map to the local storage.
         await messenger.storage.local.set({ localAddressBookEventMap: this._localAddressBookEventMap });
-// FIXME
-console.log(this._localAddressBookEventMap);
     }
 
 }
