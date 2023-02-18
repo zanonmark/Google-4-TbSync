@@ -85,24 +85,7 @@ class LocalAddressBookItemExtraPropertyManager {
         this._localAddressBookItemExtraPropertyMap.delete(addressBookId);
     }
 
-    /* I/O. */
-
-    async loadLocalAddressBookItemExtraPropertyMap() {
-        // Search for a previous local address book item extra property map in the local storage.
-        let { localAddressBookItemExtraPropertyMap } = await messenger.storage.local.get({ localAddressBookItemExtraPropertyMap: undefined });
-        // If such a previous local address book item extra property map is found...
-        if (undefined !== localAddressBookItemExtraPropertyMap) {
-            // Assign it to the current local address book item extra property map.
-            this._localAddressBookItemExtraPropertyMap = localAddressBookItemExtraPropertyMap;
-        }
-    }
-
-    async saveLocalAddressBookItemExtraPropertyMap() {
-        // Save the local address book item extra property map to the local storage.
-        await messenger.storage.local.set({ localAddressBookItemExtraPropertyMap: this._localAddressBookItemExtraPropertyMap });
-    }
-
-    /* Helpers. */
+    /* Synchronization structures. */
 
     getItemSynchronizationStructures(addressBookId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
@@ -135,6 +118,23 @@ class LocalAddressBookItemExtraPropertyManager {
         }
         //
         return { updatedLocalItemIdMap, deletedLocalItemResourceNameSet };
+    }
+
+    /* I/O. */
+
+    async loadLocalAddressBookItemExtraPropertyMap() {
+        // Search for a previous local address book item extra property map in the local storage.
+        let { localAddressBookItemExtraPropertyMap } = await messenger.storage.local.get({ localAddressBookItemExtraPropertyMap: undefined });
+        // If such a previous local address book item extra property map is found...
+        if (undefined !== localAddressBookItemExtraPropertyMap) {
+            // Assign it to the current local address book item extra property map.
+            this._localAddressBookItemExtraPropertyMap = localAddressBookItemExtraPropertyMap;
+        }
+    }
+
+    async saveLocalAddressBookItemExtraPropertyMap() {
+        // Save the local address book item extra property map to the local storage.
+        await messenger.storage.local.set({ localAddressBookItemExtraPropertyMap: this._localAddressBookItemExtraPropertyMap });
     }
 
 }
