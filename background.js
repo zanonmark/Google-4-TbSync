@@ -33,16 +33,9 @@ async function main() {
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => localAddressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
 localAddressBookEventManager.clearEventData("53e04e69-57c7-4152-a313-16507e8ad9b6");
-//~ localAddressBookEventManager.disableEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
 let localAddressBookItemExtraPropertyManager = new LocalAddressBookItemExtraPropertyManager();
 localAddressBookItemExtraPropertyManager.loadLocalAddressBookItemExtraPropertyMap();
-//~ localAddressBookItemExtraPropertyManager.setItemExtraProperties("rubr", "contact/12345", "88888", "67890");
-//~ console.log(localAddressBookItemExtraPropertyManager);
-//~ console.log(localAddressBookItemExtraPropertyManager.getItemExtraProperties("rubr", "contact/12345"));
-//~ console.log(localAddressBookItemExtraPropertyManager.getItemResourceNameSet("rubr"));
-//~ localAddressBookItemExtraPropertyManager.deleteItemExtraProperties("rubr", "contact/12345");
-//~ console.log(localAddressBookItemExtraPropertyManager);
 localAddressBookItemExtraPropertyManager.deleteItemExtraProperties("53e04e69-57c7-4152-a313-16507e8ad9b6");
 localAddressBookItemExtraPropertyManager.saveLocalAddressBookItemExtraPropertyMap();
 // FIXME: temporary.
