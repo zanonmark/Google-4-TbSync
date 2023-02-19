@@ -91,33 +91,32 @@ class LocalAddressBookItemExtraPropertyManager {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        // Retrieve the updated item id sets.
-        let updatedMailingListIdSet = localAddressBookEventManager.getUpdatedMailingListIdSet(addressBookId);
-        let updatedContactIdSet = localAddressBookEventManager.getUpdatedContactIdSet(addressBookId);
         // Retrieve the deleted item id sets.
         let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
         let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
-        // Prepare the item synchronization structures.
-        let updatedLocalItemIdMap = new Map();
-        let deletedLocalItemResourceNameSet = new Set();
+        // Prepare the item synchronization structures, and clean the local address book item extra property map from the deleted items.
+        let originalLocalItemIdMap = new Map();
+        let originalDeletedLocalItemResourceNameSet = new Set();
         if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
             for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
                 let entry = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName);
                 let itemId = entry.id;
                 let itemEtag = entry.etag;
-                if ((updatedMailingListIdSet.has(itemId)) || (updatedContactIdSet.has(itemId))) {
-                    updatedLocalItemIdMap.set(itemId, {
+                if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
+                    originalDeletedLocalItemResourceNameSet.add(key);
+                    //
+                    this.deleteItemExtraProperty(addressBookId, itemResourceName);
+                }
+                else {
+                    originalLocalItemIdMap.set(itemId, {
                         resourceName: itemResourceName,
                         etag: itemEtag
                     });
                 }
-                if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
-                    deletedLocalItemResourceNameSet.add(key);
-                }
             }
         }
         //
-        return { updatedLocalItemIdMap, deletedLocalItemResourceNameSet };
+        return { originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet };
     }
 
     /* I/O. */
