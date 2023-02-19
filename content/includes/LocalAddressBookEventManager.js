@@ -138,14 +138,11 @@ class LocalAddressBookEventManager {
         // Get the ids.
         let contactId = id;
         let mailingListId = parentId;
-// FIXME: could fail
+// FIXME: could fail.
         let addressBookId = (await messenger.mailingLists.get(mailingListId)).parentId;
         // Add the event data to the local addressbook event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
             await this.addMailingListMemberRemovedEventData(addressBookId, mailingListId, contactId);
-        }
-        }
-        catch (error) {
         }
     }
 
