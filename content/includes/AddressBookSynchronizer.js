@@ -51,7 +51,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         await localAddressBookItemExtraPropertyManager.loadLocalAddressBookItemExtraPropertyMap();
         // Retrieve the synchronization structures for the cycles.
         logger.log0("AddressBookSynchronizer.synchronize(): Retrieving the synchronization structures for the cycles.");
-        let { originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet } = localAddressBookItemExtraPropertyManager.getItemSynchronizationStructures(localAddressBookId);
+        let { originalDeletedLocalItemResourceNameSet } = localAddressBookItemExtraPropertyManager.getItemSynchronizationStructures(localAddressBookId);
         let originalCreatedLocalContactGroupIdSet = localAddressBookEventManager.getCreatedMailingListIdSet(localAddressBookId);
         let originalUpdatedLocalContactGroupIdSet = localAddressBookEventManager.getUpdatedMailingListIdSet(localAddressBookId);
 // TODO: contacts, contact group members.
@@ -66,7 +66,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             await AddressBookSynchronizer.synchronizeContacts(peopleAPI, localAddressBook, localAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
 */
             // Synchronize the contact groups.
-            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet);
+            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet);
 /* FIXME
             // Synchronize the contact group members.
             await AddressBookSynchronizer.synchronizeContactGroupMembers(localAddressBook, localAddressBookItemMap, contactGroupMemberMap, readOnlyMode);
@@ -1135,7 +1135,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
 
     /* Contact groups. */
 
-    static async synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet) {
+    static async synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
@@ -1150,9 +1150,6 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         }
         if (null == localAddressBookItemExtraPropertyManager) {
             throw new IllegalArgumentError("Invalid 'localAddressBookItemExtraPropertyManager': null.");
-        }
-        if (null == originalLocalItemIdMap) {
-            throw new IllegalArgumentError("Invalid 'originalLocalItemIdMap': null.");
         }
         if (null == originalDeletedLocalItemResourceNameSet) {
             throw new IllegalArgumentError("Invalid 'originalDeletedLocalItemResourceNameSet': null.");
@@ -1187,7 +1184,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 remoteContactGroup.etag = FAKE_ETAG;
             }
             // Try to match the remote contact group locally.
-            let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraProperties(localAddressBookId, contactGroupResourceName);
+            let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
             let contactGroupId = undefined;
             if (undefined !== localItemExtraProperties) {
                 contactGroupId = localItemExtraProperties.id;
@@ -1220,7 +1217,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     let localContactGroupProperties = AddressBookSynchronizer.getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup);
                     // Create a local contact group, and update the local address book item extra property map.
                     let contactGroupId = await messenger.mailingLists.create(localAddressBookId, localContactGroupProperties);
-                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been created locally: '" + contactGroupId + "'.");
                 }
             }
@@ -1232,7 +1229,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     let localContactGroupProperties = AddressBookSynchronizer.getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup);
                     // Update the local contact group, and update the local address book item extra property map.
                     await messenger.mailingLists.update(contactGroupId, localContactGroupProperties);
-                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been updated locally: '" + contactGroupId + "'.");
                     // Remove the event data from the local address book event map, and remove the contact group from the locally updated ones (to avoid duplications).
                     await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
@@ -1260,7 +1257,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 // Create a remote contact group, and update the local address book item extra property map.
                 remoteContactGroup = await peopleAPI.createContactGroup(remoteContactGroup);
                 let contactGroupResourceName = remoteContactGroup.resourceName;
-                localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                 logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been created remotely: '" + contactGroupResourceName + "'.");
                 // Remove the event data from the local address book event map.
                 await localAddressBookEventManager.clearMailingListCreatedEventData(localAddressBookId, contactGroupId);
@@ -1272,7 +1269,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
             // Check we are not in read-only mode, then...
             if (!readOnlyMode) {
                 // Get the contact group extra properties.
-                let contactGroupExtraProperties = originalLocalItemIdMap.get(contactGroupId);
+                let contactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId);
                 // Make sure the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated).
                 if (FAKE_ETAG === contactGroupExtraProperties.etag) {
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + localContactGroupId + "' has no etag and has therefore been ignored.");
@@ -1299,7 +1296,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     // Update the remote contact group, and update the local address book item extra property map.
                     remoteContactGroup = await peopleAPI.updateContactGroup(remoteContactGroup);
                     let contactGroupResourceName = remoteContactGroup.resourceName;
-                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been updated remotely: '" + contactGroupResourceName + "'.");
                     // Remove the event data from the local address book event map.
                     await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
@@ -1309,7 +1306,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     if ((error instanceof ResponseError) && (error.message.includes(": 404:"))) {
                         // Delete the local contact group, and update the local address book item extra property map.
                         await messenger.mailingLists.delete(contactGroupId);
-                        localAddressBookItemExtraPropertyManager.deleteItemExtraProperties(localAddressBookId, contactGroupResourceName);
+                        localAddressBookItemExtraPropertyManager.deleteItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
                         logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been deleted locally.");
                         // Remove the event data from the local address book event map.
                         await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
@@ -1338,7 +1335,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
             let contactGroupResourceName = undefined;
 // FIXME: find a faster way.
             for (let remoteContactGroup of remoteContactGroups) {
-                let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraProperties(localAddressBookId, remoteContactGroup.resourceName);
+                let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, remoteContactGroup.resourceName);
                 if (undefined !== localItemExtraProperties) {
                     let itemId = localItemExtraProperties.id;
                     if (contactGroupId === itemId) {
@@ -1353,7 +1350,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
             }
             // Delete the local contact group, and update the local address book item extra property map.
             await messenger.mailingLists.delete(contactGroupId);
-            localAddressBookItemExtraPropertyManager.deleteItemExtraProperties(localAddressBookId, contactGroupResourceName);
+            localAddressBookItemExtraPropertyManager.deleteItemExtraPropertiesById(localAddressBookId, contactGroupId);
             logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been deleted locally.");
         }
     }

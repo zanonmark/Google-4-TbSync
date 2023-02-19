@@ -24,57 +24,96 @@ class LocalAddressBookItemExtraPropertyManager {
 
     /* Properties. */
 
-    setItemExtraProperties(addressBookId, resourceName, etag, id) {
+    setItemExtraProperties(addressBookId, itemId, itemResourceName, itemEtag) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        if ((null == resourceName) || ("" === resourceName)) {
-            throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
+        if ((null == itemId) || ("" === itemId)) {
+            throw new IllegalArgumentError("Invalid 'itemId': null or empty.");
         }
-        if ((null == etag) || ("" === etag)) {
-            throw new IllegalArgumentError("Invalid 'etag': null or empty.");
+        if ((null == itemResourceName) || ("" === itemResourceName)) {
+            throw new IllegalArgumentError("Invalid 'itemResourceName': null or empty.");
         }
-        if ((null == id) || ("" === id)) {
-            throw new IllegalArgumentError("Invalid 'id': null or empty.");
+        if ((null == itemEtag) || ("" === itemEtag)) {
+            throw new IllegalArgumentError("Invalid 'itemEtag': null or empty.");
         }
         // Prepare the local address book item extra property map.
         if (undefined === this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
             this._localAddressBookItemExtraPropertyMap.set(addressBookId, new Map());
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).set("by-id", new Map());
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).set("by-resourceName", new Map());
         }
         // Prepare the item extra properties.
         let itemExtraProperties = {
-            etag: etag,
-            id: id
+            id: itemId,
+            resourceName: itemResourceName,
+            etag: itemEtag
         };
         // Update the local address book item extra property map.
-        this._localAddressBookItemExtraPropertyMap.get(addressBookId).set(resourceName, itemExtraProperties);
+        this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-id").set(itemId, itemExtraProperties);
+        this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-resourceName").set(itemResourceName, itemExtraProperties);
     }
 
-    getItemExtraProperties(addressBookId, resourceName) {
+    getItemExtraPropertiesById(addressBookId, itemId) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        if ((null == resourceName) || ("" === resourceName)) {
-            throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
+        if ((null == itemId) || ("" === itemId)) {
+            throw new IllegalArgumentError("Invalid 'itemId': null or empty.");
         }
         // Prepare the item extra properties.
         let itemExtraProperties = undefined;
         if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
-            itemExtraProperties = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(resourceName);
+            itemExtraProperties = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-id").get(itemId);
         }
         //
         return itemExtraProperties;
     }
 
-    deleteItemExtraProperties(addressBookId, resourceName) {
+    getItemExtraPropertiesByResourceName(addressBookId, itemResourceName) {
         if ((null == addressBookId) || ("" === addressBookId)) {
             throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
         }
-        if ((null == resourceName) || ("" === resourceName)) {
-            throw new IllegalArgumentError("Invalid 'resourceName': null or empty.");
+        if ((null == itemResourceName) || ("" === itemResourceName)) {
+            throw new IllegalArgumentError("Invalid 'itemResourceName': null or empty.");
+        }
+        // Prepare the item extra properties.
+        let itemExtraProperties = undefined;
+        if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
+            itemExtraProperties = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-resourceName").get(itemResourceName);
+        }
+        //
+        return itemExtraProperties;
+    }
+
+    deleteItemExtraPropertiesById(addressBookId, itemId) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        if ((null == itemId) || ("" === itemId)) {
+            throw new IllegalArgumentError("Invalid 'itemId': null or empty.");
         }
         // Update the local address book item extra property map.
-        this._localAddressBookItemExtraPropertyMap.get(addressBookId).delete(resourceName);
+        let itemExtraProperties = this.getItemExtraPropertiesById(addressBookId, itemId);
+        if (undefined !== itemExtraProperties) {
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-id").delete(itemId);
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-resourceName").delete(itemExtraProperties.resourceName);
+        }
+    }
+
+    deleteItemExtraPropertiesByResourceName(addressBookId, itemResourceName) {
+        if ((null == addressBookId) || ("" === addressBookId)) {
+            throw new IllegalArgumentError("Invalid 'addressBookId': null or empty.");
+        }
+        if ((null == itemResourceName) || ("" === itemResourceName)) {
+            throw new IllegalArgumentError("Invalid 'itemResourceName': null or empty.");
+        }
+        // Update the local address book item extra property map.
+        let itemExtraProperties = this.getItemExtraPropertiesByResourceName(addressBookId, itemResourceName);
+        if (undefined !== itemExtraProperties) {
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-id").delete(itemExtraProperties.id);
+            this._localAddressBookItemExtraPropertyMap.get(addressBookId).get("by-resourceName").delete(itemResourceName);
+        }
     }
 
     deleteItemExtraProperties(addressBookId) {
@@ -94,29 +133,20 @@ class LocalAddressBookItemExtraPropertyManager {
         // Retrieve the deleted item id sets.
         let deletedMailingListIdSet = localAddressBookEventManager.getDeletedMailingListIdSet(addressBookId);
         let deletedContactIdSet = localAddressBookEventManager.getDeletedContactIdSet(addressBookId);
-        // Prepare the item synchronization structures, and clean the local address book item extra property map from the deleted items.
-        let originalLocalItemIdMap = new Map();
+        // Prepare the item synchronization structures, and remove the deleted items from the local address book item extra property map.
         let originalDeletedLocalItemResourceNameSet = new Set();
         if (undefined !== this._localAddressBookItemExtraPropertyMap.get(addressBookId)) {
             for (let itemResourceName of this._localAddressBookItemExtraPropertyMap.get(addressBookId).keys()) {
-                let entry = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName);
-                let itemId = entry.id;
-                let itemEtag = entry.etag;
+                let itemId = this._localAddressBookItemExtraPropertyMap.get(addressBookId).get(itemResourceName).id;
                 if ((deletedMailingListIdSet.has(itemId)) || (deletedContactIdSet.has(itemId))) {
                     originalDeletedLocalItemResourceNameSet.add(key);
                     //
-                    this.deleteItemExtraProperty(addressBookId, itemResourceName);
-                }
-                else {
-                    originalLocalItemIdMap.set(itemId, {
-                        resourceName: itemResourceName,
-                        etag: itemEtag
-                    });
+                    this.deleteItemExtraPropertiesByResourceName(addressBookId, itemResourceName);
                 }
             }
         }
         //
-        return { originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet };
+        return { originalDeletedLocalItemResourceNameSet };
     }
 
     /* I/O. */
