@@ -9,28 +9,8 @@
 
 "use strict";
 
-if ("undefined" === typeof IllegalArgumentError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/IllegalArgumentError.js", this, "UTF-8");
-}
-if ("undefined" === typeof Logger) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/Logger.js", this, "UTF-8");
-}
-if ("undefined" === typeof NetworkError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
-}
-if ("undefined" === typeof PeopleAPI) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/PeopleAPI.js", this, "UTF-8");
-}
-if ("undefined" === typeof ResponseError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
-}
-
-let { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetters(this, {
-    VCardPropertyEntry: "resource:///modules/VCardUtils.jsm",
-});
-
 const FAKE_EMAIL_ADDRESS_DOMAIN = "bug1522453.thunderbird.example.com";
+const FAKE_ETAG = "000/mz/000";
 
 class AddressBookSynchronizer {
 
@@ -40,60 +20,74 @@ class AddressBookSynchronizer {
         if (null == syncData) {
             throw new IllegalArgumentError("Invalid 'syncData': null.");
         }
-        // Retrieve the target address book.
-        let targetAddressBook = syncData.target;
-        if (null == targetAddressBook) {
-            throw new IllegalArgumentError("Invalid target address book: null.");
-        }
-        // Create a new PeopleAPI object.
+        // Create a PeopleAPI object.
         let peopleAPI = new PeopleAPI(syncData.accountData);
-        // Retrieve other account properties.
+        // Get other account properties.
+/* FIXME
         let useFakeEmailAddresses = syncData.accountData.getAccountProperty("useFakeEmailAddresses");
         let readOnlyMode = syncData.accountData.getAccountProperty("readOnlyMode");
         let verboseLogging = syncData.accountData.getAccountProperty("verboseLogging");
+*/
+let includeSystemContactGroups = syncData.accountData.get("includeSystemContactGroups");
+let useFakeEmailAddresses = syncData.accountData.get("useFakeEmailAddresses");
+let readOnlyMode = syncData.accountData.get("readOnlyMode");
+let verboseLogging = syncData.accountData.get("verboseLogging");
         // Enable the logger.
         logger = new Logger(verboseLogging);
+        // Retrieve the local address book and its id.
+        logger.log0("AddressBookSynchronizer.synchronize(): Retrieving the local address book.");
+// FIXME: syncData.target? true/false?
+        let localAddressBookId = syncData.target;
+        let localAddressBook = await messenger.addressBooks.get(localAddressBookId, true); // No further checking here, as it must be defined.
+        let localAddressBookName = localAddressBook.name;
+        logger.log1("AddressBookSynchronizer.synchronize(): Found the local address book '" + localAddressBookId + "' ('" + localAddressBookName + "').");
         // Check for the read-only mode.
         if (readOnlyMode) {
             logger.log0("AddressBookSynchronizer.synchronize(): Read-only mode detected.");
         }
-        // Prepare the variables for the cycles.
-        logger.log0("AddressBookSynchronizer.synchronize(): Preparing the target address book item map.");
-        let targetAddressBookItemMap = new Map();
-        let i = 0;
-        for (let targetAddressBookItem of await targetAddressBook.getAllItems()) {
-            let key = targetAddressBookItem.getProperty("X-GOOGLE-RESOURCENAME");
-            if (("" == key) || (null == key)) {
-                key = "_local_" + i;
-                i++;
-            }
-            //
-            targetAddressBookItemMap.set(key, targetAddressBookItem);
-        }
-        logger.log0("AddressBookSynchronizer.synchronize(): Preparing the contact group member map.");
-        let contactGroupMemberMap = new Map();
-        logger.log0("AddressBookSynchronizer.synchronize(): Retrieving all the local changes since the last synchronization.");
-        let addedLocalItemIds = targetAddressBook.getAddedItemsFromChangeLog();
-        let modifiedLocalItemIds = targetAddressBook.getModifiedItemsFromChangeLog();
-        let deletedLocalItemIds = targetAddressBook.getDeletedItemsFromChangeLog();
+        // Retrieve the local address book item extra property map.
+        logger.log0("AddressBookSynchronizer.synchronize(): Loading the local address book item extra property map.");
+        let localAddressBookItemExtraPropertyManager = new LocalAddressBookItemExtraPropertyManager();
+        await localAddressBookItemExtraPropertyManager.loadLocalAddressBookItemExtraPropertyMap();
+        // Retrieve the synchronization structures for the cycles.
+        logger.log0("AddressBookSynchronizer.synchronize(): Retrieving the synchronization structures for the cycles.");
+        let { originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet } = localAddressBookItemExtraPropertyManager.getItemSynchronizationStructures(localAddressBookId);
+        let originalCreatedLocalContactGroupIdSet = localAddressBookEventManager.getCreatedMailingListIdSet(localAddressBookId);
+        let originalUpdatedLocalContactGroupIdSet = localAddressBookEventManager.getUpdatedMailingListIdSet(localAddressBookId);
+// TODO: contacts, contact group members.
+        // Enable synchronization mode for the local address book.
+        logger.log0("AddressBookSynchronizer.synchronize(): Enabling synchronization mode for the local address book.");
+        await localAddressBookEventManager.enableSynchronizationMode(localAddressBookId);
         // Attempt the synchronization.
         try {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
-            // Synchronize contacts.
-            await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
-            // Synchronize contact groups.
-            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
-            // Synchronize contact group members.
-            await AddressBookSynchronizer.synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode);
-            // Fix the change log.
-            await AddressBookSynchronizer.fixChangeLog(targetAddressBook, targetAddressBookItemMap);
+/* FIXME
+            // Synchronize the contacts.
+            await AddressBookSynchronizer.synchronizeContacts(peopleAPI, localAddressBook, localAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+*/
+            // Synchronize the contact groups.
+            await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet);
+/* FIXME
+            // Synchronize the contact group members.
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(localAddressBook, localAddressBookItemMap, contactGroupMemberMap, readOnlyMode);
+*/
+            // Save the local address book item extra property map.
+            logger.log0("AddressBookSynchronizer.synchronize(): Saving the local address book item extra property map.");
+            await localAddressBookItemExtraPropertyManager.saveLocalAddressBookItemExtraPropertyMap();
+// TODO: clearEventData if in read-only mode.
+            // Disable synchronization mode for the local address book.
+            logger.log0("AddressBookSynchronizer.synchronize(): Disabling synchronization mode for the local address book.");
+            await localAddressBookEventManager.disableSynchronizationMode(localAddressBookId);
             //
-            logger.log0("AddressBookSynchronizer.synchronize(): Synchronization finished.");
+            logger.log0("AddressBookSynchronizer.synchronize(): Synchronization finished successfully.");
         }
         catch (error) {
+            logger.log0("AddressBookSynchronizer.synchronize(): Synchronization failed.");
+            // Disable synchronization mode for the local address book.
+            logger.log0("AddressBookSynchronizer.synchronize(): Disabling synchronization mode for the local address book.");
+            await localAddressBookEventManager.disableSynchronizationMode(localAddressBookId);
             // If a network error was encountered...
             if (error instanceof NetworkError) {
-                logger.log0("AddressBookSynchronizer.synchronize(): Network error.");
                 // Propagate the error.
                 throw error;
             }
@@ -135,16 +129,16 @@ class AddressBookSynchronizer {
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
         }
-        // Retrieve all server contacts.
-        let serverContacts = await peopleAPI.getContacts();
-        // Cycle on the server contacts.
-        logger.log0("AddressBookSynchronizer.synchronizeContacts(): Cycling on the server contacts.");
-        for (let serverContact of serverContacts) {
+        // Retrieve all remote contacts.
+        let remoteContacts = await peopleAPI.getContacts();
+        // Cycle on the remote contacts.
+        logger.log0("AddressBookSynchronizer.synchronizeContacts(): Cycling on the remote contacts.");
+        for (let remoteContact of remoteContacts) {
             // Get the resource name (in the form 'people/personId') and the display name.
-            let resourceName = serverContact.resourceName;
-            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
+            let resourceName = remoteContact.resourceName;
+            let displayName = (remoteContact.names ? remoteContact.names[0].displayName : "-");
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ")");
-            // Try to match the server contact locally.
+            // Try to match the remote contact locally.
             let localContact = targetAddressBookItemMap.get(resourceName);
             // If such a local contact is currently unavailable...
             if (undefined === localContact) {
@@ -152,7 +146,7 @@ class AddressBookSynchronizer {
                 if (deletedLocalItemIds.includes(resourceName)) {
                     // Check we are not in read-only mode, then...
                     if (!readOnlyMode) {
-                        // Delete the server contact remotely.
+                        // Delete the remote contact remotely.
                         await peopleAPI.deleteContact(resourceName);
                         logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been deleted remotely.");
                     }
@@ -163,10 +157,10 @@ class AddressBookSynchronizer {
                 else {
                     // Create a new local contact.
                     localContact = targetAddressBook.createNewCard();
-                    // Import the server contact information into the local contact.
+                    // Import the remote contact information into the local contact.
                     localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+                    localContact.setProperty("X-GOOGLE-ETAG", remoteContact.etag);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithRemoteContactInformation(localContact, remoteContact, useFakeEmailAddresses);
                     // Add the local contact locally, keep the target address book item map up-to-date.
                     await targetAddressBook.addItem(localContact, true);
                     targetAddressBookItemMap.set(resourceName, localContact);
@@ -175,16 +169,16 @@ class AddressBookSynchronizer {
                     // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                     // Update the contact group member map.
-                    AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                    AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, remoteContact.memberships);
                 }
             }
             // If such a local contact is currently available...
             else {
-                // ...and if the server one is more recent, or if we are in read-only mode...
-                if ((localContact.getProperty("X-GOOGLE-ETAG") !== serverContact.etag) || (readOnlyMode)) {
-                    // Import the server contact information into the local contact.
-                    localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+                // ...and if the remote one is more recent, or if we are in read-only mode...
+                if ((localContact.getProperty("X-GOOGLE-ETAG") !== remoteContact.etag) || (readOnlyMode)) {
+                    // Import the remote contact information into the local contact.
+                    localContact.setProperty("X-GOOGLE-ETAG", remoteContact.etag);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithRemoteContactInformation(localContact, remoteContact, useFakeEmailAddresses);
                     // Update the local contact locally, and keep the target address book item map up-to-date.
                     await targetAddressBook.modifyItem(localContact, true);
                     targetAddressBookItemMap.set(resourceName, localContact);
@@ -193,7 +187,7 @@ class AddressBookSynchronizer {
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
                 // Update the contact group member map.
-                AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, remoteContact.memberships);
             }
         }
         // Prepare the variables for the cycles.
@@ -211,19 +205,19 @@ class AddressBookSynchronizer {
             }
             // Check we are not in read-only mode, then...
             if (!readOnlyMode) {
-                // Create a new server contact.
-                let serverContact = {};
-                // Import the local contact information into the server contact.
-                serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses);
-                // Add the server contact remotely and get the resource name (in the form 'people/personId') and the display name.
-                serverContact = await peopleAPI.createContact(serverContact);
-                let resourceName = serverContact.resourceName;
-                let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
+                // Create a remote contact.
+                let remoteContact = {};
+                // Import the local contact information into the remote contact.
+                remoteContact = AddressBookSynchronizer.fillRemoteContactWithLocalContactInformation(localContact, remoteContact, useFakeEmailAddresses);
+                // Add the remote contact remotely and get the resource name (in the form 'people/personId') and the display name.
+                remoteContact = await peopleAPI.createContact(remoteContact);
+                let resourceName = remoteContact.resourceName;
+                let displayName = (remoteContact.names ? remoteContact.names[0].displayName : "-");
                 logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been added remotely.");
-                // Import the server contact information into the local contact.
+                // Import the remote contact information into the local contact.
                 localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+                localContact.setProperty("X-GOOGLE-ETAG", remoteContact.etag);
+                localContact = AddressBookSynchronizer.fillLocalContactWithRemoteContactInformation(localContact, remoteContact, useFakeEmailAddresses);
                 // Update the local contact locally, and keep the target address book item map up-to-date.
                 await targetAddressBook.modifyItem(localContact, true);
                 targetAddressBookItemMap.set(resourceName, localContact);
@@ -246,29 +240,29 @@ class AddressBookSynchronizer {
             }
             // Check we are not in read-only mode, then...
             if (!readOnlyMode) {
-                // Create a new server contact.
-                let serverContact = {};
-                serverContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
-                serverContact.etag = localContact.getProperty("X-GOOGLE-ETAG");
-                // Import the local contact information into the server contact.
-                serverContact = AddressBookSynchronizer.fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses);
-                // Update the server contact remotely or delete the local contact locally.
+                // Create a new remote contact.
+                let remoteContact = {};
+                remoteContact.resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
+                remoteContact.etag = localContact.getProperty("X-GOOGLE-ETAG");
+                // Import the local contact information into the remote contact.
+                remoteContact = AddressBookSynchronizer.fillRemoteContactWithLocalContactInformation(localContact, remoteContact, useFakeEmailAddresses);
+                // Update the remote contact remotely or delete the local contact locally.
                 try {
-                    // Update the server contact remotely and get the resource name (in the form 'people/personId') and the display name.
-                    serverContact = await peopleAPI.updateContact(serverContact);
-                    let resourceName = serverContact.resourceName;
-                    let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
+                    // Update the remote contact remotely and get the resource name (in the form 'people/personId') and the display name.
+                    remoteContact = await peopleAPI.updateContact(remoteContact);
+                    let resourceName = remoteContact.resourceName;
+                    let displayName = (remoteContact.names ? remoteContact.names[0].displayName : "-");
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been updated remotely.");
-                    // Import the server contact information into the local contact.
+                    // Import the remote contact information into the local contact.
                     localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
-                    localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+                    localContact.setProperty("X-GOOGLE-ETAG", remoteContact.etag);
+                    localContact = AddressBookSynchronizer.fillLocalContactWithRemoteContactInformation(localContact, remoteContact, useFakeEmailAddresses);
                     // Update the local contact locally, and keep the target address book item map up-to-date.
                     await targetAddressBook.modifyItem(localContact, true);
                     targetAddressBookItemMap.set(resourceName, localContact);
                 }
                 catch (error) {
-                    // If the server contact is no longer available (i.e.: it was deleted)...
+                    // If the remote contact is no longer available (i.e.: it was deleted)...
                     if ((error instanceof ResponseError) && (error.message.includes("404"))) {
                         // Get the resource name (in the form 'people/personId').
                         let resourceName = localContact.getProperty("X-GOOGLE-RESOURCENAME");
@@ -306,14 +300,14 @@ class AddressBookSynchronizer {
                 continue;
             }
             // Check if the local contact id matches any of the resource names downloaded.
-            let localContactFoundAmongServerContacts = false;
-            for (let serverContact of serverContacts) {
-                if (localContactId === serverContact.resourceName) {
-                    localContactFoundAmongServerContacts = true;
+            let localContactFoundAmongRemoteContacts = false;
+            for (let remoteContact of remoteContacts) {
+                if (localContactId === remoteContact.resourceName) {
+                    localContactFoundAmongRemoteContacts = true;
                     break;
                 }
             }
-            if (localContactFoundAmongServerContacts) {
+            if (localContactFoundAmongRemoteContacts) {
                 continue;
             }
             // Delete the local contact locally, and keep the target address book item map up-to-date.
@@ -323,12 +317,12 @@ class AddressBookSynchronizer {
         }
     }
 
-    static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
+    static fillLocalContactWithRemoteContactInformation(localContact, remoteContact, useFakeEmailAddresses) {
         if (null == localContact) {
             throw new IllegalArgumentError("Invalid 'localContact': null.");
         }
-        if (null == serverContact) {
-            throw new IllegalArgumentError("Invalid 'serverContact': null.");
+        if (null == remoteContact) {
+            throw new IllegalArgumentError("Invalid 'remoteContact': null.");
         }
         if (null == useFakeEmailAddresses) {
             throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
@@ -352,10 +346,10 @@ class AddressBookSynchronizer {
         localContact._card.vCardProperties.clearValues("x-custom3");
         localContact._card.vCardProperties.clearValues("x-custom4");
         // Set the name and the display name.
-        if (serverContact.names) {
+        if (remoteContact.names) {
             let name_found = false;
             let name = null;
-            for (name of serverContact.names) {
+            for (name of remoteContact.names) {
                 if ("CONTACT" === name.metadata.source.type) {
                     name_found = true;
                     break;
@@ -390,9 +384,9 @@ class AddressBookSynchronizer {
             }
         }
         // Set the nickname.
-        if (serverContact.nicknames) {
+        if (remoteContact.nicknames) {
             let nickname_found = false;
-            let nickname = serverContact.nicknames[0];
+            let nickname = remoteContact.nicknames[0];
             nickname_found = true;
             //
             if (nickname_found) {
@@ -406,10 +400,10 @@ class AddressBookSynchronizer {
             }
         }
         // Set the email addresses.
-        if (serverContact.emailAddresses) {
+        if (remoteContact.emailAddresses) {
             let pref_param = "1";
             //
-            for (let emailAddress of serverContact.emailAddresses) {
+            for (let emailAddress of remoteContact.emailAddresses) {
                 if ("CONTACT" !== emailAddress.metadata.source.type) {
                     continue;
                 }
@@ -449,8 +443,8 @@ class AddressBookSynchronizer {
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("email", { type: email_type_param }, "text", email_values[0]));
         }
         // Set the websites.
-        if (serverContact.urls) {
-            for (let url of serverContact.urls) {
+        if (remoteContact.urls) {
+            for (let url of remoteContact.urls) {
                 let url_values = [ "" ];
                 let url_type_param = "";
                 //
@@ -472,8 +466,8 @@ class AddressBookSynchronizer {
             }
         }
         // Set the addresses.
-        if (serverContact.addresses) {
-            for (let address of serverContact.addresses) {
+        if (remoteContact.addresses) {
+            for (let address of remoteContact.addresses) {
                 let adr_values = [ "", "", "", "", "", "", "" ];
                 let adr_type_param = "";
                 //
@@ -520,8 +514,8 @@ class AddressBookSynchronizer {
             }
         }
         // Set the phone numbers.
-        if (serverContact.phoneNumbers) {
-            for (let phoneNumber of serverContact.phoneNumbers) {
+        if (remoteContact.phoneNumbers) {
+            for (let phoneNumber of remoteContact.phoneNumbers) {
                 let tel_values = [ "" ];
                 let tel_type_param = "";
                 //
@@ -560,8 +554,8 @@ class AddressBookSynchronizer {
             }
         }
         // Set the chat accounts.
-        if (serverContact.imClients) {
-            for (let imClient of serverContact.imClients) {
+        if (remoteContact.imClients) {
+            for (let imClient of remoteContact.imClients) {
                 let impp_values = [ "" ];
                 //
                 if (imClient.protocol && imClient.username) {
@@ -572,9 +566,9 @@ class AddressBookSynchronizer {
             }
         }
         // Set the special dates.
-        if (serverContact.birthdays) {
+        if (remoteContact.birthdays) {
             let birthday_found = false;
-            let birthday = serverContact.birthdays[0];
+            let birthday = remoteContact.birthdays[0];
             birthday_found = true;
             //
             if (birthday_found) {
@@ -591,8 +585,8 @@ class AddressBookSynchronizer {
                 localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("bday", {}, "date-and-or-time", bday_values[0]));
             }
         }
-        if (serverContact.events) {
-            for (let event of serverContact.events) {
+        if (remoteContact.events) {
+            for (let event of remoteContact.events) {
                 let anniversary_values = [ "" ];
                 //
                 if (event && event.date) {
@@ -607,19 +601,19 @@ class AddressBookSynchronizer {
             }
         }
         // Set the notes.
-        if (serverContact.biographies) {
+        if (remoteContact.biographies) {
             let note_values = [ "" ];
             //
-            if (serverContact.biographies[0] && serverContact.biographies[0].value) {
-                note_values[0] = serverContact.biographies[0].value.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
+            if (remoteContact.biographies[0] && remoteContact.biographies[0].value) {
+                note_values[0] = remoteContact.biographies[0].value.replaceAll(", ", " ").replaceAll(",", " ").replace(/(\r\n|\n|\r)/gm, " - ");
             }
             //
             localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("note", {}, "array", note_values));
         }
         // Set the organizational properties.
-        if (serverContact.organizations) {
+        if (remoteContact.organizations) {
             let organization_found = false;
-            let organization = serverContact.organizations[0];
+            let organization = remoteContact.organizations[0];
             organization_found = true;
             //
             if (organization_found) {
@@ -645,23 +639,23 @@ class AddressBookSynchronizer {
             }
         }
         // Set the custom properties.
-        if (serverContact.userDefined) {
+        if (remoteContact.userDefined) {
             let x_custom1_values = [ "" ];
             let x_custom2_values = [ "" ];
             let x_custom3_values = [ "" ];
             let x_custom4_values = [ "" ];
             //
-            if (serverContact.userDefined[0] && serverContact.userDefined[0].value) {
-                x_custom1_values[0] = serverContact.userDefined[0].value.replaceAll(", ", " ").replaceAll(",", " ");
+            if (remoteContact.userDefined[0] && remoteContact.userDefined[0].value) {
+                x_custom1_values[0] = remoteContact.userDefined[0].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
-            if (serverContact.userDefined[1] && serverContact.userDefined[1].value) {
-                x_custom2_values[0] = serverContact.userDefined[1].value.replaceAll(", ", " ").replaceAll(",", " ");
+            if (remoteContact.userDefined[1] && remoteContact.userDefined[1].value) {
+                x_custom2_values[0] = remoteContact.userDefined[1].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
-            if (serverContact.userDefined[2] && serverContact.userDefined[2].value) {
-                x_custom3_values[0] = serverContact.userDefined[2].value.replaceAll(", ", " ").replaceAll(",", " ");
+            if (remoteContact.userDefined[2] && remoteContact.userDefined[2].value) {
+                x_custom3_values[0] = remoteContact.userDefined[2].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
-            if (serverContact.userDefined[3] && serverContact.userDefined[3].value) {
-                x_custom4_values[0] = serverContact.userDefined[3].value.replaceAll(", ", " ").replaceAll(",", " ");
+            if (remoteContact.userDefined[3] && remoteContact.userDefined[3].value) {
+                x_custom4_values[0] = remoteContact.userDefined[3].value.replaceAll(", ", " ").replaceAll(",", " ");
             }
             //
 /* FIXME: temporary workaround for a TB bug.
@@ -679,54 +673,54 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         return localContact;
     }
 
-    static fillServerContactWithLocalContactInformation(localContact, serverContact, useFakeEmailAddresses) {
+    static fillRemoteContactWithLocalContactInformation(localContact, remoteContact, useFakeEmailAddresses) {
         if (null == localContact) {
             throw new IllegalArgumentError("Invalid 'localContact': null.");
         }
-        if (null == serverContact) {
-            throw new IllegalArgumentError("Invalid 'serverContact': null.");
+        if (null == remoteContact) {
+            throw new IllegalArgumentError("Invalid 'remoteContact': null.");
         }
         if (null == useFakeEmailAddresses) {
             throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
         }
         // Reset all the properties managed by this method.
-        delete serverContact.names;
-        delete serverContact.nicknames;
-        delete serverContact.emailAddresses;
-        delete serverContact.urls;
-        delete serverContact.addresses;
-        delete serverContact.phoneNumbers;
-        delete serverContact.imClients;
-        delete serverContact.birthdays;
-        delete serverContact.events;
-        delete serverContact.biographies;
-        delete serverContact.organizations;
-        delete serverContact.userDefined;
+        delete remoteContact.names;
+        delete remoteContact.nicknames;
+        delete remoteContact.emailAddresses;
+        delete remoteContact.urls;
+        delete remoteContact.addresses;
+        delete remoteContact.phoneNumbers;
+        delete remoteContact.imClients;
+        delete remoteContact.birthdays;
+        delete remoteContact.events;
+        delete remoteContact.biographies;
+        delete remoteContact.organizations;
+        delete remoteContact.userDefined;
         // Set the name and the display name.
         let n_entry = localContact._card.vCardProperties.getFirstEntry("n");
         let fn_entry = localContact._card.vCardProperties.getFirstEntry("fn");
         if (n_entry || fn_entry) {
-            serverContact.names = [];
+            remoteContact.names = [];
             //
-            serverContact.names[0] = {};
+            remoteContact.names[0] = {};
             //
             if (n_entry) {
                 let n_values = n_entry.value; // n_entry.value: array
                 //
                 if (n_values[3]) {
-                    serverContact.names[0].honorificPrefix = n_values[3];
+                    remoteContact.names[0].honorificPrefix = n_values[3];
                 }
                 if (n_values[1]) {
-                    serverContact.names[0].givenName = n_values[1];
+                    remoteContact.names[0].givenName = n_values[1];
                 }
                 if (n_values[2]) {
-                    serverContact.names[0].middleName = n_values[2];
+                    remoteContact.names[0].middleName = n_values[2];
                 }
                 if (n_values[0]) {
-                    serverContact.names[0].familyName = n_values[0];
+                    remoteContact.names[0].familyName = n_values[0];
                 }
                 if (n_values[4]) {
-                    serverContact.names[0].honorificSuffix = n_values[4];
+                    remoteContact.names[0].honorificSuffix = n_values[4];
                 }
             }
 /* Disabled, as names[0].displayName is an output-only field for Google.
@@ -734,7 +728,7 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 let fn_values = [ fn_entry.value ]; // fn_entry.value: string
                 //
                 if (fn_values[0]) {
-                    serverContact.names[0].displayName = fn_values[0];
+                    remoteContact.names[0].displayName = fn_values[0];
                 }
             }
 */
@@ -742,20 +736,20 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         // Set the nickname.
         let nickname_entry = localContact._card.vCardProperties.getFirstEntry("nickname");
         if (nickname_entry) {
-            serverContact.nicknames = [];
+            remoteContact.nicknames = [];
             //
-            serverContact.nicknames[0] = {};
+            remoteContact.nicknames[0] = {};
             //
             let nickname_values = [ nickname_entry.value ]; // nickname_entry.value: string
             //
             if (nickname_values[0]) {
-                serverContact.nicknames[0].value = nickname_values[0];
+                remoteContact.nicknames[0].value = nickname_values[0];
             }
         }
         // Set the email addresses.
         let email_entries = localContact._card.vCardProperties.getAllEntries("email");
         if (email_entries) {
-            serverContact.emailAddresses = [];
+            remoteContact.emailAddresses = [];
             let i = 0;
             //
             for (let email_entry of email_entries) {
@@ -763,25 +757,25 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     continue;
                 }
                 //
-                serverContact.emailAddresses[i] = {};
+                remoteContact.emailAddresses[i] = {};
                 //
                 let email_values = [ email_entry.value ]; // email_entry.value: string
                 let email_type_param = email_entry.params.type;
                 //
                 if (email_values[0]) {
-                    serverContact.emailAddresses[i].value = email_values[0];
+                    remoteContact.emailAddresses[i].value = email_values[0];
                 }
                 switch (email_type_param) {
                     case "work":
-                        serverContact.emailAddresses[i].type = "work";
+                        remoteContact.emailAddresses[i].type = "work";
                         //
                         break;
                     case "home":
-                        serverContact.emailAddresses[i].type = "home";
+                        remoteContact.emailAddresses[i].type = "home";
                         //
                         break;
                     default:
-                        serverContact.emailAddresses[i].type = "other";
+                        remoteContact.emailAddresses[i].type = "other";
                         //
                         break;
                 }
@@ -789,32 +783,32 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 i++;
             }
             //
-            if (0 == serverContact.emailAddresses.length) {
-                delete serverContact.emailAddresses;
+            if (0 == remoteContact.emailAddresses.length) {
+                delete remoteContact.emailAddresses;
             }
         }
         // Set the websites.
         let url_entries = localContact._card.vCardProperties.getAllEntries("url");
         if (url_entries) {
-            serverContact.urls = [];
+            remoteContact.urls = [];
             let i = 0;
             //
             for (let url_entry of url_entries) {
-                serverContact.urls[i] = {};
+                remoteContact.urls[i] = {};
                 //
                 let url_values = [ url_entry.value ]; // url_entry.value: string
                 let url_type_param = url_entry.params.type;
                 //
                 if (url_values[0]) {
-                    serverContact.urls[i].value = url_values[0];
+                    remoteContact.urls[i].value = url_values[0];
                 }
                 switch (url_type_param) {
                     case "work":
-                        serverContact.urls[i].type = "work";
+                        remoteContact.urls[i].type = "work";
                         //
                         break;
                     default:
-                        serverContact.urls[i].type = "";
+                        remoteContact.urls[i].type = "";
                         //
                         break;
                 }
@@ -825,11 +819,11 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         // Set the addresses.
         let adr_entries = localContact._card.vCardProperties.getAllEntries("adr");
         if (adr_entries) {
-            serverContact.addresses = [];
+            remoteContact.addresses = [];
             let i = 0;
             //
             for (let adr_entry of adr_entries) {
-                serverContact.addresses[i] = {};
+                remoteContact.addresses[i] = {};
                 //
                 let adr_values = adr_entry.value; // adr_entry.value: array
                 let adr_type_param = adr_entry.params.type;
@@ -838,35 +832,35 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                     let adr_values_2_values = (Array.isArray(adr_values[2]) ? adr_values[2] : [ adr_values[2] ]); // adr_values[2]: string or array
                     //
                     if (adr_values_2_values[0]) {
-                        serverContact.addresses[i].streetAddress = adr_values_2_values[0];
+                        remoteContact.addresses[i].streetAddress = adr_values_2_values[0];
                     }
                     if (adr_values_2_values[1]) {
-                        serverContact.addresses[i].extendedAddress = adr_values_2_values[1];
+                        remoteContact.addresses[i].extendedAddress = adr_values_2_values[1];
                     }
                 }
                 if (adr_values[3]) {
-                    serverContact.addresses[i].city = adr_values[3];
+                    remoteContact.addresses[i].city = adr_values[3];
                 }
                 if (adr_values[4]) {
-                    serverContact.addresses[i].region = adr_values[4];
+                    remoteContact.addresses[i].region = adr_values[4];
                 }
                 if (adr_values[5]) {
-                    serverContact.addresses[i].postalCode = adr_values[5];
+                    remoteContact.addresses[i].postalCode = adr_values[5];
                 }
                 if (adr_values[6]) {
-                    serverContact.addresses[i].country = adr_values[6];
+                    remoteContact.addresses[i].country = adr_values[6];
                 }
                 switch (adr_type_param) {
                     case "work":
-                        serverContact.addresses[i].type = "work";
+                        remoteContact.addresses[i].type = "work";
                         //
                         break;
                     case "home":
-                        serverContact.addresses[i].type = "home";
+                        remoteContact.addresses[i].type = "home";
                         //
                         break;
                     default:
-                        serverContact.addresses[i].type = "";
+                        remoteContact.addresses[i].type = "";
                         //
                         break;
                 }
@@ -877,41 +871,41 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         // Set the phone numbers.
         let tel_entries = localContact._card.vCardProperties.getAllEntries("tel");
         if (tel_entries) {
-            serverContact.phoneNumbers = [];
+            remoteContact.phoneNumbers = [];
             let i = 0;
             //
             for (let tel_entry of tel_entries) {
-                serverContact.phoneNumbers[i] = {};
+                remoteContact.phoneNumbers[i] = {};
                 //
                 let tel_values = [ tel_entry.value ]; // tel_entry.value: string
                 let tel_type_param = tel_entry.params.type;
                 //
                 if (tel_values[0]) {
-                    serverContact.phoneNumbers[i].value = tel_values[0];
+                    remoteContact.phoneNumbers[i].value = tel_values[0];
                 }
                 switch (tel_type_param) {
                     case "work":
-                        serverContact.phoneNumbers[i].type = "work";
+                        remoteContact.phoneNumbers[i].type = "work";
                         //
                         break;
                     case "home":
-                        serverContact.phoneNumbers[i].type = "home";
+                        remoteContact.phoneNumbers[i].type = "home";
                         //
                         break;
                     case "cell":
-                        serverContact.phoneNumbers[i].type = "mobile";
+                        remoteContact.phoneNumbers[i].type = "mobile";
                         //
                         break;
                     case "fax":
-                        serverContact.phoneNumbers[i].type = "Work Fax";
+                        remoteContact.phoneNumbers[i].type = "Work Fax";
                         //
                         break;
                     case "pager":
-                        serverContact.phoneNumbers[i].type = "pager";
+                        remoteContact.phoneNumbers[i].type = "pager";
                         //
                         break;
                     default:
-                        serverContact.phoneNumbers[i].type = "";
+                        remoteContact.phoneNumbers[i].type = "";
                         //
                         break;
                 }
@@ -922,19 +916,19 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         // Set the chat accounts.
         let impp_entries = localContact._card.vCardProperties.getAllEntries("impp");
         if (impp_entries) {
-            serverContact.imClients = [];
+            remoteContact.imClients = [];
             let i = 0;
             //
             for (let impp_entry of impp_entries) {
-                serverContact.imClients[i] = {};
+                remoteContact.imClients[i] = {};
                 //
                 let impp_values = [ impp_entry.value ]; // impp_entry.value: string
                 //
                 if (impp_values[0] && impp_values[0].includes(":")) {
                     let impp_values_pu = impp_values[0].split(":");
                     //
-                    serverContact.imClients[i].username = impp_values_pu[1];
-                    serverContact.imClients[i].protocol = impp_values_pu[0];
+                    remoteContact.imClients[i].username = impp_values_pu[1];
+                    remoteContact.imClients[i].protocol = impp_values_pu[0];
                 }
                 //
                 i++;
@@ -944,10 +938,10 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         let bday_entry = localContact._card.vCardProperties.getFirstEntry("bday");
         let anniversary_entries = localContact._card.vCardProperties.getAllEntries("anniversary");
         if (bday_entry) {
-            serverContact.birthdays = [];
+            remoteContact.birthdays = [];
             //
-            serverContact.birthdays[0] = {};
-            serverContact.birthdays[0].date = {};
+            remoteContact.birthdays[0] = {};
+            remoteContact.birthdays[0].date = {};
             //
             let bday_values = [ bday_entry.value ]; // bday_entry.value: string
             //
@@ -978,22 +972,22 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
             }
             //
             if (month) {
-                serverContact.birthdays[0].date.month = month;
+                remoteContact.birthdays[0].date.month = month;
             }
             if (day) {
-                serverContact.birthdays[0].date.day = day;
+                remoteContact.birthdays[0].date.day = day;
             }
             if (year) {
-                serverContact.birthdays[0].date.year = year;
+                remoteContact.birthdays[0].date.year = year;
             }
         }
         if (anniversary_entries) {
-            serverContact.events = [];
+            remoteContact.events = [];
             let i = 0;
             //
             for (let anniversary_entry of anniversary_entries) {
-                serverContact.events[i] = {};
-                serverContact.events[i].date = {};
+                remoteContact.events[i] = {};
+                remoteContact.events[i].date = {};
                 //
                 let anniversary_values = [ anniversary_entry.value ]; // anniversary_entry.value: string
                 //
@@ -1025,13 +1019,13 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
                 //
                 if (month && day) {
                     if (month) {
-                        serverContact.events[i].date.month = month;
+                        remoteContact.events[i].date.month = month;
                     }
                     if (day) {
-                        serverContact.events[i].date.day = day;
+                        remoteContact.events[i].date.day = day;
                     }
                     if (year) {
-                        serverContact.events[i].date.year = year;
+                        remoteContact.events[i].date.year = year;
                     }
                 }
                 //
@@ -1041,39 +1035,39 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         // Set the notes.
         let note_entry = localContact._card.vCardProperties.getFirstEntry("note");
         if (note_entry) {
-            serverContact.biographies = [];
+            remoteContact.biographies = [];
             //
-            serverContact.biographies[0] = {};
+            remoteContact.biographies[0] = {};
             //
             let note_values = [ note_entry.value ]; // note_entry.value: string
             //
             if (note_values[0]) {
-                serverContact.biographies[0].value = note_values[0];
+                remoteContact.biographies[0].value = note_values[0];
             }
         }
         // Set the organizational properties.
         let title_entry = localContact._card.vCardProperties.getFirstEntry("title");
         let org_entry = localContact._card.vCardProperties.getFirstEntry("org");
         if (title_entry || org_entry) {
-            serverContact.organizations = [];
+            remoteContact.organizations = [];
             //
-            serverContact.organizations[0] = {};
+            remoteContact.organizations[0] = {};
             //
             if (title_entry) {
                 let title_values = [ title_entry.value ]; // title_entry.value: string
                 //
                 if (title_values[0]) {
-                    serverContact.organizations[0].title = title_values[0];
+                    remoteContact.organizations[0].title = title_values[0];
                 }
             }
             if (org_entry) {
                 let org_values = (Array.isArray(org_entry.value) ? org_entry.value : [ org_entry.value ]); // org_entry.value: string or array
                 //
                 if (org_values[0]) {
-                    serverContact.organizations[0].name = org_values[0];
+                    remoteContact.organizations[0].name = org_values[0];
                 }
                 if (org_values[1]) {
-                    serverContact.organizations[0].department = org_values[1];
+                    remoteContact.organizations[0].department = org_values[1];
                 }
             }
         }
@@ -1083,240 +1077,242 @@ localContact._card.vCardProperties.addEntry(new VCardPropertyEntry("x-custom4", 
         let x_custom3_entry = localContact._card.vCardProperties.getFirstEntry("x-custom3");
         let x_custom4_entry = localContact._card.vCardProperties.getFirstEntry("x-custom4");
         if (x_custom1_entry || x_custom2_entry || x_custom3_entry || x_custom4_entry) {
-            serverContact.userDefined = [];
+            remoteContact.userDefined = [];
             let i = 0;
             //
             if (x_custom1_entry) {
-                serverContact.userDefined[i] = {};
+                remoteContact.userDefined[i] = {};
                 //
                 let x_custom1_values = [ x_custom1_entry.value ]; // x_custom1_entry.value: string
                 //
                 if (x_custom1_values[0]) {
-                    serverContact.userDefined[i].key = "-";
-                    serverContact.userDefined[i].value = x_custom1_values[0];
+                    remoteContact.userDefined[i].key = "-";
+                    remoteContact.userDefined[i].value = x_custom1_values[0];
                     //
                     i++;
                 }
             }
             if (x_custom2_entry) {
-                serverContact.userDefined[i] = {};
+                remoteContact.userDefined[i] = {};
                 //
                 let x_custom2_values = [ x_custom2_entry.value ]; // x_custom2_entry.value: string
                 //
                 if (x_custom2_values[0]) {
-                    serverContact.userDefined[i].key = "-";
-                    serverContact.userDefined[i].value = x_custom2_values[0];
+                    remoteContact.userDefined[i].key = "-";
+                    remoteContact.userDefined[i].value = x_custom2_values[0];
                     //
                     i++;
                 }
             }
             if (x_custom3_entry) {
-                serverContact.userDefined[i] = {};
+                remoteContact.userDefined[i] = {};
                 //
                 let x_custom3_values = [ x_custom3_entry.value ]; // x_custom3_entry.value: string
                 //
                 if (x_custom3_values[0]) {
-                    serverContact.userDefined[i].key = "-";
-                    serverContact.userDefined[i].value = x_custom3_values[0];
+                    remoteContact.userDefined[i].key = "-";
+                    remoteContact.userDefined[i].value = x_custom3_values[0];
                     //
                     i++;
                 }
             }
             if (x_custom4_entry) {
-                serverContact.userDefined[i] = {};
+                remoteContact.userDefined[i] = {};
                 //
                 let x_custom4_values = [ x_custom4_entry.value ]; // x_custom4_entry.value: string
                 //
                 if (x_custom4_values[0]) {
-                    serverContact.userDefined[i].key = "-";
-                    serverContact.userDefined[i].value = x_custom4_values[0];
+                    remoteContact.userDefined[i].key = "-";
+                    remoteContact.userDefined[i].value = x_custom4_values[0];
                     //
                     i++;
                 }
             }
         }
         //
-        return serverContact;
+        return remoteContact;
     }
 
     /* Contact groups. */
 
-    static async synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode) {
+    static async synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalLocalItemIdMap, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
-        if (null == targetAddressBook) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
-        }
-        if (null == targetAddressBookItemMap) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
-        }
-        if (null == addedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'addedLocalItemIds': null.");
-        }
-        if (null == modifiedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'modifiedLocalItemIds': null.");
-        }
-        if (null == deletedLocalItemIds) {
-            throw new IllegalArgumentError("Invalid 'deletedLocalItemIds': null.");
+        if (null == includeSystemContactGroups) {
+            throw new IllegalArgumentError("Invalid 'includeSystemContactGroups': null.");
         }
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
         }
-        // Retrieve all server contact groups.
-        let serverContactGroups = await peopleAPI.getContactGroups();
-        // Cycle on the server contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the server contact groups.");
-        let includeSystemContactGroups = peopleAPI.getIncludeSystemContactGroups();
-        logger.log1("PeopleAPI.getContactGroups(): includeSystemContactGroups = " + includeSystemContactGroups);
-        for (let serverContactGroup of serverContactGroups) {
-            // Get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-            let resourceName = serverContactGroup.resourceName;
-            let name = serverContactGroup.name;
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ")");
-            // Determine if the server contact group is a system one and if it should be discarded.
-            if (("SYSTEM_CONTACT_GROUP" === serverContactGroup.groupType) && (!includeSystemContactGroups)) {
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") is a system contact group and has therefore been ignored.");
-                continue;
+        if (null == localAddressBook) {
+            throw new IllegalArgumentError("Invalid 'localAddressBook': null.");
+        }
+        if (null == localAddressBookItemExtraPropertyManager) {
+            throw new IllegalArgumentError("Invalid 'localAddressBookItemExtraPropertyManager': null.");
+        }
+        if (null == originalLocalItemIdMap) {
+            throw new IllegalArgumentError("Invalid 'originalLocalItemIdMap': null.");
+        }
+        if (null == originalDeletedLocalItemResourceNameSet) {
+            throw new IllegalArgumentError("Invalid 'originalDeletedLocalItemResourceNameSet': null.");
+        }
+        if (null == originalCreatedLocalContactGroupIdSet) {
+            throw new IllegalArgumentError("Invalid 'originalCreatedLocalContactGroupIdSet': null.");
+        }
+        if (null == originalUpdatedLocalContactGroupIdSet) {
+            throw new IllegalArgumentError("Invalid 'originalUpdatedLocalContactGroupIdSet': null.");
+        }
+        // Get the local address book id.
+        let localAddressBookId = localAddressBook.id;
+        // Retrieve the remote contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Retrieving the remote contact groups.");
+        let remoteContactGroups = await peopleAPI.getContactGroups();
+        // Cycle on the remote contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the remote contact groups.");
+        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): includeSystemContactGroups = " + includeSystemContactGroups + ".");
+        for (let remoteContactGroup of remoteContactGroups) {
+            // Get the contact group resource name (in the form 'contactGroups/contactGroupId') and name.
+            let contactGroupResourceName = remoteContactGroup.resourceName;
+            let contactGroupName = remoteContactGroup.name;
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing remote contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "').");
+            // Determine if the remote contact group is a system one.
+            if ("SYSTEM_CONTACT_GROUP" === remoteContactGroup.groupType) {
+                // Determine if the remote contact group should be discarded.
+                if (!includeSystemContactGroups) {
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Remote contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') is a system contact group and has therefore been ignored.");
+                    continue;
+                }
+                // Fix the missing etag.
+                remoteContactGroup.etag = FAKE_ETAG;
             }
-            // Try to match the server contact group locally.
-            let localContactGroup = targetAddressBookItemMap.get(resourceName);
-            // If such a local contact group is currently unavailable...
+            // Try to match the remote contact group locally.
+            let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraProperties(localAddressBookId, contactGroupResourceName);
+            let contactGroupId = undefined;
+            if (undefined !== localItemExtraProperties) {
+                contactGroupId = localItemExtraProperties.id;
+            }
+            let localContactGroup = undefined;
+            if (undefined !== contactGroupId) {
+                try {
+                    localContactGroup = await messenger.mailingLists.get(contactGroupId);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Match found: remote contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') -> local contact group '" + contactGroupId + "'.");
+                }
+                catch (error) {
+                }
+            }
+            // If such a remote contact group is currently unavailable locally...
             if (undefined === localContactGroup) {
                 // ...and if it was previously deleted locally...
-                if (deletedLocalItemIds.includes(resourceName)) {
+                if (originalDeletedLocalItemResourceNameSet.has(contactGroupResourceName)) {
                     // Check we are not in read-only mode, then...
                     if (!readOnlyMode) {
-                        // Delete the server contact group remotely.
-                        await peopleAPI.deleteContactGroup(resourceName);
-                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted remotely.");
+                        // Delete the remote contact group.
+                        await peopleAPI.deleteContactGroup(contactGroupResourceName);
+                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been deleted remotely.");
+                        // Remove the event data from the local address book event map.
+                        await localAddressBookEventManager.clearMailingListDeletedEventData(localAddressBookId, contactGroupId);
                     }
-                    // Remove the resource name from the local change log (deleted items).
-                    await targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
                 // ...and if it wasn't previously deleted locally...
                 else {
-                    // Create a new local contact group.
-                    localContactGroup = targetAddressBook.createNewList();
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Add the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.addItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added locally.");
-                    // Remove the resource name from the local change log (added items).
-                    // (This should be logically useless, but sometimes the change log is filled with some of the contact groups added above.)
-                    await targetAddressBook.removeItemFromChangeLog(resourceName);
+                    // Prepare the local contact group properties.
+                    let localContactGroupProperties = AddressBookSynchronizer.getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup);
+                    // Create a local contact group, and update the local address book item extra property map.
+                    let contactGroupId = await messenger.mailingLists.create(localAddressBookId, localContactGroupProperties);
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been created locally: '" + contactGroupId + "'.");
                 }
             }
-            // If such a local contact group is currently available...
+            // If such a remote contact group is currently available locally...
             else {
-                // ...and if the server one is more recent, or if we are in read-only mode...
-                if ((localContactGroup.getProperty("X-GOOGLE-ETAG") !== serverContactGroup.etag) || (readOnlyMode)) {
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Update the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.modifyItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated locally.");
-                    // Remove the resource name from the local change log (modified items).
-                    await targetAddressBook.removeItemFromChangeLog(resourceName);
+                // ...and if the remote one is more recent, or if we are in read-only mode...
+                if ((localItemExtraProperties.etag !== remoteContactGroup.etag) || (readOnlyMode)) {
+                    // Prepare the local contact group properties.
+                    let localContactGroupProperties = AddressBookSynchronizer.getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup);
+                    // Update the local contact group, and update the local address book item extra property map.
+                    await messenger.mailingLists.update(contactGroupId, localContactGroupProperties);
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been updated locally: '" + contactGroupId + "'.");
+                    // Remove the event data from the local address book event map, and remove the contact group from the locally updated ones (to avoid duplications).
+                    await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
+                    originalUpdatedLocalContactGroupIdSet.delete(contactGroupId);
                 }
             }
         }
-        // Prepare the variables for the cycles.
-        let addedLocalItemResourceNames = new Set();
-        // Cycle on the locally added contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally added contact groups.");
-        for (let localContactGroupId of addedLocalItemIds) {
-            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
-            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
-            if (undefined === localContactGroup) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
+        // Cycle on the created local contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the created local contact groups.");
+        for (let contactGroupId of originalCreatedLocalContactGroupIdSet) {
             // Check we are not in read-only mode, then...
             if (!readOnlyMode) {
-                // Create a new server contact group.
-                let serverContactGroup = {};
-                // Import the local contact group information into the server contact group.
-                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
-                // Add the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-                serverContactGroup = await peopleAPI.createContactGroup(serverContactGroup);
-                let resourceName = serverContactGroup.resourceName;
-                let name = serverContactGroup.name;
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been added remotely.");
-                // Import the server contact group information into the local contact group.
-                localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                // Update the local contact group locally, and keep the target address book item map up-to-date.
-                await targetAddressBook.modifyItem(localContactGroup, true);
-                targetAddressBookItemMap.set(resourceName, localContactGroup);
-                // Add the resource name to the proper set.
-                addedLocalItemResourceNames.add(resourceName);
+                // Retrieve the local contact group.
+                let localContactGroup = await messenger.mailingLists.get(contactGroupId);
+                // Get the contact group name.
+                let contactGroupName = localContactGroup.name;
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+                // Prepare the remote contact group.
+                let localContactGroupProperties = {
+                    name: contactGroupName,
+                    nickName: localContactGroup.nickName,
+                    type: localContactGroup.type
+                };
+                let remoteContactGroup = AddressBookSynchronizer.getRemoteContactGroupFromLocalContactGroupProperties(localContactGroupProperties);
+                // Create a remote contact group, and update the local address book item extra property map.
+                remoteContactGroup = await peopleAPI.createContactGroup(remoteContactGroup);
+                let contactGroupResourceName = remoteContactGroup.resourceName;
+                localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been created remotely: '" + contactGroupResourceName + "'.");
+                // Remove the event data from the local address book event map.
+                await localAddressBookEventManager.clearMailingListCreatedEventData(localAddressBookId, contactGroupId);
             }
-            // Remove the local contact group id from the local change log (added items).
-            await targetAddressBook.removeItemFromChangeLog(localContactGroupId);
         }
-        // Cycle on the locally modified contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the locally modified contact groups.");
-        for (let localContactGroupId of modifiedLocalItemIds) {
-            // Retrieve the local contact group, and make sure such an item is actually valid and a real contact group.
-            let localContactGroup = targetAddressBookItemMap.get(localContactGroupId);
-            if (undefined === localContactGroup) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
+        // Cycle on the updated local contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the updated local contact groups.");
+        for (let contactGroupId of originalUpdatedLocalContactGroupIdSet) {
             // Check we are not in read-only mode, then...
             if (!readOnlyMode) {
-                // Make sure the local contact group has a valid X-GOOGLE-ETAG property (if not, it is probably a system contact group, which cannot be updated).
-                if (!localContactGroup.getProperty("X-GOOGLE-ETAG")) {
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " has no X-GOOGLE-ETAG property and has therefore been ignored.");
+                // Get the contact group extra properties.
+                let contactGroupExtraProperties = originalLocalItemIdMap.get(contactGroupId);
+                // Make sure the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated).
+                if (FAKE_ETAG === contactGroupExtraProperties.etag) {
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + localContactGroupId + "' has no etag and has therefore been ignored.");
                     continue;
                 }
-                // Create a new server contact group.
-                let serverContactGroup = {};
-                serverContactGroup.resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-                serverContactGroup.etag = localContactGroup.getProperty("X-GOOGLE-ETAG");
-                // Import the local contact group information into the server contact group.
-                serverContactGroup = AddressBookSynchronizer.fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup);
-                // Update the server contact group remotely or delete the local contact group locally.
+                // Retrieve the local contact group.
+                let localContactGroup = await messenger.mailingLists.get(contactGroupId);
+                // Get the contact group name.
+                let contactGroupName = localContactGroup.name;
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+                // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
+                let contactGroupResourceName = contactGroupExtraProperties.resourceName;
+                // Prepare the remote contact group.
+                let localContactGroupProperties = {
+                    name: contactGroupName,
+                    nickName: localContactGroup.nickName,
+                    type: localContactGroup.type
+                };
+                let remoteContactGroup = AddressBookSynchronizer.getRemoteContactGroupFromLocalContactGroupProperties(localContactGroupProperties);
+                remoteContactGroup.resourceName = contactGroupResourceName;
+                remoteContactGroup.etag = contactGroupExtraProperties.etag;
+                // Update the remote contact group or delete the local contact group.
                 try {
-                    // Update the server contact group remotely and get the resource name (in the form 'contactGroups/contactGroupId') and the name.
-                    serverContactGroup = await peopleAPI.updateContactGroup(serverContactGroup);
-                    let resourceName = serverContactGroup.resourceName;
-                    let name = serverContactGroup.name;
-                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been updated remotely.");
-                    // Import the server contact group information into the local contact group.
-                    localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
-                    localContactGroup.setProperty("X-GOOGLE-ETAG", serverContactGroup.etag);
-                    localContactGroup = AddressBookSynchronizer.fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup);
-                    // Update the local contact group locally, and keep the target address book item map up-to-date.
-                    await targetAddressBook.modifyItem(localContactGroup, true);
-                    targetAddressBookItemMap.set(resourceName, localContactGroup);
+                    // Update the remote contact group, and update the local address book item extra property map.
+                    remoteContactGroup = await peopleAPI.updateContactGroup(remoteContactGroup);
+                    let contactGroupResourceName = remoteContactGroup.resourceName;
+                    localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupResourceName, remoteContactGroup.etag, contactGroupId);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been updated remotely: '" + contactGroupResourceName + "'.");
+                    // Remove the event data from the local address book event map.
+                    await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
                 }
                 catch (error) {
-                    // If the server contact group is no longer available (i.e.: it was deleted)...
+                    // If the remote contact group is no longer available (i.e.: it was deleted)...
                     if ((error instanceof ResponseError) && (error.message.includes(": 404:"))) {
-                        // Get the resource name (in the form 'contactGroups/contactGroupId').
-                        let resourceName = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-                        let name = localContactGroup.getProperty("ListName");
-                        // Delete the local contact group locally, and keep the target address book item map up-to-date.
-/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
-                        targetAddressBook.deleteItem(localContactGroup, true);
-*/
-let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
-abManager.deleteAddressBook(localContactGroup._card.mailListURI);
-                        targetAddressBookItemMap.delete(resourceName);
-                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + resourceName + " (" + name + ") has been deleted locally.");
+                        // Delete the local contact group, and update the local address book item extra property map.
+                        await messenger.mailingLists.delete(contactGroupId);
+                        localAddressBookItemExtraPropertyManager.deleteItemExtraProperties(localAddressBookId, contactGroupResourceName);
+                        logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been deleted locally.");
+                        // Remove the event data from the local address book event map.
+                        await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
                     }
                     // If the root reason is different...
                     else {
@@ -1325,82 +1321,71 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
                     }
                 }
             }
-            // Remove the local contact group id from the local change log (modified items).
-            await targetAddressBook.removeItemFromChangeLog(localContactGroupId);
         }
-        // Determine all the contact groups which were previously deleted remotely and delete them locally.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the remotely deleted contact groups.");
-        for (let localContactGroup of targetAddressBookItemMap.values()) {
-            // Make sure the item is actually valid and a real contact group.
-            if (undefined === targetAddressBookItemMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"))) {
+        // Determine all the deleted remote contact groups.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the deleted remote contact groups.");
+        for (let localContactGroup of await messenger.mailingLists.list(localAddressBookId)) {
+            // Get the contact group id and name.
+            let contactGroupId = localContactGroup.id;
+            let contactGroupName = localContactGroup.name;
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+            // Determine if the local contact group is a locally added one.
+            if (originalCreatedLocalContactGroupIdSet.has(contactGroupId)) {
                 continue;
             }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
-            // Get the local contact group id and the name.
-            let localContactGroupId = localContactGroup.getProperty("X-GOOGLE-RESOURCENAME");
-            let name = localContactGroup.getProperty("ListName");
-            // Check if the local contact group id matches any of the locally added contact groups.
-            if (addedLocalItemResourceNames.has(localContactGroupId)) {
-                continue;
-            }
-            // Check if the local contact group id matches any of the resource names downloaded.
-            let localContactGroupFoundAmongServerContactGroups = false;
-            for (let serverContactGroup of serverContactGroups) {
-                if (localContactGroupId === serverContactGroup.resourceName) {
-                    localContactGroupFoundAmongServerContactGroups = true;
-                    break;
+            // Determine if the local contact group is among the downloaded ones, and get the contact group resource name (in the form 'contactGroups/contactGroupId').
+            let localContactGroupFoundAmongRemoteContactGroups = false;
+            let contactGroupResourceName = undefined;
+// FIXME: find a faster way.
+            for (let remoteContactGroup of remoteContactGroups) {
+                let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraProperties(localAddressBookId, remoteContactGroup.resourceName);
+                if (undefined !== localItemExtraProperties) {
+                    let itemId = localItemExtraProperties.id;
+                    if (contactGroupId === itemId) {
+                        localContactGroupFoundAmongRemoteContactGroups = true;
+                        contactGroupResourceName = remoteContactGroup.resourceName;
+                        break;
+                    }
                 }
             }
-            if (localContactGroupFoundAmongServerContactGroups) {
+            if (localContactGroupFoundAmongRemoteContactGroups) {
                 continue;
             }
-            // Delete the local contact group locally, and keep the target address book item map up-to-date.
-/* FIXME: temporary: .deleteItem() does not actually delete a contact group.
-            targetAddressBook.deleteItem(localContactGroup, true);
-*/
-let abManager = Components.classes["@mozilla.org/abmanager;1"].createInstance(Components.interfaces.nsIAbManager);
-abManager.deleteAddressBook(localContactGroup._card.mailListURI);
-            targetAddressBookItemMap.delete(localContactGroupId);
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") has been deleted locally.");
+            // Delete the local contact group, and update the local address book item extra property map.
+            await messenger.mailingLists.delete(contactGroupId);
+            localAddressBookItemExtraPropertyManager.deleteItemExtraProperties(localAddressBookId, contactGroupResourceName);
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been deleted locally.");
         }
     }
 
-    static fillLocalContactGroupWithServerContactGroupInformation(localContactGroup, serverContactGroup) {
-        if (null == localContactGroup) {
-            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
+    static getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup) {
+        if (null == remoteContactGroup) {
+            throw new IllegalArgumentError("Invalid 'remoteContactGroup': null.");
         }
-        if (null == serverContactGroup) {
-            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
-        }
-        // Reset all the properties managed by this method.
-        localContactGroup.deleteProperty("ListName");
+        // Prepare the local contact group properties.
+        let localContactGroupProperties = {}
         // Set the name.
-        if (serverContactGroup.name) {
-            let name = serverContactGroup.name.replace(/[<>;,"]/g, '_');
+        if (remoteContactGroup.name) {
+            let name = remoteContactGroup.name.replace(/[<>;,"]/g, '_');
             //
-            localContactGroup.setProperty("ListName", name);
+            localContactGroupProperties.name = name;
         }
         //
-        return localContactGroup;
+        return localContactGroupProperties;
     }
 
-    static fillServerContactGroupWithLocalContactGroupInformation(localContactGroup, serverContactGroup) {
-        if (null == localContactGroup) {
-            throw new IllegalArgumentError("Invalid 'localContactGroup': null.");
+    static getRemoteContactGroupFromLocalContactGroupProperties(localContactGroupProperties) {
+        if (null == localContactGroupProperties) {
+            throw new IllegalArgumentError("Invalid 'localContactGroupProperties': null.");
         }
-        if (null == serverContactGroup) {
-            throw new IllegalArgumentError("Invalid 'serverContactGroup': null.");
-        }
-        // Reset all the properties managed by this method.
-        delete serverContactGroup.name;
+        // Prepare the remote contact group.
+        let remoteContactGroup = {}
         // Set the name.
-        if (localContactGroup.getProperty("ListName")) {
-            serverContactGroup.name = localContactGroup.getProperty("ListName");
+        if (localContactGroupProperties.name) {
+            remoteContactGroup.name = localContactGroupProperties.name;
         }
         //
-        return serverContactGroup;
+        return remoteContactGroup;
     }
 
     /* Contact group members. */
@@ -1432,22 +1417,22 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             // Retrieve the local contact group directory.
             let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
             let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
-            // Retrieve the server contact group members.
-            let serverContactGroupMembers = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
-            // Synchronize the local contact group members with the (old) server contact group members.
+            // Retrieve the remote contact group members.
+            let remoteContactGroupMembers = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
+            // Synchronize the local contact group members with the (old) remote contact group members.
             for (let localContactGroupDirectoryCard of localContactGroupDirectory.childCards) {
                 let localContactGroupDirectoryCardResourceName = localContactGroupDirectoryCard.getProperty("X-GOOGLE-RESOURCENAME", null);
-                if ((undefined !== serverContactGroupMembers) && (serverContactGroupMembers.has(localContactGroupDirectoryCardResourceName))) {
-                    serverContactGroupMembers.delete(localContactGroupDirectoryCardResourceName);
+                if ((undefined !== remoteContactGroupMembers) && (remoteContactGroupMembers.has(localContactGroupDirectoryCardResourceName))) {
+                    remoteContactGroupMembers.delete(localContactGroupDirectoryCardResourceName);
                 }
                 else {
                     localContactGroupDirectory.deleteCards([ localContactGroupDirectoryCard ]);
                 }
             }
-            // Fill the local contact group with the remaining (new) server contact group members.
-            if (undefined !== serverContactGroupMembers) {
-                for (let serverContactGroupMember of serverContactGroupMembers) {
-                    let localContact = targetAddressBookItemMap.get(serverContactGroupMember);
+            // Fill the local contact group with the remaining (new) remote contact group members.
+            if (undefined !== remoteContactGroupMembers) {
+                for (let remoteContactGroupMember of remoteContactGroupMembers) {
+                    let localContact = targetAddressBookItemMap.get(remoteContactGroupMember);
                     localContactGroupDirectory.addCard(localContact._card);
                 }
             }
@@ -1480,37 +1465,6 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             }
             // Add the contact to the map.
             contactGroupMemberMap.get(contactGroupResourceName).add(contactResourceName);
-        }
-    }
-
-    /* Change log. */
-
-    static async fixChangeLog(targetAddressBook, targetAddressBookItemMap) {
-        if (null == targetAddressBook) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
-        }
-        if (null == targetAddressBookItemMap) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
-        }
-        // Cycle on all the items in the change log.
-        logger.log0("AddressBookSynchronizer.synchronize(): Fixing the change log.");
-        for (let item of targetAddressBook.getItemsFromChangeLog()) {
-            // Retrieve the item id.
-            let itemId = item.itemId;
-            // Try to match the item locally.
-/* FIXME: this query must be done on the current target address book.
-            let localItem = targetAddressBookItemMap.get(itemId);
-*/
-let localItem = await targetAddressBook.getItemFromProperty("X-GOOGLE-RESOURCENAME", itemId);
-            // If it is not a valid local item...
-/* FIXME.
-            if (undefined === localItem) {
-*/
-if (null === localItem) {
-                // Remove the item id from the change log.
-                await targetAddressBook.removeItemFromChangeLog(itemId);
-                logger.log1("AddressBookSynchronizer.fixChangeLog(): " + itemId + " has been removed from the change log.");
-            }
         }
     }
 

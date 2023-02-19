@@ -32,27 +32,29 @@ async function main() {
     messenger.mailingLists.onMemberAdded.addListener( (node) => localAddressBookEventManager.onMailingListMemberAdded(node) );
     messenger.mailingLists.onMemberRemoved.addListener( (parentId, id) => localAddressBookEventManager.onMailingListMemberRemoved(parentId, id) );
 // FIXME: temporary.
-localAddressBookEventManager.clearEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
+localAddressBookEventManager.clearEventData("53e04e69-57c7-4152-a313-16507e8ad9b6");
 //~ localAddressBookEventManager.disableEvents("53e04e69-57c7-4152-a313-16507e8ad9b6");
 // FIXME: temporary.
 let localAddressBookItemExtraPropertyManager = new LocalAddressBookItemExtraPropertyManager();
 localAddressBookItemExtraPropertyManager.loadLocalAddressBookItemExtraPropertyMap();
-localAddressBookItemExtraPropertyManager.setItemExtraProperties("rubr", "contact/12345", "88888", "12345");
-console.log(localAddressBookItemExtraPropertyManager);
-console.log(localAddressBookItemExtraPropertyManager.getItemExtraProperties("rubr", "contact/12345"));
-console.log(localAddressBookItemExtraPropertyManager);
-localAddressBookItemExtraPropertyManager.deleteItemExtraProperties("rubr", "contact/12345");
-console.log(localAddressBookItemExtraPropertyManager);
+//~ localAddressBookItemExtraPropertyManager.setItemExtraProperties("rubr", "contact/12345", "88888", "67890");
+//~ console.log(localAddressBookItemExtraPropertyManager);
+//~ console.log(localAddressBookItemExtraPropertyManager.getItemExtraProperties("rubr", "contact/12345"));
+//~ console.log(localAddressBookItemExtraPropertyManager.getItemResourceNameSet("rubr"));
+//~ localAddressBookItemExtraPropertyManager.deleteItemExtraProperties("rubr", "contact/12345");
+//~ console.log(localAddressBookItemExtraPropertyManager);
+localAddressBookItemExtraPropertyManager.deleteItemExtraProperties("53e04e69-57c7-4152-a313-16507e8ad9b6");
+localAddressBookItemExtraPropertyManager.saveLocalAddressBookItemExtraPropertyMap();
 // FIXME: temporary.
 messenger.browserAction.onClicked.addListener(async (tab, info) => {
     accountData = new Map();
     accountData.set("clientID", "*** INSERT HERE ***");
     accountData.set("clientSecret", "*** INSERT HERE ***");
     accountData.set("refreshToken", "");
-    accountData.set("includeSystemContactGroups", "true");
-    accountData.set("useFakeEmailAddresses", "true");
-    accountData.set("readOnlyMode", "true");
-    accountData.set("verboseLogging", "true");
+    accountData.set("includeSystemContactGroups", true);
+    accountData.set("useFakeEmailAddresses", true);
+    accountData.set("readOnlyMode", false);
+    accountData.set("verboseLogging", true);
     syncData = {
         accountData: accountData,
         target: "53e04e69-57c7-4152-a313-16507e8ad9b6",
@@ -75,7 +77,7 @@ messenger.browserAction.onClicked.addListener(async (tab, info) => {
     //~ console.log(localAddressBookEventManager.getAddedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
     //~ console.log(localAddressBookEventManager.getRemovedMailingListMemberIdSet("53e04e69-57c7-4152-a313-16507e8ad9b6", "012baae5-dcbc-4a81-8680-2726ada64554"));
     // TEST #4.
-    //~ AddressBookSynchronizer.synchronize(syncData);
+    AddressBookSynchronizer.synchronize(syncData);
 } );
 }
 
