@@ -19,10 +19,10 @@
     },
     "background": {
         "scripts": [
-            "content/includes/AuthorizationCodeError.js",
-            "content/includes/IllegalArgumentError.js",
-            "content/includes/NetworkError.js",
-            "content/includes/ResponseError.js",
+            "content/includes/errors/AuthorizationCodeError.js",
+            "content/includes/errors/IllegalArgumentError.js",
+            "content/includes/errors/NetworkError.js",
+            "content/includes/errors/ResponseError.js",
             "content/includes/Logger.js",
             "content/includes/LocalAddressBookEventManager.js",
             "content/includes/LocalAddressBookItemExtraPropertyManager.js",

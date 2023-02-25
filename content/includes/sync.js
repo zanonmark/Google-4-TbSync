@@ -11,7 +11,7 @@
 
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AddressBookSynchronizer.js", this, "UTF-8");
 if ("undefined" === typeof NetworkError) {
-    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");
+    Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/errors/NetworkError.js", this, "UTF-8");
 }
 
 var sync = {
