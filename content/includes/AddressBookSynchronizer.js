@@ -138,7 +138,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Get the contact group resource name (in the form 'contactGroups/contactGroupId') and name.
             let contactGroupResourceName = remoteContactGroup.resourceName;
             let contactGroupName = remoteContactGroup.name;
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing remote contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "').");
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Examining remote contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "').");
             // Determine if the remote contact group is a system one.
             if ("SYSTEM_CONTACT_GROUP" === remoteContactGroup.groupType) {
                 // Determine if the remote contact group should be discarded.
@@ -212,7 +212,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let localContactGroup = await messenger.mailingLists.get(contactGroupId);
                 // Get the contact group name.
                 let contactGroupName = localContactGroup.name;
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Examining local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
                 // Prepare the remote contact group.
                 let localContactGroupProperties = {
                     name: contactGroupName,
@@ -244,7 +244,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let localContactGroup = await messenger.mailingLists.get(contactGroupId);
                 // Get the contact group name.
                 let contactGroupName = localContactGroup.name;
-                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Examining local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
                 // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
                 let contactGroupResourceName = contactGroupExtraProperties.resourceName;
                 // Prepare the remote contact group.
@@ -289,7 +289,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Get the contact group id and name.
             let contactGroupId = localContactGroup.id;
             let contactGroupName = localContactGroup.name;
-            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Processing local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Examining local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
             // Determine if the local contact group is a locally added one.
             if (originalCreatedLocalContactGroupIdSet.has(contactGroupId)) {
                 continue;
@@ -387,7 +387,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Get the contact resource name (in the form 'people/personId') and display name.
             let contactResourceName = remoteContact.resourceName;
             let contactDisplayName = AddressBookSynchronizer.getRemoteContactDisplayName(remoteContact);
-            logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing remote contact '" + contactResourceName + "' ('" + contactDisplayName + "').");
+            logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining remote contact '" + contactResourceName + "' ('" + contactDisplayName + "').");
             // Try to match the remote contact locally.
             let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
             let contactId = undefined;
@@ -451,7 +451,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let localContact = await messenger.contacts.get(contactId);
                 // Get the contact display name.
                 let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
-                logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
+                logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining local contact '" + contactId + "' ('" + contactDisplayName + "').");
                 // Prepare the remote contact.
                 let localContactProperties = localContact.properties;
                 let remoteContact = AddressBookSynchronizer.getRemoteContactFromLocalContactProperties(localContactProperties, useFakeEmailAddresses);
@@ -475,7 +475,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let localContact = await messenger.contacts.get(contactId);
                 // Get the contact display name.
                 let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
-                logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
+                logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining local contact '" + contactId + "' ('" + contactDisplayName + "').");
                 // Get the contact resource name (in the form 'people/personId').
                 let contactResourceName = contactExtraProperties.resourceName;
                 // Prepare the remote contact.
@@ -517,7 +517,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Get the contact id and display name.
             let contactId = localContact.id;
             let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
-            logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
+            logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining local contact '" + contactId + "' ('" + contactDisplayName + "').");
             // Determine if the local contact is a locally added one.
             if (originalCreatedLocalContactIdSet.has(contactId)) {
                 continue;
