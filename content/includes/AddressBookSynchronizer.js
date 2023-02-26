@@ -386,7 +386,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         for (let remoteContact of remoteContacts) {
             // Get the contact resource name (in the form 'people/personId') and display name.
             let contactResourceName = remoteContact.resourceName;
-            let contactDisplayName = remoteContact.names[0].displayName;
+            let contactDisplayName = AddressBookSynchronizer.getRemoteContactDisplayName(remoteContact);
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing remote contact '" + contactResourceName + "' ('" + contactDisplayName + "').");
             // Try to match the remote contact locally.
             let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
@@ -450,9 +450,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 // Retrieve the local contact.
                 let localContact = await messenger.contacts.get(contactId);
                 // Get the contact display name.
-// FIXME
-                //~ let contactDisplayName = localContact.name;
-let contactDisplayName = "BAUBAU";
+                let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
                 logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
                 // Prepare the remote contact.
                 let localContactProperties = localContact.properties;
@@ -476,9 +474,7 @@ let contactDisplayName = "BAUBAU";
                 // Retrieve the local contact.
                 let localContact = await messenger.contacts.get(contactId);
                 // Get the contact display name.
-// FIXME
-                //~ let contactGroupName = localContactGroup.name;
-let contactDisplayName = "BAUBAU";
+                let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
                 logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
                 // Get the contact resource name (in the form 'people/personId').
                 let contactResourceName = contactExtraProperties.resourceName;
@@ -520,9 +516,7 @@ let contactDisplayName = "BAUBAU";
         for (let localContact of await messenger.contacts.list(localAddressBookId)) {
             // Get the contact id and display name.
             let contactId = localContact.id;
-// FIXME
-            //~ let contactDisplayName = localContact.name;
-let contactDisplayName = "BAUBAU";
+            let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): Processing local contact '" + contactId + "' ('" + contactDisplayName + "').");
             // Determine if the local contact is a locally added one.
             if (originalCreatedLocalContactIdSet.has(contactId)) {
@@ -551,6 +545,35 @@ let contactDisplayName = "BAUBAU";
             localAddressBookItemExtraPropertyManager.deleteItemExtraPropertiesById(localAddressBookId, contactId);
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactId + "' ('" + contactDisplayName + "') has been deleted locally.");
         }
+    }
+
+    static getRemoteContactDisplayName(remoteContact) {
+        if (null == remoteContact) {
+            throw new IllegalArgumentError("Invalid 'remoteContact': null.");
+        }
+        // Get the contact display name.
+        let contactDisplayName = "-";
+        if (remoteContact.names) {
+            contactDisplayName = remoteContact.names[0].displayName;
+        }
+        //
+        return contactDisplayName;
+    }
+
+    static getLocalContactDisplayName(localContact) {
+        if (null == localContact) {
+            throw new IllegalArgumentError("Invalid 'localContact': null.");
+        }
+        // Unpack the vCard properties.
+        let vCardProperties = new ICAL.Component(ICAL.parse(localContact.properties.vCard));
+        // Get the contact display name.
+        let contactDisplayName = "-";
+        let fn_entry = vCardProperties.getFirstProperty("fn");
+        if (undefined !== fn_entry) {
+            contactDisplayName = fn_entry.jCal[3];
+        }
+        //
+        return contactDisplayName;
     }
 
     static getLocalContactPropertiesFromRemoteContact(remoteContact, useFakeEmailAddresses) { // https://webextension-api.thunderbird.net/en/stable/how-to/contacts.html
