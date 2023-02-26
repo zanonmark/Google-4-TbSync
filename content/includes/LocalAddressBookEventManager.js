@@ -11,7 +11,7 @@
 
 class LocalAddressBookEventManager {
 
-/* FIXME: disabled as it is still not fully supported.
+/* FIXME: disabled as it is not fully supported yet.
     _localAddressBookEventMap = null;
     _localAddressBookSynchronizationModeSet = null;
 */

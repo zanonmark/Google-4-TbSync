@@ -15,7 +15,7 @@ if ("undefined" === typeof IllegalArgumentError) {
 
 class Logger {
 
-/* FIXME: disabled as it is still not fully supported.
+/* FIXME: disabled as it is not fully supported yet.
     _verboseLogging = false;
 */
 
