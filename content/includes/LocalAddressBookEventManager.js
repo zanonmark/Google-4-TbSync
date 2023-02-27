@@ -446,6 +446,7 @@ class LocalAddressBookEventManager {
         if (newItemRequired) {
             this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").add(mailingListId);
         }
+        this._localAddressBookEventMap.get(addressBookId).delete(mailingListId);
         // Save the local address book event map (if not in synchronization mode).
         if (!this._localAddressBookSynchronizationModeSet.has(addressBookId)) {
             await this.saveLocalAddressBookEventMap();
