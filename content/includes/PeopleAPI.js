@@ -250,114 +250,6 @@ return this.getAccountData().get("refreshToken");
         return authenticatedUser;
     }
 
-    /* Contacts. */
-
-    async getContacts() { // https://developers.google.com/people/api/rest/v1/people.connections/list
-        // Retrieve a new access token.
-        let accessToken = await this.retrieveNewAccessToken();
-        // Retrieve the contacts page by page.
-        let contacts = [];
-        let nextPageToken = null;
-        while (true) {
-            logger.log1("PeopleAPI.getContacts(): nextPageToken = " + nextPageToken);
-            // Prepare the partial contact request URL and data.
-            let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
-            partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-                personFields: CONTACT_PERSON_FIELDS,
-                pageSize: CONTACT_PAGE_SIZE,
-                sortOrder: "LAST_NAME_ASCENDING",
-                access_token: accessToken,
-            });
-            if (null != nextPageToken) {
-                partialContactRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
-            }
-            let partialContactRequestData = null;
-            // Perform the request and retrieve the response data.
-            let responseData = await this.getResponseData("GET", partialContactRequestURL, partialContactRequestData);
-            // Retrieve the partial contacts.
-            let partialContacts = responseData.connections;
-            // Concatenate the partial contacts with the contacts.
-            if (null != partialContacts) {
-                contacts = contacts.concat(partialContacts);
-            }
-            // Retrieve the next page token, necessary to retrieve the next page.
-            nextPageToken = responseData.nextPageToken;
-            // Check if this was the last page.
-            if (null == nextPageToken) {
-                break;
-            }
-        }
-        //
-        logger.log1("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
-        return contacts;
-    }
-
-    async createContact(contact) { // https://developers.google.com/people/api/rest/v1/people/createContact
-        if (null == contact) {
-            throw new IllegalArgumentError("Invalid 'contact': null.");
-        }
-        // Retrieve a new access token.
-        let accessToken = await this.retrieveNewAccessToken();
-        // Prepare the contact creation request URL and data.
-        let contactCreationRequestURL = SERVICE_ENDPOINT + "/v1/people:createContact";
-        contactCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            personFields: CONTACT_PERSON_FIELDS,
-            access_token: accessToken,
-        });
-        let contactCreationRequestData = contact;
-        // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData("POST", contactCreationRequestURL, contactCreationRequestData);
-        // Retrieve the response contact.
-        let responseContact = responseData;
-        //
-        logger.log1("PeopleAPI.createContact(): contact = " + JSON.stringify(responseContact));
-        return responseContact;
-    }
-
-    async updateContact(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
-        if (null == contact) {
-            throw new IllegalArgumentError("Invalid 'contact': null.");
-        }
-        // Retrieve a new access token.
-        let accessToken = await this.retrieveNewAccessToken();
-        // Get the resource name.
-        let resourceName = contact.resourceName;
-        // Prepare the contact update request URL and data.
-        let contactUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":updateContact";
-        contactUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            updatePersonFields: CONTACT_UPDATE_PERSON_FIELDS,
-            personFields: CONTACT_PERSON_FIELDS,
-            access_token: accessToken,
-        });
-        let contactUpdateRequestData = contact;
-        // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData("PATCH", contactUpdateRequestURL, contactUpdateRequestData);
-        // Retrieve the response contact.
-        let responseContact = responseData;
-        //
-        logger.log1("PeopleAPI.updateContact(): contact = " + JSON.stringify(responseContact));
-        return responseContact;
-    }
-
-    async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
-        if (null == resourceName) {
-            throw new IllegalArgumentError("Invalid 'resourceName': null.");
-        }
-        // Retrieve a new access token.
-        let accessToken = await this.retrieveNewAccessToken();
-        // Prepare the contact deletion request URL and data.
-        let contactDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":deleteContact";
-        contactDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            access_token: accessToken,
-        });
-        let contactDeletionRequestData = null;
-        // Perform the request and retrieve the response data.
-        let responseData = await this.getResponseData("DELETE", contactDeletionRequestURL, contactDeletionRequestData);
-        //
-        logger.log1("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
-        return true;
-    }
-
     /* Contact groups. */
 
     async getContactGroups() { // https://developers.google.com/people/api/rest/v1/contactGroups/list
@@ -466,6 +358,114 @@ return this.getAccountData().get("refreshToken");
         let responseData = await this.getResponseData("DELETE", contactGroupDeletionRequestURL, contactGroupDeletionRequestData);
         //
         logger.log1("PeopleAPI.deleteContactGroup(): contact group " + resourceName + " deleted.");
+        return true;
+    }
+
+    /* Contacts. */
+
+    async getContacts() { // https://developers.google.com/people/api/rest/v1/people.connections/list
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
+        // Retrieve the contacts page by page.
+        let contacts = [];
+        let nextPageToken = null;
+        while (true) {
+            logger.log1("PeopleAPI.getContacts(): nextPageToken = " + nextPageToken);
+            // Prepare the partial contact request URL and data.
+            let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
+            partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+                personFields: CONTACT_PERSON_FIELDS,
+                pageSize: CONTACT_PAGE_SIZE,
+                sortOrder: "LAST_NAME_ASCENDING",
+                access_token: accessToken,
+            });
+            if (null != nextPageToken) {
+                partialContactRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
+            }
+            let partialContactRequestData = null;
+            // Perform the request and retrieve the response data.
+            let responseData = await this.getResponseData("GET", partialContactRequestURL, partialContactRequestData);
+            // Retrieve the partial contacts.
+            let partialContacts = responseData.connections;
+            // Concatenate the partial contacts with the contacts.
+            if (null != partialContacts) {
+                contacts = contacts.concat(partialContacts);
+            }
+            // Retrieve the next page token, necessary to retrieve the next page.
+            nextPageToken = responseData.nextPageToken;
+            // Check if this was the last page.
+            if (null == nextPageToken) {
+                break;
+            }
+        }
+        //
+        logger.log1("PeopleAPI.getContacts(): contacts = " + JSON.stringify(contacts));
+        return contacts;
+    }
+
+    async createContact(contact) { // https://developers.google.com/people/api/rest/v1/people/createContact
+        if (null == contact) {
+            throw new IllegalArgumentError("Invalid 'contact': null.");
+        }
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
+        // Prepare the contact creation request URL and data.
+        let contactCreationRequestURL = SERVICE_ENDPOINT + "/v1/people:createContact";
+        contactCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            personFields: CONTACT_PERSON_FIELDS,
+            access_token: accessToken,
+        });
+        let contactCreationRequestData = contact;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("POST", contactCreationRequestURL, contactCreationRequestData);
+        // Retrieve the response contact.
+        let responseContact = responseData;
+        //
+        logger.log1("PeopleAPI.createContact(): contact = " + JSON.stringify(responseContact));
+        return responseContact;
+    }
+
+    async updateContact(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
+        if (null == contact) {
+            throw new IllegalArgumentError("Invalid 'contact': null.");
+        }
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
+        // Get the resource name.
+        let resourceName = contact.resourceName;
+        // Prepare the contact update request URL and data.
+        let contactUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":updateContact";
+        contactUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            updatePersonFields: CONTACT_UPDATE_PERSON_FIELDS,
+            personFields: CONTACT_PERSON_FIELDS,
+            access_token: accessToken,
+        });
+        let contactUpdateRequestData = contact;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("PATCH", contactUpdateRequestURL, contactUpdateRequestData);
+        // Retrieve the response contact.
+        let responseContact = responseData;
+        //
+        logger.log1("PeopleAPI.updateContact(): contact = " + JSON.stringify(responseContact));
+        return responseContact;
+    }
+
+    async deleteContact(resourceName) { // https://developers.google.com/people/api/rest/v1/people/deleteContact
+        if (null == resourceName) {
+            throw new IllegalArgumentError("Invalid 'resourceName': null.");
+        }
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
+        // Prepare the contact deletion request URL and data.
+        let contactDeletionRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":deleteContact";
+        contactDeletionRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            access_token: accessToken,
+        });
+        let contactDeletionRequestData = null;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("DELETE", contactDeletionRequestURL, contactDeletionRequestData);
+        //
+        logger.log1("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
         return true;
     }
 
