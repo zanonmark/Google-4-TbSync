@@ -11,8 +11,8 @@
 
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
-const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
-const CONTACT_UPDATE_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies"; // no 'memberships' here
+const CONTACT_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
+const CONTACT_UPDATE_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies"; // no 'memberships' here
 const CONTACT_PAGE_SIZE = 1000;
 const CONTACT_GROUP_FIELDS = "name,groupType";
 const CONTACT_GROUP_PAGE_SIZE = 1000;
@@ -374,7 +374,7 @@ return this.getAccountData().get("refreshToken");
             // Prepare the partial contact request URL and data.
             let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people/me/connections";
             partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-                personFields: CONTACT_PERSON_FIELDS,
+                personFields: CONTACT_FIELDS,
                 pageSize: CONTACT_PAGE_SIZE,
                 sortOrder: "LAST_NAME_ASCENDING",
                 access_token: accessToken,
@@ -412,7 +412,7 @@ return this.getAccountData().get("refreshToken");
         // Prepare the contact creation request URL and data.
         let contactCreationRequestURL = SERVICE_ENDPOINT + "/v1/people:createContact";
         contactCreationRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            personFields: CONTACT_PERSON_FIELDS,
+            personFields: CONTACT_FIELDS,
             access_token: accessToken,
         });
         let contactCreationRequestData = contact;
@@ -436,8 +436,8 @@ return this.getAccountData().get("refreshToken");
         // Prepare the contact update request URL and data.
         let contactUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":updateContact";
         contactUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
-            updatePersonFields: CONTACT_UPDATE_PERSON_FIELDS,
-            personFields: CONTACT_PERSON_FIELDS,
+            updatePersonFields: CONTACT_UPDATE_FIELDS,
+            personFields: CONTACT_FIELDS,
             access_token: accessToken,
         });
         let contactUpdateRequestData = contact;
