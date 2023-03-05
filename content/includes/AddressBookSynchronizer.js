@@ -172,9 +172,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     // Delete the remote contact group.
                     await peopleAPI.deleteContactGroup(contactGroupResourceName);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been deleted remotely.");
-// FIXME
-                    // Remove the event data from the local address book event map.
-                    await localAddressBookEventManager.clearMailingListDeletedEventData(localAddressBookId, contactGroupId);
                 }
                 // ...and if it wasn't previously deleted locally, or if the read-only mode is set...
                 else {
@@ -184,6 +181,11 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     let contactGroupId = await messenger.mailingLists.create(localAddressBookId, localContactGroupProperties);
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been created locally: '" + contactGroupId + "'.");
+                }
+                // ...and if it was previously deleted locally (regardless of the read-only mode)...
+                if (originalDeletedLocalItemResourceNameSet.has(contactGroupResourceName)) {
+                    // Remove the event data from the local address book event map.
+                    await localAddressBookEventManager.clearMailingListDeletedEventData(localAddressBookId, contactGroupId);
                 }
             }
             // If such a remote contact group is currently available locally...
@@ -196,7 +198,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     await messenger.mailingLists.update(contactGroupId, localContactGroupProperties);
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupResourceName + "' ('" + contactGroupName + "') has been updated locally: '" + contactGroupId + "'.");
-// FIXME
                     // Remove the event data from the local address book event map, and remove the contact group from the locally updated ones (to avoid duplications).
                     await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
                     originalUpdatedLocalContactGroupIdSet.delete(contactGroupId);
@@ -206,7 +207,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         // Cycle on the created local contact groups.
         logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the created local contact groups.");
         for (let contactGroupId of originalCreatedLocalContactGroupIdSet) {
-            // Check the read-only mode is not set, then...
+            // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Retrieve the local contact group.
                 let localContactGroup = await messenger.mailingLists.get(contactGroupId);
@@ -224,15 +225,14 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let contactGroupResourceName = remoteContactGroup.resourceName;
                 localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                 logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been created remotely: '" + contactGroupResourceName + "'.");
-// FIXME
-                // Remove the event data from the local address book event map.
-                await localAddressBookEventManager.clearMailingListCreatedEventData(localAddressBookId, contactGroupId);
             }
+            // Remove the event data from the local address book event map.
+            await localAddressBookEventManager.clearMailingListCreatedEventData(localAddressBookId, contactGroupId);
         }
         // Cycle on the updated local contact groups.
         logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Cycling on the updated local contact groups.");
         for (let contactGroupId of originalUpdatedLocalContactGroupIdSet) {
-            // Check the read-only mode is not set, then...
+            // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Get the contact group extra properties.
                 let contactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId);
@@ -263,9 +263,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     let contactGroupResourceName = remoteContactGroup.resourceName;
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactGroupId, contactGroupResourceName, remoteContactGroup.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been updated remotely: '" + contactGroupResourceName + "'.");
-// FIXME
-                    // Remove the event data from the local address book event map.
-                    await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
                 }
                 catch (error) {
                     // If the remote contact group is no longer available (i.e.: it was deleted)...
@@ -274,9 +271,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                         await messenger.mailingLists.delete(contactGroupId);
                         localAddressBookItemExtraPropertyManager.deleteItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
                         logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + contactGroupId + "' ('" + contactGroupName + "') has been deleted locally.");
-// FIXME
-                        // Remove the event data from the local address book event map.
-                        await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
                     }
                     // If the root reason is different...
                     else {
@@ -285,6 +279,8 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     }
                 }
             }
+            // Remove the event data from the local address book event map.
+            await localAddressBookEventManager.clearMailingListUpdatedEventData(localAddressBookId, contactGroupId);
         }
         // Determine all the deleted remote contact groups.
         logger.log0("AddressBookSynchronizer.synchronizeContactGroups(): Determining all the deleted remote contact groups.");
@@ -416,9 +412,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     // Delete the remote contact.
                     await peopleAPI.deleteContact(contactResourceName);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactResourceName + "' ('" + contactDisplayName + "') has been deleted remotely.");
-// FIXME
-                    // Remove the event data from the local address book event map.
-                    await localAddressBookEventManager.clearContactDeletedEventData(localAddressBookId, contactId);
                 }
                 // ...and if it wasn't previously deleted locally, or if the read-only mode is set...
                 else {
@@ -428,6 +421,11 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     let contactId = await messenger.contacts.create(localAddressBookId, localContactProperties);
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactId, contactResourceName, remoteContact.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactResourceName + "' ('" + contactDisplayName + "') has been created locally: '" + contactId + "'.");
+                }
+                // ...and if it was previously deleted locally (regardless of the read-only mode)...
+                if (originalDeletedLocalItemResourceNameSet.has(contactResourceName)) {
+                    // Remove the event data from the local address book event map.
+                    await localAddressBookEventManager.clearContactDeletedEventData(localAddressBookId, contactId);
                 }
             }
             // If such a remote contact is currently available locally...
@@ -440,7 +438,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     await messenger.contacts.update(contactId, localContactProperties);
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactId, contactResourceName, remoteContact.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactResourceName + "' ('" + contactDisplayName + "') has been updated locally: '" + contactId + "'.");
-// FIXME
                     // Remove the event data from the local address book event map, and remove the contact from the locally updated ones (to avoid duplications).
                     await localAddressBookEventManager.clearContactUpdatedEventData(localAddressBookId, contactId);
                     originalUpdatedLocalContactIdSet.delete(contactId);
@@ -450,7 +447,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         // Cycle on the created local contacts.
         logger.log0("AddressBookSynchronizer.synchronizeContacts(): Cycling on the created local contacts.");
         for (let contactId of originalCreatedLocalContactIdSet) {
-            // Check the read-only mode is not set, then...
+            // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Retrieve the local contact.
                 let localContact = await messenger.contacts.get(contactId);
@@ -465,15 +462,14 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let contactResourceName = remoteContact.resourceName;
                 localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactId, contactResourceName, remoteContact.etag);
                 logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactId + "' ('" + contactDisplayName + "') has been created remotely: '" + contactResourceName + "'.");
-// FIXME
-                // Remove the event data from the local address book event map.
-                await localAddressBookEventManager.clearContactCreatedEventData(localAddressBookId, contactId);
             }
+            // Remove the event data from the local address book event map.
+            await localAddressBookEventManager.clearContactCreatedEventData(localAddressBookId, contactId);
         }
         // Cycle on the updated local contacts.
         logger.log0("AddressBookSynchronizer.synchronizeContacts(): Cycling on the updated local contacts.");
         for (let contactId of originalUpdatedLocalContactIdSet) {
-            // Check the read-only mode is not set, then...
+            // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Get the contact extra properties.
                 let contactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactId);
@@ -496,9 +492,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     let contactResourceName = remoteContact.resourceName;
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactId, contactResourceName, remoteContact.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactId + "' ('" + contactDisplayName + "') has been updated remotely: '" + contactResourceName + "'.");
-// FIXME
-                    // Remove the event data from the local address book event map.
-                    await localAddressBookEventManager.clearContactUpdatedEventData(localAddressBookId, contactId);
                 }
                 catch (error) {
                     // If the remote contact is no longer available (i.e.: it was deleted)...
@@ -507,9 +500,6 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                         await messenger.contacts.delete(contactId);
                         localAddressBookItemExtraPropertyManager.deleteItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
                         logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactId + "' ('" + contactDisplayName + "') has been deleted locally.");
-// FIXME
-                        // Remove the event data from the local address book event map.
-                        await localAddressBookEventManager.clearContactUpdatedEventData(localAddressBookId, contactId);
                     }
                     // If the root reason is different...
                     else {
@@ -518,6 +508,8 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     }
                 }
             }
+            // Remove the event data from the local address book event map.
+            await localAddressBookEventManager.clearContactUpdatedEventData(localAddressBookId, contactId);
         }
         // Determine all the deleted remote contacts.
         logger.log0("AddressBookSynchronizer.synchronizeContacts(): Determining all the deleted remote contacts.");
