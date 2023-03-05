@@ -218,7 +218,7 @@ class LocalAddressBookEventManager {
         if ((null == contactId) || ("" === contactId)) {
             throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated"))) {
             this._localAddressBookEventMap.get(addressBookId).get("contacts.onCreated").delete(contactId);
         }
@@ -265,7 +265,7 @@ class LocalAddressBookEventManager {
         if ((null == contactId) || ("" === contactId)) {
             throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated"))) {
             this._localAddressBookEventMap.get(addressBookId).get("contacts.onUpdated").delete(contactId);
         }
@@ -317,7 +317,7 @@ class LocalAddressBookEventManager {
         if ((null == contactId) || ("" === contactId)) {
             throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted"))) {
             this._localAddressBookEventMap.get(addressBookId).get("contacts.onDeleted").delete(contactId);
         }
@@ -360,7 +360,7 @@ class LocalAddressBookEventManager {
         if ((null == mailingListId) || ("" === mailingListId)) {
             throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated"))) {
             this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onCreated").delete(mailingListId);
         }
@@ -407,7 +407,7 @@ class LocalAddressBookEventManager {
         if ((null == mailingListId) || ("" === mailingListId)) {
             throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated"))) {
             this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onUpdated").delete(mailingListId);
         }
@@ -460,7 +460,7 @@ class LocalAddressBookEventManager {
         if ((null == mailingListId) || ("" === mailingListId)) {
             throw new IllegalArgumentError("Invalid 'mailingListId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted"))) {
             this._localAddressBookEventMap.get(addressBookId).get("mailingLists.onDeleted").delete(mailingListId);
         }
@@ -518,7 +518,7 @@ class LocalAddressBookEventManager {
         if ((null == contactId) || ("" === contactId)) {
             throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded"))) {
             this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberAdded").delete(contactId);
         }
@@ -576,7 +576,7 @@ class LocalAddressBookEventManager {
         if ((null == contactId) || ("" === contactId)) {
             throw new IllegalArgumentError("Invalid 'contactId': null or empty.");
         }
-        //
+        // Update the local address book event map.
         if ((undefined !== this._localAddressBookEventMap.get(addressBookId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId)) && (undefined !== this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved"))) {
             this._localAddressBookEventMap.get(addressBookId).get(mailingListId).get("mailingLists.onMemberRemoved").delete(contactId);
         }
