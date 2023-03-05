@@ -421,6 +421,8 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     let contactId = await messenger.contacts.create(localAddressBookId, localContactProperties);
                     localAddressBookItemExtraPropertyManager.setItemExtraProperties(localAddressBookId, contactId, contactResourceName, remoteContact.etag);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): Contact '" + contactResourceName + "' ('" + contactDisplayName + "') has been created locally: '" + contactId + "'.");
+                    // Update the remote contact group member map.
+                    AddressBookSynchronizer.updateRemoteContactGroupMemberMap(remoteContactGroupMemberMap, contactResourceName, remoteContact.memberships);
                 }
                 // ...and if it was previously deleted locally (regardless of the read-only mode)...
                 if (originalDeletedLocalItemResourceNameSet.has(contactResourceName)) {
@@ -442,6 +444,8 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                     await localAddressBookEventManager.clearContactUpdatedEventData(localAddressBookId, contactId);
                     originalUpdatedLocalContactIdSet.delete(contactId);
                 }
+                // Update the remote contact group member map.
+                AddressBookSynchronizer.updateRemoteContactGroupMemberMap(remoteContactGroupMemberMap, contactResourceName, remoteContact.memberships);
             }
         }
         // Cycle on the created local contacts.
