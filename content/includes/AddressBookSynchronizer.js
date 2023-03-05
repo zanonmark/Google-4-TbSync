@@ -1373,7 +1373,7 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
 
     /* Contact group members. */
 
-    static async synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode) { // https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Address_Book_Examples
+    static async synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode) {
         if (null == targetAddressBook) {
             throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
         }
