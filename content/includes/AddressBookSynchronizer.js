@@ -56,6 +56,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         let originalUpdatedLocalContactGroupIdSet = localAddressBookEventManager.getUpdatedMailingListIdSet(localAddressBookId);
         let originalCreatedLocalContactIdSet = localAddressBookEventManager.getCreatedContactIdSet(localAddressBookId);
         let originalUpdatedLocalContactIdSet = localAddressBookEventManager.getUpdatedContactIdSet(localAddressBookId);
+        let remoteContactGroupMemberMap = new Map();
 // TODO: contact group members.
         // Enable synchronization mode for the local address book.
         logger.log0("AddressBookSynchronizer.synchronize(): Enabling synchronization mode for the local address book.");
@@ -66,10 +67,10 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Synchronize the contact groups.
             await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactGroupIdSet, originalUpdatedLocalContactGroupIdSet);
             // Synchronize the contacts.
-            await AddressBookSynchronizer.synchronizeContacts(peopleAPI, useFakeEmailAddresses, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactIdSet, originalUpdatedLocalContactIdSet);
+            await AddressBookSynchronizer.synchronizeContacts(peopleAPI, useFakeEmailAddresses, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactIdSet, originalUpdatedLocalContactIdSet, remoteContactGroupMemberMap);
 /* FIXME
             // Synchronize the contact group members.
-            await AddressBookSynchronizer.synchronizeContactGroupMembers(localAddressBook, localAddressBookItemMap, contactGroupMemberMap, readOnlyMode);
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(peopleAPI, readOnlyMode, localAddressBook, remoteContactGroupMemberMap);
 */
             // Save the local address book item extra property map.
             logger.log0("AddressBookSynchronizer.synchronize(): Saving the local address book item extra property map.");
@@ -351,7 +352,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
 
     /* Contacts. */
 
-    static async synchronizeContacts(peopleAPI, useFakeEmailAddresses, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactIdSet, originalUpdatedLocalContactIdSet) {
+    static async synchronizeContacts(peopleAPI, useFakeEmailAddresses, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactIdSet, originalUpdatedLocalContactIdSet, remoteContactGroupMemberMap) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
         }
@@ -375,6 +376,9 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
         }
         if (null == originalUpdatedLocalContactIdSet) {
             throw new IllegalArgumentError("Invalid 'originalUpdatedLocalContactIdSet': null.");
+        }
+        if (null == remoteContactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'remoteContactGroupMemberMap': null.");
         }
         // Get the local address book id.
         let localAddressBookId = localAddressBook.id;
@@ -1373,60 +1377,60 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
 
     /* Contact group members. */
 
-    static async synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode) {
-        if (null == targetAddressBook) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
-        }
-        if (null == targetAddressBookItemMap) {
-            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
-        }
-        if (null == contactGroupMemberMap) {
-            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
-        }
-        if (null == readOnlyMode) {
-            throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
-        }
-// FIXME: temporary (Google-to-Thunderbird only synchronization).
-        // Cycle on the local contact groups.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Determining all the members for each contact group.");
-        for (let localContactGroup of targetAddressBookItemMap.values()) {
-            // Make sure the item is actually valid and a real contact group.
-            if (undefined === targetAddressBookItemMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"))) {
-                continue;
-            }
-            if (!localContactGroup.isMailList) {
-                continue;
-            }
-            // Retrieve the local contact group directory.
-            let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
-            let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
-            // Retrieve the remote contact group members.
-            let remoteContactGroupMembers = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
-            // Synchronize the local contact group members with the (old) remote contact group members.
-            for (let localContactGroupDirectoryCard of localContactGroupDirectory.childCards) {
-                let localContactGroupDirectoryCardResourceName = localContactGroupDirectoryCard.getProperty("X-GOOGLE-RESOURCENAME", null);
-                if ((undefined !== remoteContactGroupMembers) && (remoteContactGroupMembers.has(localContactGroupDirectoryCardResourceName))) {
-                    remoteContactGroupMembers.delete(localContactGroupDirectoryCardResourceName);
-                }
-                else {
-                    localContactGroupDirectory.deleteCards([ localContactGroupDirectoryCard ]);
-                }
-            }
-            // Fill the local contact group with the remaining (new) remote contact group members.
-            if (undefined !== remoteContactGroupMembers) {
-                for (let remoteContactGroupMember of remoteContactGroupMembers) {
-                    let localContact = targetAddressBookItemMap.get(remoteContactGroupMember);
-                    localContactGroupDirectory.addCard(localContact._card);
-                }
-            }
-            // Finalize the changes.
-            localContactGroupDirectory.editMailListToDatabase(localContactGroup);
-        }
-    }
+    //~ static async synchronizeContactGroupMembers(targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, readOnlyMode) {
+        //~ if (null == targetAddressBook) {
+            //~ throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        //~ }
+        //~ if (null == targetAddressBookItemMap) {
+            //~ throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
+        //~ }
+        //~ if (null == contactGroupMemberMap) {
+            //~ throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
+        //~ }
+        //~ if (null == readOnlyMode) {
+            //~ throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
+        //~ }
+//~ // FIXME: temporary (Google-to-Thunderbird only synchronization).
+        //~ // Cycle on the local contact groups.
+        //~ logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Determining all the members for each contact group.");
+        //~ for (let localContactGroup of targetAddressBookItemMap.values()) {
+            //~ // Make sure the item is actually valid and a real contact group.
+            //~ if (undefined === targetAddressBookItemMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"))) {
+                //~ continue;
+            //~ }
+            //~ if (!localContactGroup.isMailList) {
+                //~ continue;
+            //~ }
+            //~ // Retrieve the local contact group directory.
+            //~ let abManager = Components.classes["@mozilla.org/abmanager;1"].getService(Components.interfaces.nsIAbManager);
+            //~ let localContactGroupDirectory = abManager.getDirectory(localContactGroup._card.mailListURI);
+            //~ // Retrieve the remote contact group members.
+            //~ let remoteContactGroupMembers = contactGroupMemberMap.get(localContactGroup.getProperty("X-GOOGLE-RESOURCENAME"));
+            //~ // Synchronize the local contact group members with the (old) remote contact group members.
+            //~ for (let localContactGroupDirectoryCard of localContactGroupDirectory.childCards) {
+                //~ let localContactGroupDirectoryCardResourceName = localContactGroupDirectoryCard.getProperty("X-GOOGLE-RESOURCENAME", null);
+                //~ if ((undefined !== remoteContactGroupMembers) && (remoteContactGroupMembers.has(localContactGroupDirectoryCardResourceName))) {
+                    //~ remoteContactGroupMembers.delete(localContactGroupDirectoryCardResourceName);
+                //~ }
+                //~ else {
+                    //~ localContactGroupDirectory.deleteCards([ localContactGroupDirectoryCard ]);
+                //~ }
+            //~ }
+            //~ // Fill the local contact group with the remaining (new) remote contact group members.
+            //~ if (undefined !== remoteContactGroupMembers) {
+                //~ for (let remoteContactGroupMember of remoteContactGroupMembers) {
+                    //~ let localContact = targetAddressBookItemMap.get(remoteContactGroupMember);
+                    //~ localContactGroupDirectory.addCard(localContact._card);
+                //~ }
+            //~ }
+            //~ // Finalize the changes.
+            //~ localContactGroupDirectory.editMailListToDatabase(localContactGroup);
+        //~ }
+    //~ }
 
-    static updateContactGroupMemberMap(contactGroupMemberMap, contactResourceName, contactMemberships) {
-        if (null == contactGroupMemberMap) {
-            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
+    static updateRemoteContactGroupMemberMap(remoteContactGroupMemberMap, contactResourceName, contactMemberships) {
+        if (null == remoteContactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'remoteContactGroupMemberMap': null.");
         }
         if (null == contactResourceName) {
             throw new IllegalArgumentError("Invalid 'contactResourceName': null.");
@@ -1437,17 +1441,16 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
         // Cycle on all contact memberships.
         for (let contactMembership of contactMemberships) {
             // Discard useless items.
-            if (undefined == contactMembership.contactGroupMembership) {
+            if (undefined === contactMembership.contactGroupMembership) {
                 continue;
             }
-            // Retrieve the contact group resource name.
+            // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
             let contactGroupResourceName = contactMembership.contactGroupMembership.contactGroupResourceName;
-            // If such a contact group is not already in the map, add it and its set.
-            if (undefined === contactGroupMemberMap.get(contactGroupResourceName)) {
-                contactGroupMemberMap.set(contactGroupResourceName, new Set());
+            // Update the remote contact group member map.
+            if (undefined === remoteContactGroupMemberMap.get(contactGroupResourceName)) {
+                remoteContactGroupMemberMap.set(contactGroupResourceName, new Set());
             }
-            // Add the contact to the map.
-            contactGroupMemberMap.get(contactGroupResourceName).add(contactResourceName);
+            remoteContactGroupMemberMap.get(contactGroupResourceName).add(contactResourceName);
         }
     }
 
