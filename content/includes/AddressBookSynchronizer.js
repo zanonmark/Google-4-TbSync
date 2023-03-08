@@ -68,7 +68,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Synchronize the contacts.
             await AddressBookSynchronizer.synchronizeContacts(peopleAPI, useFakeEmailAddresses, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, originalDeletedLocalItemResourceNameSet, originalCreatedLocalContactIdSet, originalUpdatedLocalContactIdSet, remoteMembershipMap);
             // Synchronize the contact group members.
-            await AddressBookSynchronizer.synchronizeContactGroupMembers(peopleAPI, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, remoteMembershipMap);
+            await AddressBookSynchronizer.synchronizeContactGroupMembers(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, remoteMembershipMap);
             // Save the local address book item extra property map.
             logger.log0("AddressBookSynchronizer.synchronize(): Saving the local address book item extra property map.");
             await localAddressBookItemExtraPropertyManager.saveLocalAddressBookItemExtraPropertyMap();
@@ -1374,9 +1374,12 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
 
     /* Contact group members. */
 
-    static async synchronizeContactGroupMembers(peopleAPI, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, remoteMembershipMap) {
+    static async synchronizeContactGroupMembers(peopleAPI, includeSystemContactGroups, readOnlyMode, localAddressBook, localAddressBookItemExtraPropertyManager, remoteMembershipMap) {
         if (null == peopleAPI) {
             throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
+        }
+        if (null == includeSystemContactGroups) {
+            throw new IllegalArgumentError("Invalid 'includeSystemContactGroups': null.");
         }
         if (null == readOnlyMode) {
             throw new IllegalArgumentError("Invalid 'readOnlyMode': null.");
@@ -1413,8 +1416,13 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
             let remoteContactGroupMemberSet = remoteMembershipMap.get(contactGroupResourceName);
             // Get the local contact group member set.
             let localContactGroupMemberSet = localMembershipMap.get(contactGroupResourceName); // No further checking here, as it must be defined.
-            // Get the contact group id.
+            // Get the contact group extra properties.
             let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
+            // Make sure the contact group extra properties are defined (if not, this is a system contact group which was not considered in the previous steps, and must therefore be discarded).
+            if (undefined === localContactGroupExtraProperties) {
+                continue;
+            }
+            // Get the contact group id.
             let contactGroupId = localContactGroupExtraProperties.id;
             // Retrieve the member events on the local contact group.
             let originalRemovedLocalContactGroupMemberIdSet = localAddressBookEventManager.getRemovedMailingListMemberIdSet(localAddressBookId, contactGroupId);
