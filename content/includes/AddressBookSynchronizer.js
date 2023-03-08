@@ -148,10 +148,10 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 remoteContactGroup.etag = FAKE_ETAG;
             }
             // Try to match the remote contact group locally.
-            let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
+            let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
             let contactGroupId = undefined;
-            if (undefined !== localItemExtraProperties) {
-                contactGroupId = localItemExtraProperties.id;
+            if (undefined !== localContactGroupExtraProperties) {
+                contactGroupId = localContactGroupExtraProperties.id;
             }
             let localContactGroup = undefined;
             if (undefined !== contactGroupId) {
@@ -188,7 +188,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // If such a remote contact group is currently available locally...
             else {
                 // ...and if the remote one is more recent, or if the read-only mode is set...
-                if ((localItemExtraProperties.etag !== remoteContactGroup.etag) || (readOnlyMode)) {
+                if ((localContactGroupExtraProperties.etag !== remoteContactGroup.etag) || (readOnlyMode)) {
                     // Prepare the local contact group properties.
                     let localContactGroupProperties = AddressBookSynchronizer.getLocalContactGroupPropertiesFromRemoteContactGroup(remoteContactGroup);
                     // Update the local contact group, and update the local address book item extra property map.
@@ -295,9 +295,9 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             let contactGroupResourceName = undefined;
 // FIXME: find a faster way.
             for (let remoteContactGroup of remoteContactGroups) {
-                let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, remoteContactGroup.resourceName);
-                if (undefined !== localItemExtraProperties) {
-                    let itemId = localItemExtraProperties.id;
+                let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, remoteContactGroup.resourceName);
+                if (undefined !== localContactGroupExtraProperties) {
+                    let itemId = localContactGroupExtraProperties.id;
                     if (contactGroupId === itemId) {
                         localContactGroupFoundAmongRemoteContactGroups = true;
                         contactGroupResourceName = remoteContactGroup.resourceName;
@@ -388,10 +388,10 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             let contactDisplayName = AddressBookSynchronizer.getRemoteContactDisplayName(remoteContact);
             logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining remote contact '" + contactResourceName + "' ('" + contactDisplayName + "').");
             // Try to match the remote contact locally.
-            let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+            let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
             let contactId = undefined;
-            if (undefined !== localItemExtraProperties) {
-                contactId = localItemExtraProperties.id;
+            if (undefined !== localContactExtraProperties) {
+                contactId = localContactExtraProperties.id;
             }
             let localContact = undefined;
             if (undefined !== contactId) {
@@ -430,7 +430,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // If such a remote contact is currently available locally...
             else {
                 // ...and if the remote one is more recent, or if the read-only mode is set...
-                if ((localItemExtraProperties.etag !== remoteContact.etag) || (readOnlyMode)) {
+                if ((localContactExtraProperties.etag !== remoteContact.etag) || (readOnlyMode)) {
                     // Prepare the local contact properties.
                     let localContactProperties = AddressBookSynchronizer.getLocalContactPropertiesFromRemoteContact(remoteContact);
                     // Update the local contact, and update the local address book item extra property map.
@@ -528,9 +528,9 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             let contactResourceName = undefined;
 // FIXME: find a faster way.
             for (let remoteContact of remoteContacts) {
-                let localItemExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, remoteContact.resourceName);
-                if (undefined !== localItemExtraProperties) {
-                    let itemId = localItemExtraProperties.id;
+                let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, remoteContact.resourceName);
+                if (undefined !== localContactExtraProperties) {
+                    let itemId = localContactExtraProperties.id;
                     if (contactId === itemId) {
                         localContactFoundAmongRemoteContacts = true;
                         contactResourceName = remoteContact.resourceName;
@@ -1394,6 +1394,8 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
         let localAddressBookId = localAddressBook.id;
         // Prepare the synchronization structures.
         let localMembershipMap = new Map();
+        let remoteContactMembershipUpdateMap = new Map();
+        let remoteContactMembershipUpdateSet = new Set();
         // Prepare the local membership map.
         logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Preparing the local membership map.");
         for (let localContactGroup of await messenger.mailingLists.list(localAddressBookId)) {
@@ -1404,9 +1406,151 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
             // Update the local membership map.
             AddressBookSynchronizer.updateLocalMembershipMap(localMembershipMap, contactGroupId, localContactGroupMembers, localAddressBookId, localAddressBookItemExtraPropertyManager);
         }
-        // Compare the local and remote membership maps.
-        logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Comparing the local and remote membership maps.");
-// TODO
+        // Cycle on the remote membership map.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Cycling on the remote membership map.");
+        for (let contactGroupResourceName of remoteMembershipMap.keys()) {
+            // Get the remote contact group member set.
+            let remoteContactGroupMemberSet = remoteMembershipMap.get(contactGroupResourceName);
+            // Get the local contact group member set.
+            let localContactGroupMemberSet = localMembershipMap.get(contactGroupResourceName); // No further checking here, as it must be defined.
+            // Get the contact group id.
+            let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
+            let contactGroupId = localContactGroupExtraProperties.id;
+            // Retrieve the member events on the local contact group.
+            let originalRemovedLocalContactGroupMemberIdSet = localAddressBookEventManager.getRemovedMailingListMemberIdSet(localAddressBookId, contactGroupId);
+            // Cycle on the remote contact group member set.
+            for (let contactResourceName of remoteContactGroupMemberSet) {
+                // Get the contact id.
+                let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+                let contactId = localContactExtraProperties.id;
+                // If such a contact group member is currently unavailable locally...
+                if (!localContactGroupMemberSet.has(contactResourceName)) {
+                    // ...and if it was previously removed locally, and if the read-only mode is not set...
+                    if ((originalRemovedLocalContactGroupMemberIdSet.has(contactId)) && (!readOnlyMode)) {
+                        // Update the remote contact membership update map and / or set.
+                        if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
+                            remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
+                        }
+                        remoteContactMembershipUpdateSet.add(contactResourceName);
+                    }
+                    // ...and if it wasn't previously removed locally, or if the read-only mode is set...
+                    else {
+                        // Add the member to the local contact group.
+                        await messenger.mailingLists.addMember(contactGroupId, contactId);
+                        logger.log1("AddressBookSynchronizer.synchronizeContactGroupMembers(): Contact '" + contactResourceName + "' has been added locally to the contact group '" + contactGroupResourceName + "'.");
+                    }
+                    // ...and if it was previously removed locally (regardless of the read-only mode)...
+                    if (originalRemovedLocalContactGroupMemberIdSet.has(contactId)) {
+                        // Remove the event data from the local address book event map.
+                        await localAddressBookEventManager.clearMailingListMemberRemovedEventData(localAddressBookId, contactGroupId, contactId);
+                    }
+                }
+                // If such a contact group member is currently available locally...
+                else {
+                    // Update the remote contact membership update map and / or set.
+                    if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
+                        remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
+                    }
+
+// Make sure the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated).
+if (FAKE_ETAG !== localContactGroupExtraProperties.etag) {
+/* FIXME
+                    remoteContactMembershipUpdateMap.get(contactResourceName).add(contactGroupResourceName);
+*/
+remoteContactMembershipUpdateMap.get(contactResourceName).add({
+    "contactGroupMembership": {
+        "contactGroupResourceName": contactGroupResourceName,
+    },
+});
+}
+                }
+                // Update the remote and local contact group member set.
+                remoteContactGroupMemberSet.delete(contactResourceName);
+                localContactGroupMemberSet.delete(contactResourceName);
+            }
+        }
+        // Cycle on the local membership map.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Cycling on the local membership map.");
+        for (let contactGroupResourceName of localMembershipMap.keys()) {
+            // Get the local contact group member set.
+            let localContactGroupMemberSet = localMembershipMap.get(contactGroupResourceName);
+            // Get the remote contact group member set.
+            let remoteContactGroupMemberSet = remoteMembershipMap.get(contactGroupResourceName); // No further checking here, as it must be defined.
+            // Get the contact group id.
+            let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactGroupResourceName);
+            let contactGroupId = localContactGroupExtraProperties.id;
+            // Retrieve the member events on the local contact group.
+            let originalAddedLocalContactGroupMemberIdSet = localAddressBookEventManager.getAddedMailingListMemberIdSet(localAddressBookId, contactGroupId);
+            // Cycle on the local contact group member set (i.e.: the remaining items).
+            for (let contactResourceName of localContactGroupMemberSet) {
+                // Get the contact id.
+                let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+                let contactId = localContactExtraProperties.id;
+                // If such a contact group member was previously added locally, and if the read-only mode is not set...
+                if ((originalAddedLocalContactGroupMemberIdSet.has(contactId)) && (!readOnlyMode)) {
+                    // Update the remote contact membership update map and / or set.
+                    if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
+                        remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
+                    }
+/* FIXME
+                    remoteContactMembershipUpdateMap.get(contactResourceName).add(contactGroupResourceName);
+*/
+remoteContactMembershipUpdateMap.get(contactResourceName).add({
+    "contactGroupMembership": {
+        "contactGroupResourceName": contactGroupResourceName,
+    },
+});
+                    remoteContactMembershipUpdateSet.add(contactResourceName);
+                }
+                // If such a contact group member wasn't previously added locally, or if the read-only mode is set...
+                else {
+                    // Remove the member from the local contact group.
+                    await messenger.mailingLists.removeMember(contactGroupId, contactId);
+                    logger.log1("AddressBookSynchronizer.synchronizeContactGroupMembers(): Contact '" + contactResourceName + "' has been removed locally from the contact group '" + contactGroupResourceName + "'.");
+                }
+                // If such a contact group member was previously added locally (regardless of the read-only mode)...
+                if (originalAddedLocalContactGroupMemberIdSet.has(contactId)) {
+                    // Remove the event data from the local address book event map.
+                    await localAddressBookEventManager.clearMailingListMemberAddedEventData(localAddressBookId, contactGroupId, contactId);
+                }
+                // Update the local contact group member set.
+                localContactGroupMemberSet.delete(contactResourceName);
+            }
+        }
+        // Cycle on the remote contact membership update map.
+        logger.log0("AddressBookSynchronizer.synchronizeContactGroupMembers(): Cycling on the remote contact membership update map.");
+        for (let contactResourceName of remoteContactMembershipUpdateMap.keys()) {
+            // If the read-only mode is not set...
+            if (!readOnlyMode) {
+                // Check if the contact actually needs to be updated remotely.
+                if (!remoteContactMembershipUpdateSet.has(contactResourceName)) {
+                    continue;
+                }
+// Get the contact extra properties.
+let contactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+/* FIXME
+                // Get the contact group resource names.
+                let contactGroupResourceNames = remoteContactMembershipUpdateMap.get(contactResourceName);
+*/
+// Get the remote contact memberships.
+let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResourceName);
+// Prepare the remote contact memberships.
+//~ let remoteContactMemberships = [];
+//~ for (let remoteContactMembership of remoteContactMembershipUpdateMap.get(contactResourceName)) {
+    //~ remoteContactMemberships.push(remoteContactMembership);
+//~ }
+                // Prepare the remote contact.
+                let remoteContact = {
+                    resourceName: contactResourceName,
+                    etag: contactExtraProperties.etag,
+                    memberships: Array.from(remoteContactMemberships),
+                };
+                // Update the remote contact memberships.
+                remoteContact = await peopleAPI.updateContactMemberships(remoteContact);
+                contactResourceName = remoteContact.resourceName;
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroupMembers(): Contact '" + contactResourceName + "' memberships have been updated remotely.");
+            }
+        }
     }
 
     static updateRemoteMembershipMap(remoteMembershipMap, contactResourceName, contactMemberships) {
@@ -1455,6 +1599,10 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
         let contactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId); // No further checking here, as it must be defined.
         // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
         let contactGroupResourceName = contactGroupExtraProperties.resourceName;
+        // Update the local membership map.
+        if (undefined === localMembershipMap.get(contactGroupResourceName)) {
+            localMembershipMap.set(contactGroupResourceName, new Set());
+        }
         // Cycle on all the contact group members.
         for (let localContact of contactGroupMembers) {
             // Get the contact id.
@@ -1464,9 +1612,6 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
             // Get the contact resource name (in the form 'people/personId').
             let contactResourceName = contactExtraProperties.resourceName;
             // Update the local membership map.
-            if (undefined === localMembershipMap.get(contactGroupResourceName)) {
-                localMembershipMap.set(contactGroupResourceName, new Set());
-            }
             localMembershipMap.get(contactGroupResourceName).add(contactResourceName);
         }
     }

@@ -13,6 +13,7 @@ const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.goo
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
 const CONTACT_UPDATE_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies"; // no 'memberships' here
+const CONTACT_MEMBERSHIPS_UPDATE_FIELDS = "memberships"; // only 'memberships' here
 const CONTACT_PAGE_SIZE = 1000;
 const CONTACT_GROUP_FIELDS = "name,groupType";
 const CONTACT_GROUP_PAGE_SIZE = 1000;
@@ -467,6 +468,31 @@ return this.getAccountData().get("refreshToken");
         //
         logger.log1("PeopleAPI.deleteContact(): contact " + resourceName + " deleted.");
         return true;
+    }
+
+    async updateContactMemberships(contact) { // https://developers.google.com/people/api/rest/v1/people/updateContact
+        if (null == contact) {
+            throw new IllegalArgumentError("Invalid 'contact': null.");
+        }
+        // Retrieve a new access token.
+        let accessToken = await this.retrieveNewAccessToken();
+        // Get the resource name.
+        let resourceName = contact.resourceName;
+        // Prepare the contact update request URL and data.
+        let contactUpdateRequestURL = SERVICE_ENDPOINT + "/v1/" + resourceName + ":updateContact";
+        contactUpdateRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+            updatePersonFields: CONTACT_MEMBERSHIPS_UPDATE_FIELDS,
+            personFields: CONTACT_FIELDS,
+            access_token: accessToken,
+        });
+        let contactUpdateRequestData = contact;
+        // Perform the request and retrieve the response data.
+        let responseData = await this.getResponseData("PATCH", contactUpdateRequestURL, contactUpdateRequestData);
+        // Retrieve the response contact.
+        let responseContact = responseData;
+        //
+        logger.log1("PeopleAPI.updateContactMemberships(): contact = " + JSON.stringify(responseContact));
+        return responseContact;
     }
 
     /* Connection tests. */
