@@ -1441,28 +1441,25 @@ vCardProperties.push([ "x-custom4", {}, "array", x_custom4_values[0] ]);
                     }
                     // ...and if it was previously removed locally (regardless of the read-only mode)...
                     if (originalRemovedLocalContactGroupMemberIdSet.has(contactId)) {
+// FIXME: delay the removal until the update has been pushed successfully.
                         // Remove the event data from the local address book event map.
                         await localAddressBookEventManager.clearMailingListMemberRemovedEventData(localAddressBookId, contactGroupId, contactId);
                     }
                 }
                 // If such a contact group member is currently available locally...
                 else {
-                    // Update the remote contact membership update map and / or set.
-                    if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
-                        remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
+                    // ...and if the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated)...
+                    if (FAKE_ETAG !== localContactGroupExtraProperties.etag) {
+                        // Update the remote contact membership update map and / or set.
+                        if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
+                            remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
+                        }
+                        remoteContactMembershipUpdateMap.get(contactResourceName).add({
+                            "contactGroupMembership": {
+                                "contactGroupResourceName": contactGroupResourceName,
+                            },
+                        });
                     }
-
-// Make sure the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated).
-if (FAKE_ETAG !== localContactGroupExtraProperties.etag) {
-/* FIXME
-                    remoteContactMembershipUpdateMap.get(contactResourceName).add(contactGroupResourceName);
-*/
-remoteContactMembershipUpdateMap.get(contactResourceName).add({
-    "contactGroupMembership": {
-        "contactGroupResourceName": contactGroupResourceName,
-    },
-});
-}
                 }
                 // Update the remote and local contact group member set.
                 remoteContactGroupMemberSet.delete(contactResourceName);
@@ -1492,14 +1489,11 @@ remoteContactMembershipUpdateMap.get(contactResourceName).add({
                     if (undefined === remoteContactMembershipUpdateMap.get(contactResourceName)) {
                         remoteContactMembershipUpdateMap.set(contactResourceName, new Set());
                     }
-/* FIXME
-                    remoteContactMembershipUpdateMap.get(contactResourceName).add(contactGroupResourceName);
-*/
-remoteContactMembershipUpdateMap.get(contactResourceName).add({
-    "contactGroupMembership": {
-        "contactGroupResourceName": contactGroupResourceName,
-    },
-});
+                    remoteContactMembershipUpdateMap.get(contactResourceName).add({
+                        "contactGroupMembership": {
+                            "contactGroupResourceName": contactGroupResourceName,
+                        },
+                    });
                     remoteContactMembershipUpdateSet.add(contactResourceName);
                 }
                 // If such a contact group member wasn't previously added locally, or if the read-only mode is set...
@@ -1510,6 +1504,7 @@ remoteContactMembershipUpdateMap.get(contactResourceName).add({
                 }
                 // If such a contact group member was previously added locally (regardless of the read-only mode)...
                 if (originalAddedLocalContactGroupMemberIdSet.has(contactId)) {
+// FIXME: delay the removal until the update has been pushed successfully.
                     // Remove the event data from the local address book event map.
                     await localAddressBookEventManager.clearMailingListMemberAddedEventData(localAddressBookId, contactGroupId, contactId);
                 }
@@ -1526,19 +1521,10 @@ remoteContactMembershipUpdateMap.get(contactResourceName).add({
                 if (!remoteContactMembershipUpdateSet.has(contactResourceName)) {
                     continue;
                 }
-// Get the contact extra properties.
-let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
-/* FIXME
-                // Get the contact group resource names.
-                let contactGroupResourceNames = remoteContactMembershipUpdateMap.get(contactResourceName);
-*/
-// Get the remote contact memberships.
-let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResourceName);
-// Prepare the remote contact memberships.
-//~ let remoteContactMemberships = [];
-//~ for (let remoteContactMembership of remoteContactMembershipUpdateMap.get(contactResourceName)) {
-    //~ remoteContactMemberships.push(remoteContactMembership);
-//~ }
+                // Get the contact extra properties.
+                let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+                // Get the remote contact memberships.
+                let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResourceName);
                 // Prepare the remote contact.
                 let remoteContact = {
                     resourceName: contactResourceName,
