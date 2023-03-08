@@ -232,9 +232,9 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Get the contact group extra properties.
-                let contactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId);
+                let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId);
                 // Make sure the local contact group has a valid etag (if not, it is probably a system contact group, which cannot be updated).
-                if (FAKE_ETAG === contactGroupExtraProperties.etag) {
+                if (FAKE_ETAG === localContactGroupExtraProperties.etag) {
                     logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Contact group '" + localContactGroupId + "' has no etag and has therefore been ignored.");
                     continue;
                 }
@@ -244,7 +244,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 let contactGroupName = localContactGroup.name;
                 logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): Examining local contact group '" + contactGroupId + "' ('" + contactGroupName + "').");
                 // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
-                let contactGroupResourceName = contactGroupExtraProperties.resourceName;
+                let contactGroupResourceName = localContactGroupExtraProperties.resourceName;
                 // Prepare the remote contact group.
                 let localContactGroupProperties = {
                     name: contactGroupName,
@@ -252,7 +252,7 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
                 };
                 let remoteContactGroup = AddressBookSynchronizer.getRemoteContactGroupFromLocalContactGroupProperties(localContactGroupProperties);
                 remoteContactGroup.resourceName = contactGroupResourceName;
-                remoteContactGroup.etag = contactGroupExtraProperties.etag;
+                remoteContactGroup.etag = localContactGroupExtraProperties.etag;
                 // Update the remote contact group or delete the local contact group.
                 try {
                     // Update the remote contact group, and update the local address book item extra property map.
@@ -473,19 +473,19 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // If the read-only mode is not set...
             if (!readOnlyMode) {
                 // Get the contact extra properties.
-                let contactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactId);
+                let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactId);
                 // Retrieve the local contact.
                 let localContact = await messenger.contacts.get(contactId);
                 // Get the contact display name.
                 let contactDisplayName = AddressBookSynchronizer.getLocalContactDisplayName(localContact);
                 logger.log1("AddressBookSynchronizer.synchronizeContacts(): Examining local contact '" + contactId + "' ('" + contactDisplayName + "').");
                 // Get the contact resource name (in the form 'people/personId').
-                let contactResourceName = contactExtraProperties.resourceName;
+                let contactResourceName = localContactExtraProperties.resourceName;
                 // Prepare the remote contact.
                 let localContactProperties = localContact.properties;
                 let remoteContact = AddressBookSynchronizer.getRemoteContactFromLocalContactProperties(localContactProperties, useFakeEmailAddresses);
                 remoteContact.resourceName = contactResourceName;
-                remoteContact.etag = contactExtraProperties.etag;
+                remoteContact.etag = localContactExtraProperties.etag;
                 // Update the remote contact or delete the local contact.
                 try {
                     // Update the remote contact, and update the local address book item extra property map.
@@ -1527,7 +1527,7 @@ remoteContactMembershipUpdateMap.get(contactResourceName).add({
                     continue;
                 }
 // Get the contact extra properties.
-let contactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
+let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesByResourceName(localAddressBookId, contactResourceName);
 /* FIXME
                 // Get the contact group resource names.
                 let contactGroupResourceNames = remoteContactMembershipUpdateMap.get(contactResourceName);
@@ -1542,7 +1542,7 @@ let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResou
                 // Prepare the remote contact.
                 let remoteContact = {
                     resourceName: contactResourceName,
-                    etag: contactExtraProperties.etag,
+                    etag: localContactExtraProperties.etag,
                     memberships: Array.from(remoteContactMemberships),
                 };
                 // Update the remote contact memberships.
@@ -1596,9 +1596,9 @@ let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResou
             throw new IllegalArgumentError("Invalid 'localAddressBookItemExtraPropertyManager': null.");
         }
         // Get the contact group extra properties.
-        let contactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId); // No further checking here, as it must be defined.
+        let localContactGroupExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactGroupId); // No further checking here, as it must be defined.
         // Get the contact group resource name (in the form 'contactGroups/contactGroupId').
-        let contactGroupResourceName = contactGroupExtraProperties.resourceName;
+        let contactGroupResourceName = localContactGroupExtraProperties.resourceName;
         // Update the local membership map.
         if (undefined === localMembershipMap.get(contactGroupResourceName)) {
             localMembershipMap.set(contactGroupResourceName, new Set());
@@ -1608,9 +1608,9 @@ let remoteContactMemberships = remoteContactMembershipUpdateMap.get(contactResou
             // Get the contact id.
             let contactId = localContact.id;
             // Get the contact extra properties.
-            let contactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactId);
+            let localContactExtraProperties = localAddressBookItemExtraPropertyManager.getItemExtraPropertiesById(localAddressBookId, contactId);
             // Get the contact resource name (in the form 'people/personId').
-            let contactResourceName = contactExtraProperties.resourceName;
+            let contactResourceName = localContactExtraProperties.resourceName;
             // Update the local membership map.
             localMembershipMap.get(contactGroupResourceName).add(contactResourceName);
         }
