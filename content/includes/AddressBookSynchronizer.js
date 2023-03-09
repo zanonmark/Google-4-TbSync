@@ -72,11 +72,9 @@ let verboseLogging = syncData.accountData.get("verboseLogging");
             // Save the local address book item extra property map.
             logger.log0("AddressBookSynchronizer.synchronize(): Saving the local address book item extra property map.");
             await localAddressBookItemExtraPropertyManager.saveLocalAddressBookItemExtraPropertyMap();
-            // Clear the event data from the local address book event map (only if the read-only mode is set).
-            if (readOnlyMode) {
-                logger.log0("AddressBookSynchronizer.synchronize(): Clearing the event data from the local addressbook event map.");
-                await localAddressBookEventManager.clearEventData(localAddressBookId);
-            }
+            // Clear the event data from the local address book event map.
+            logger.log0("AddressBookSynchronizer.synchronize(): Clearing the event data from the local addressbook event map.");
+            await localAddressBookEventManager.clearEventData(localAddressBookId);
             // Disable synchronization mode for the local address book.
             logger.log0("AddressBookSynchronizer.synchronize(): Disabling synchronization mode for the local address book.");
             await localAddressBookEventManager.disableSynchronizationMode(localAddressBookId);
