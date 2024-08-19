@@ -25,7 +25,7 @@ if ("undefined" === typeof ResponseError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
 }
 
-let { MailE10SUtils } = ChromeUtils.import("resource:///modules/MailE10SUtils.jsm");
+let { MailE10SUtils } = ChromeUtils.importESModule("resource:///modules/MailE10SUtils.sys.mjs");
 
 const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";

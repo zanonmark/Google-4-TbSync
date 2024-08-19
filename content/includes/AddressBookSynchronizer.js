@@ -25,9 +25,8 @@ if ("undefined" === typeof ResponseError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/ResponseError.js", this, "UTF-8");
 }
 
-var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetters(this, {
-    VCardPropertyEntry: "resource:///modules/VCardUtils.jsm",
+ChromeUtils.defineESModuleGetters(this, {
+    VCardPropertyEntry: "resource:///modules/VCardUtils.sys.mjs",
 });
 
 const FAKE_EMAIL_ADDRESS_DOMAIN = "bug1522453.thunderbird.example.com";

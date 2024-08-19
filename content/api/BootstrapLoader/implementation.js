@@ -12,10 +12,8 @@
  */
 
 // Get various parts of the WebExtension framework that we need.
-var { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
 var { ExtensionSupport } = ChromeUtils.import("resource:///modules/ExtensionSupport.jsm");
 var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var BootstrapLoader = class extends ExtensionCommon.ExtensionAPI {
   getMessenger(context) {   
@@ -48,13 +46,13 @@ var BootstrapLoader = class extends ExtensionCommon.ExtensionAPI {
     for (let api of apis) {
       switch (api) {
         case "storage":
-          XPCOMUtils.defineLazyGetter(messenger, "storage", () =>
+          ChromeUtils.defineLazyGetter(messenger, "storage", () =>
             getStorage()
           );
         break;
 
         default:
-          XPCOMUtils.defineLazyGetter(messenger, api, () =>
+          ChromeUtils.defineLazyGetter(messenger, api, () =>
             context.apiCan.findAPIPath(api)
           );
       }
