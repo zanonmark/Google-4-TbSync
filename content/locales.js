@@ -7,6 +7,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
 
-var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
+var { TbSync } = ChromeUtils.importESModule("chrome://tbsync/content/tbsync.sys.mjs");
 
 TbSync.localizeOnLoad(window, "google");

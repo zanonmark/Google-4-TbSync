@@ -9,7 +9,7 @@
 
 "use strict";
 
-var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { MailServices } = ChromeUtils.importESModule("resource:///modules/MailServices.sys.mjs");
 
 // Every Object in here will be loaded into the following namespace: TbSync.providers.google. 
 const google = TbSync.providers.google;

@@ -15,7 +15,7 @@ let onInitDoneObserver = {
         let valid = false;
         //
         try {
-            var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
+            var { TbSync } = ChromeUtils.importESModule("chrome://tbsync/content/tbsync.sys.mjs");
             valid = TbSync.enabled;
         }
         catch (e) {
@@ -50,7 +50,7 @@ function shutdown(data, reason) { // Possible reasons: APP_SHUTDOWN, ADDON_DISAB
     Services.obs.removeObserver(onInitDoneObserver, "tbsync.observer.initialized");
     // Unload this provider add-on from TbSync.
     try {
-        var { TbSync } = ChromeUtils.import("chrome://tbsync/content/tbsync.jsm");
+        var { TbSync } = ChromeUtils.importESModule("chrome://tbsync/content/tbsync.sys.mjs");
         TbSync.providers.unloadProvider("google");
     }
     catch (e) {
