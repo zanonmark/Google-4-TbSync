@@ -9,6 +9,16 @@
  
 "use strict";
 
+var { ExtensionParent } = ChromeUtils.importESModule(
+    "resource://gre/modules/ExtensionParent.sys.mjs"
+);
+var tbsyncExtension = ExtensionParent.GlobalManager.getExtension(
+    "tbsync@jobisoft.de"
+);
+var { TbSync } = ChromeUtils.importESModule(
+    `chrome://tbsync/content/tbsync.sys.mjs?${tbsyncExtension.manifest.version}`
+);
+
 Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/AddressBookSynchronizer.js", this, "UTF-8");
 if ("undefined" === typeof NetworkError) {
     Services.scriptloader.loadSubScript("chrome://google-4-tbsync/content/includes/NetworkError.js", this, "UTF-8");

@@ -18,25 +18,39 @@
         "64": "skin/icon64.png"
     },
     "background": {
+        "type": "module",
         "scripts": [
             "background.js"
         ]
     },
-    "permissions": [
-    ],
+    "permissions": [],
     "experiment_apis": {
-        "BootstrapLoader": {
-            "schema": "content/api/BootstrapLoader/schema.json",
+        "LegacyHelper": {
+            "schema": "api/LegacyHelper/schema.json",
             "parent": {
                 "scopes": [
                     "addon_parent"
                 ],
                 "paths": [
                     [
-                        "BootstrapLoader"
+                        "LegacyHelper"
                     ]
                 ],
-                "script": "content/api/BootstrapLoader/implementation.js"
+                "script": "api/LegacyHelper/implementation.js"
+            }
+        },
+        "Google4TbSync": {
+            "schema": "api/Google4TbSync/schema.json",
+            "parent": {
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "Google4TbSync"
+                    ]
+                ],
+                "script": "api/Google4TbSync/implementation.js"
             }
         }
     }

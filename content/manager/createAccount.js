@@ -6,11 +6,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
- 
+
 "use strict";
 
-var { TbSync } = ChromeUtils.importESModule("chrome://tbsync/content/tbsync.sys.mjs");
-
+var { ExtensionParent } = ChromeUtils.importESModule(
+    "resource://gre/modules/ExtensionParent.sys.mjs"
+);
+var tbsyncExtension = ExtensionParent.GlobalManager.getExtension(
+    "tbsync@jobisoft.de"
+);
+var { TbSync } = ChromeUtils.importESModule(
+    `chrome://tbsync/content/tbsync.sys.mjs?${tbsyncExtension.manifest.version}`
+);
 const google = TbSync.providers.google;
 
 var tbSyncNewAccount = {
@@ -23,7 +30,7 @@ var tbSyncNewAccount = {
     readOnlyModeWidget: null,
     verboseLoggingWidget: null,
 
-    onLoad: function() {
+    onLoad: function () {
         this.providerData = new TbSync.ProviderData("google");
         //
         document.getElementById('tbsync.newaccount.wizard')._adjustWizardHeader(); // https://bugzilla.mozilla.org/show_bug.cgi?id=1618252
@@ -53,18 +60,18 @@ var tbSyncNewAccount = {
         document.addEventListener("wizardfinish", tbSyncNewAccount.onFinish.bind(this));
     },
 
-    onUnload: function() {
+    onUnload: function () {
     },
 
-    onClose: function() {
+    onClose: function () {
         return true;
     },
 
-    onUserTextInput: function() {
+    onUserTextInput: function () {
         document.getElementById("tbsync.newaccount.wizard").canAdvance = (("" !== this.accountNameWidget.value.trim()) && ("" !== this.clientIDWidget.value.trim()) && ("" !== this.clientSecretWidget.value.trim()));
     },
 
-    onFinish: function(event) {
+    onFinish: function (event) {
         let accountName = this.accountNameWidget.value.trim();
         let clientID = this.clientIDWidget.value.trim();
         let clientSecret = this.clientSecretWidget.value.trim();
@@ -76,7 +83,7 @@ var tbSyncNewAccount = {
         tbSyncNewAccount.addAccount(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode, verboseLogging);
     },
 
-    addAccount: function(accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode, verboseLogging) {
+    addAccount: function (accountName, clientID, clientSecret, includeSystemContactGroups, useFakeEmailAddresses, readOnlyMode, verboseLogging) {
         // Retrieve a new object with default values.
         let newAccountEntry = this.providerData.getDefaultAccountEntries();
         // Override the default values.
