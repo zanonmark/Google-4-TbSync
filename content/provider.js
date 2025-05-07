@@ -9,7 +9,18 @@
 
 "use strict";
 
-var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { ExtensionParent } = ChromeUtils.importESModule(
+    "resource://gre/modules/ExtensionParent.sys.mjs"
+);
+var { MailServices } = ChromeUtils.importESModule(
+    "resource:///modules/MailServices.sys.mjs"
+);
+var tbsyncExtension = ExtensionParent.GlobalManager.getExtension(
+    "tbsync@jobisoft.de"
+);
+var { TbSync } = ChromeUtils.importESModule(
+    `chrome://tbsync/content/tbsync.sys.mjs?${tbsyncExtension.manifest.version}`
+);
 
 // Every Object in here will be loaded into the following namespace: TbSync.providers.google. 
 const google = TbSync.providers.google;

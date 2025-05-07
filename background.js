@@ -7,21 +7,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
 
-async function main() {
-    await messenger.BootstrapLoader.registerChromeUrl([ 
-        [
-            "content",
-            "google-4-tbsync",
-            "content/",
-        ],
-        [
-            "resource",
-            "google-4-tbsync",
-            ".",
-        ],
-    ]);
-    //
-    await messenger.BootstrapLoader.registerBootstrapScript("chrome://google-4-tbsync/content/bootstrap.js");  
-}
+await browser.LegacyHelper.registerGlobalUrls([
+    ["content", "google-4-tbsync", "content/"],
+    ["resource", "google-4-tbsync", "."],
+]);
 
-main();
+await browser.Google4TbSync.load();

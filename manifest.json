@@ -2,14 +2,14 @@
     "manifest_version": 2,
     "name": "__MSG_extensionName__",
     "description": "__MSG_extensionDescription__",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "author": "Marco Zanon",
     "default_locale": "en-US",
     "applications": {
         "gecko": {
             "id": "google-4-tbsync@marcozanon.com",
-            "strict_min_version": "128.0",
-            "strict_max_version": "128.*"
+            "strict_min_version": "136.0",
+            "strict_max_version": "138.*"
         }
     },
     "icons": {
@@ -18,25 +18,39 @@
         "64": "skin/icon64.png"
     },
     "background": {
+        "type": "module",
         "scripts": [
             "background.js"
         ]
     },
-    "permissions": [
-    ],
+    "permissions": [],
     "experiment_apis": {
-        "BootstrapLoader": {
-            "schema": "content/api/BootstrapLoader/schema.json",
+        "LegacyHelper": {
+            "schema": "api/LegacyHelper/schema.json",
             "parent": {
                 "scopes": [
                     "addon_parent"
                 ],
                 "paths": [
                     [
-                        "BootstrapLoader"
+                        "LegacyHelper"
                     ]
                 ],
-                "script": "content/api/BootstrapLoader/implementation.js"
+                "script": "api/LegacyHelper/implementation.js"
+            }
+        },
+        "Google4TbSync": {
+            "schema": "api/Google4TbSync/schema.json",
+            "parent": {
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "Google4TbSync"
+                    ]
+                ],
+                "script": "api/Google4TbSync/implementation.js"
             }
         }
     }
