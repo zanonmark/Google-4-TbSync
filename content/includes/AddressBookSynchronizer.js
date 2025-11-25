@@ -1508,7 +1508,9 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             throw new IllegalArgumentError("Invalid 'contactResourceName': null.");
         }
         if (null == contactMemberships) {
-            throw new IllegalArgumentError("Invalid 'contactMemberships': null.");
+            // Some DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT contacts do not have any membership.
+            logger.log0("AddressBookSynchronizer.updateContactGroupMemberMap(): No contact memberships for " + contactResourceName + ".");
+            return;
         }
         // Cycle on all contact memberships.
         for (let contactMembership of contactMemberships) {
