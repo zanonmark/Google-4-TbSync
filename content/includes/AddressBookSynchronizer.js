@@ -49,6 +49,7 @@ class AddressBookSynchronizer {
         // Retrieve other account properties.
         let useFakeEmailAddresses = syncData.accountData.getAccountProperty("useFakeEmailAddresses");
         let readOnlyMode = syncData.accountData.getAccountProperty("readOnlyMode");
+        let includeDirectoryContacts = syncData.accountData.getAccountProperty("includeDirectoryContacts");
         let verboseLogging = syncData.accountData.getAccountProperty("verboseLogging");
         // Enable the logger.
         logger = new Logger(verboseLogging);
@@ -80,6 +81,10 @@ class AddressBookSynchronizer {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
             // Synchronize contacts.
             await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+            if (includeDirectoryContacts) {
+                // Synchronize directory contacts.
+                await AddressBookSynchronizer.synchronizeDirectoryContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, useFakeEmailAddresses);
+            }
             // Synchronize contact groups.
             await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contact group members.
@@ -174,7 +179,7 @@ class AddressBookSynchronizer {
                     // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                     // Update the contact group member map.
-                    AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                    AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships, false);
                 }
             }
             // If such a local contact is currently available...
@@ -192,7 +197,7 @@ class AddressBookSynchronizer {
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
                 // Update the contact group member map.
-                AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+                AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships, false);
             }
         }
         // Prepare the variables for the cycles.
@@ -322,6 +327,62 @@ class AddressBookSynchronizer {
         }
     }
 
+    static async synchronizeDirectoryContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, useFakeEmailAddresses) {
+        if (null == peopleAPI) {
+            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
+        }
+        if (null == targetAddressBook) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == contactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
+        }
+        if (null == targetAddressBookItemMap) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBookItemMap': null.");
+        }
+        if (null == useFakeEmailAddresses) {
+            throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
+        }
+
+        // Create the _Directory mailing list (contact group) if it does not already exist.
+        let localContactGroup = targetAddressBookItemMap.get("_Directory");
+        if (undefined === localContactGroup) {
+            localContactGroup = targetAddressBook.createNewList();
+            localContactGroup.setProperty("X-GOOGLE-RESOURCENAME", "_Directory");
+            localContactGroup.setProperty("ListName", "_Directory");
+            // Add the local contact group locally, and keep the target address book item map up-to-date.
+            await targetAddressBook.addItem(localContactGroup, true);
+            targetAddressBookItemMap.set("_Directory", localContactGroup);
+            logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): _Directory has been added locally.");
+        }
+        await targetAddressBook.removeItemFromChangeLog("_Directory");
+
+        // Retrieve all server contacts.
+        let serverContacts = await peopleAPI.getDirectoryContacts();
+        // Cycle on the server contacts.
+        logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): Cycling on the server contacts.");
+        await Promise.all(serverContacts.map(async (serverContact) => {
+            // Get the resource name (in the form 'people/personId') and the display name.
+            let resourceName = serverContact.resourceName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
+            logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): " + resourceName + " (" + displayName + ")");
+            let localContact = targetAddressBook.createNewCard();
+            // Import the server contact information into the local contact.
+            localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+            // Add the local contact locally, keep the target address book item map up-to-date.
+            await targetAddressBook.addItem(localContact, true)
+            targetAddressBookItemMap.set(resourceName, localContact);;
+            logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): " + resourceName + " (" + displayName + ") has been added locally.");
+            // Remove the resource name from the local change log (added items).
+            // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
+            await targetAddressBook.removeItemFromChangeLog(resourceName);
+            // Update the contact group member map.
+            AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships, true);
+        }))
+    }
+
     static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
             throw new IllegalArgumentError("Invalid 'localContact': null.");
@@ -355,7 +416,8 @@ class AddressBookSynchronizer {
             let name_found = false;
             let name = null;
             for (name of serverContact.names) {
-                if ("CONTACT" === name.metadata.source.type) {
+                if ("CONTACT" === name.metadata.source.type ||
+                    "PROFILE" === name.metadata.source.type || "DOMAIN_PROFILE" === name.metadata.source.type || "DOMAIN_CONTACT" === name.metadata.source.type) {
                     name_found = true;
                     break;
                 }
@@ -409,7 +471,8 @@ class AddressBookSynchronizer {
             let pref_param = "1";
             //
             for (let emailAddress of serverContact.emailAddresses) {
-                if ("CONTACT" !== emailAddress.metadata.source.type) {
+                if (!("CONTACT" === emailAddress.metadata.source.type ||
+                    "PROFILE" === emailAddress.metadata.source.type || "DOMAIN_PROFILE" === emailAddress.metadata.source.type || "DOMAIN_CONTACT" === emailAddress.metadata.source.type)) {
                     continue;
                 }
                 //
@@ -1355,6 +1418,11 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             if (localContactGroupFoundAmongServerContactGroups) {
                 continue;
             }
+            // Check that we are not deleting _Directory
+            if (localContactGroupId.startsWith("_Directory")) {
+                logger.log1("AddressBookSynchronizer.synchronizeContactGroups(): " + localContactGroupId + " (" + name + ") is a _Directory contact group and has therefore been ignored.");
+                continue;
+            }
             // Delete the local contact group locally, and keep the target address book item map up-to-date.
 /* FIXME: temporary: .deleteItem() does not actually delete a contact group.
             targetAddressBook.deleteItem(localContactGroup, true);
@@ -1455,7 +1523,7 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
         }
     }
 
-    static updateContactGroupMemberMap(contactGroupMemberMap, contactResourceName, contactMemberships) {
+    static updateContactGroupMemberMap(contactGroupMemberMap, contactResourceName, contactMemberships, isDirectoryContact) {
         if (null == contactGroupMemberMap) {
             throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
         }
@@ -1463,7 +1531,9 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             throw new IllegalArgumentError("Invalid 'contactResourceName': null.");
         }
         if (null == contactMemberships) {
-            throw new IllegalArgumentError("Invalid 'contactMemberships': null.");
+            // Some DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT contacts do not have any membership.
+            logger.log0("AddressBookSynchronizer.updateContactGroupMemberMap(): No contact memberships for " + contactResourceName + ".");
+            return;
         }
         // Cycle on all contact memberships.
         for (let contactMembership of contactMemberships) {
@@ -1479,6 +1549,14 @@ abManager.deleteAddressBook(localContactGroup._card.mailListURI);
             }
             // Add the contact to the map.
             contactGroupMemberMap.get(contactGroupResourceName).add(contactResourceName);
+        }
+        if (isDirectoryContact) {
+            // Make sure the contact is also a member of the _Directory contact group.
+            let directoryContactGroupResourceName = "_Directory";
+            if (undefined === contactGroupMemberMap.get(directoryContactGroupResourceName)) {
+                contactGroupMemberMap.set(directoryContactGroupResourceName, new Set());
+            }
+            contactGroupMemberMap.get(directoryContactGroupResourceName).add(contactResourceName);
         }
     }
 
