@@ -344,7 +344,7 @@ class AddressBookSynchronizer {
         let serverContacts = await peopleAPI.getDirectoryContacts();
         // Cycle on the server contacts.
         logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): Cycling on the server contacts.");
-        for (let serverContact of serverContacts) {
+        await Promise.all(serverContacts.map(async (serverContact) => {
             // Get the resource name (in the form 'people/personId') and the display name.
             let resourceName = serverContact.resourceName;
             let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
@@ -362,7 +362,7 @@ class AddressBookSynchronizer {
             await targetAddressBook.removeItemFromChangeLog(resourceName);
             // Update the contact group member map.
             AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
-        }
+        }))
     }
 
     static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
