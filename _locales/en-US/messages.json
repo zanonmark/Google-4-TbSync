@@ -42,6 +42,9 @@
     "pref.readOnlyMode": {
         "message": "Read-only mode"
     },
+    "pref.includeDirectoryContacts": {
+        "message": "Include domain directory contacts (always read-only)"
+    },
     "pref.useFakeEmailAddresses": {
         "message": "Use fake email addresses"
     },
