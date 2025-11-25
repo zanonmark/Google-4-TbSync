@@ -148,17 +148,15 @@ class AddressBookSynchronizer {
             // If such a local contact is currently unavailable...
             if (undefined === localContact) {
                 // ...and if it was previously deleted locally...
-                if (deletedLocalItemIds.includes(resourceName)) {
-                    // Check we are not in read-only mode, then...
-                    if (!readOnlyMode) {
-                        // Delete the server contact remotely.
-                        await peopleAPI.deleteContact(resourceName);
-                        logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been deleted remotely.");
-                    }
+                // if in read only mode, we ignore deletions made locally
+                if (deletedLocalItemIds.includes(resourceName) && !readOnlyMode) {
+                    // Delete the server contact remotely.
+                    await peopleAPI.deleteContact(resourceName);
+                    logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been deleted remotely.");
                     // Remove the resource name from the local change log (deleted items).
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                 }
-                // ...and if it wasn't previously deleted locally...
+                // ...and if it wasn't previously deleted locally (or we are in readonly mode and the deletion doesn't matter)...
                 else {
                     // Create a new local contact.
                     localContact = targetAddressBook.createNewCard();
@@ -171,7 +169,7 @@ class AddressBookSynchronizer {
                     targetAddressBookItemMap.set(resourceName, localContact);
                     logger.log1("AddressBookSynchronizer.synchronizeContacts(): " + resourceName + " (" + displayName + ") has been added locally.");
                     // Remove the resource name from the local change log (added items).
-                    // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
+                    // (This is now logically useful, as the contact could have been deleted locally in readonly mode before the synchronization started.)
                     await targetAddressBook.removeItemFromChangeLog(resourceName);
                     // Update the contact group member map.
                     AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
