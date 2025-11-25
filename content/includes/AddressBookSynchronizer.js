@@ -49,6 +49,7 @@ class AddressBookSynchronizer {
         // Retrieve other account properties.
         let useFakeEmailAddresses = syncData.accountData.getAccountProperty("useFakeEmailAddresses");
         let readOnlyMode = syncData.accountData.getAccountProperty("readOnlyMode");
+        let includeDirectoryContacts = syncData.accountData.getAccountProperty("includeDirectoryContacts");
         let verboseLogging = syncData.accountData.getAccountProperty("verboseLogging");
         // Enable the logger.
         logger = new Logger(verboseLogging);
@@ -80,6 +81,10 @@ class AddressBookSynchronizer {
             logger.log0("AddressBookSynchronizer.synchronize(): Synchronization started.");
             // Synchronize contacts.
             await AddressBookSynchronizer.synchronizeContacts(peopleAPI, targetAddressBook, targetAddressBookItemMap, contactGroupMemberMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, useFakeEmailAddresses, readOnlyMode);
+            if (includeDirectoryContacts) {
+                // Synchronize directory contacts.
+                await AddressBookSynchronizer.synchronizeDirectoryContacts(peopleAPI, targetAddressBook, contactGroupMemberMap, useFakeEmailAddresses);
+            }
             // Synchronize contact groups.
             await AddressBookSynchronizer.synchronizeContactGroups(peopleAPI, targetAddressBook, targetAddressBookItemMap, addedLocalItemIds, modifiedLocalItemIds, deletedLocalItemIds, readOnlyMode);
             // Synchronize contact group members.
@@ -322,6 +327,44 @@ class AddressBookSynchronizer {
         }
     }
 
+    static async synchronizeDirectoryContacts(peopleAPI, targetAddressBook, contactGroupMemberMap, useFakeEmailAddresses) {
+        if (null == peopleAPI) {
+            throw new IllegalArgumentError("Invalid 'peopleAPI': null.");
+        }
+        if (null == targetAddressBook) {
+            throw new IllegalArgumentError("Invalid 'targetAddressBook': null.");
+        }
+        if (null == contactGroupMemberMap) {
+            throw new IllegalArgumentError("Invalid 'contactGroupMemberMap': null.");
+        }
+        if (null == useFakeEmailAddresses) {
+            throw new IllegalArgumentError("Invalid 'useFakeEmailAddresses': null.");
+        }
+        // Retrieve all server contacts.
+        let serverContacts = await peopleAPI.getDirectoryContacts();
+        // Cycle on the server contacts.
+        logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): Cycling on the server contacts.");
+        for (let serverContact of serverContacts) {
+            // Get the resource name (in the form 'people/personId') and the display name.
+            let resourceName = serverContact.resourceName;
+            let displayName = (serverContact.names ? serverContact.names[0].displayName : "-");
+            logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): " + resourceName + " (" + displayName + ")");
+            let localContact = targetAddressBook.createNewCard();
+            // Import the server contact information into the local contact.
+            localContact.setProperty("X-GOOGLE-RESOURCENAME", resourceName);
+            localContact.setProperty("X-GOOGLE-ETAG", serverContact.etag);
+            localContact = AddressBookSynchronizer.fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses);
+            // Add the local contact locally, keep the target address book item map up-to-date.
+            await targetAddressBook.addItem(localContact, true);
+           logger.log1("AddressBookSynchronizer.synchronizeDirectoryContacts(): " + resourceName + " (" + displayName + ") has been added locally.");
+            // Remove the resource name from the local change log (added items).
+            // (This should be logically useless, but sometimes the change log is filled with some of the contacts added above.)
+            await targetAddressBook.removeItemFromChangeLog(resourceName);
+            // Update the contact group member map.
+            AddressBookSynchronizer.updateContactGroupMemberMap(contactGroupMemberMap, resourceName, serverContact.memberships);
+        }
+    }
+
     static fillLocalContactWithServerContactInformation(localContact, serverContact, useFakeEmailAddresses) {
         if (null == localContact) {
             throw new IllegalArgumentError("Invalid 'localContact': null.");
@@ -355,7 +398,8 @@ class AddressBookSynchronizer {
             let name_found = false;
             let name = null;
             for (name of serverContact.names) {
-                if ("CONTACT" === name.metadata.source.type) {
+                if ("CONTACT" === name.metadata.source.type ||
+                    "PROFILE" === name.metadata.source.type || "DOMAIN_PROFILE" === name.metadata.source.type || "DOMAIN_CONTACT" === name.metadata.source.type) {
                     name_found = true;
                     break;
                 }
@@ -409,7 +453,8 @@ class AddressBookSynchronizer {
             let pref_param = "1";
             //
             for (let emailAddress of serverContact.emailAddresses) {
-                if ("CONTACT" !== emailAddress.metadata.source.type) {
+                if (!("CONTACT" === emailAddress.metadata.source.type ||
+                    "PROFILE" === emailAddress.metadata.source.type || "DOMAIN_PROFILE" === emailAddress.metadata.source.type || "DOMAIN_CONTACT" === emailAddress.metadata.source.type)) {
                     continue;
                 }
                 //

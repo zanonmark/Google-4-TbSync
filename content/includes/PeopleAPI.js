@@ -27,7 +27,7 @@ if ("undefined" === typeof ResponseError) {
 
 let { MailE10SUtils } = ChromeUtils.importESModule("resource:///modules/MailE10SUtils.sys.mjs");
 
-const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts"; // https://developers.google.com/people/v1/how-tos/authorizing
+const SCOPES = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/directory.readonly"; // https://developers.google.com/people/v1/how-tos/authorizing
 const SERVICE_ENDPOINT = "https://people.googleapis.com";
 const CONTACT_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies,memberships";
 const CONTACT_UPDATE_PERSON_FIELDS = "names,nicknames,emailAddresses,phoneNumbers,addresses,organizations,urls,birthdays,userDefined,imClients,biographies"; // no 'memberships' here
@@ -502,6 +502,50 @@ class PeopleAPI {
         return true;
     }
 
+    /* Directory Contacts */
+    async getDirectoryContacts() { // https://developers.google.com/people/api/rest/v1/people/listDirectoryPeople
+        // Get a new access token.
+        let accessToken = await this.getNewAccessToken();
+        // Retrieve the contacts page by page.
+        let contacts = [];
+        let nextPageToken = null;
+        while (true) {
+            logger.log1("PeopleAPI.getDirectoryContacts(): nextPageToken = " + nextPageToken);
+            // Prepare the partial contact request URL and data.
+            let partialContactRequestURL = SERVICE_ENDPOINT + "/v1/people:listDirectoryPeople";
+            partialContactRequestURL += "?" + PeopleAPI.getObjectAsEncodedURIParameters({
+                readMask: CONTACT_PERSON_FIELDS,
+                pageSize: CONTACT_PAGE_SIZE,
+                mergeSources: "DIRECTORY_MERGE_SOURCE_TYPE_CONTACT",
+                access_token: accessToken,
+                sources: "DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
+            }) + "&" + PeopleAPI.getObjectAsEncodedURIParameters({
+                sources: "DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT"
+            });
+            if (null != nextPageToken) {
+                partialContactRequestURL += "&pageToken=" + encodeURIComponent(nextPageToken);
+            }
+            let partialContactRequestData = null;
+            // Perform the request and retrieve the response data.
+            let responseData = await this.getResponseData("GET", partialContactRequestURL, partialContactRequestData);
+            // Retrieve the partial contacts.
+            let partialContacts = responseData.people;
+            // Concatenate the partial contacts with the contacts.
+            if (null != partialContacts) {
+                contacts = contacts.concat(partialContacts);
+            }
+            // Retrieve the next page token, necessary to retrieve the next page.
+            nextPageToken = responseData.nextPageToken;
+            // Check if this was the last page.
+            if (null == nextPageToken) {
+                break;
+            }
+        }
+        //
+        logger.log1("PeopleAPI.getDirectoryContacts(): contacts = " + JSON.stringify(contacts));
+        return contacts;
+    }
+
     /* Connection tests. */
 
     checkConnection() {
@@ -513,6 +557,13 @@ class PeopleAPI {
                 let authenticatedUserEmail = authenticatedUser.emailAddresses[0].value;
                 //
                 let contacts = await this.getContacts();
+                let directoryContacts;
+                try {
+                    directoryContacts = await this.getDirectoryContacts();
+                } catch (error) {
+                    directoryContacts = [];
+                    alert("Warning: Unable to retrieve directory contacts. If you are not using a Google Workspace account, this is expected.");
+                }
                 let contactGroups = await this.getContactGroups();
                 //
                 let systemContactGroupCount = 0;
@@ -522,7 +573,7 @@ class PeopleAPI {
                     }
                 }
                 //
-                alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts and " + (contactGroups.length - (this.getIncludeSystemContactGroups() ? 0 : systemContactGroupCount)) + " contact groups.");
+                alert("Hi " + authenticatedUserName + " (" + authenticatedUserEmail + ").\nYou have " + contacts.length + " contacts, " + directoryContacts.length + " directory contacts, and " + (contactGroups.length - (this.getIncludeSystemContactGroups() ? 0 : systemContactGroupCount)) + " contact groups.");
             }
             catch (error) {
                 // If a network error was encountered...
