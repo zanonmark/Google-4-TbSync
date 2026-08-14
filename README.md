@@ -1,3 +1,13 @@
+> [!IMPORTANT]
+>
+> This project was officially archived on 2026.08.14 and the development ceased, as I no longer have time to dedicate on it and I moved to on-premise solutions to store my data.
+>
+> Thanks to everyone who contributed over the years, especially to John Bieling.
+>
+> Anyone interested in developing the project further can fork it.
+>
+> Good luck - Marco
+
 # Google-4-TbSync
 
 This provider add-on adds Google synchronization capabilities to [TbSync](https://github.com/jobisoft/TbSync).
